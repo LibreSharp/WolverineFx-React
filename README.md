@@ -56,6 +56,11 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   reuse-detection (a previously-rotated-away token being replayed revokes the whole chain).
   Client-side tokens are held only in memory (not `sessionStorage`/`localStorage`) to avoid
   exposing them to an injected script — the trade-off is that a hard page reload forces re-login.
+- (`--IncludeTests true`, the default) A `tests/` project (xUnit + [Alba](https://jasperfx.github.io/alba/)
+  + Testcontainers) that boots the real app against a throwaway Postgres container and exercises
+  the Todo endpoints, plus (when `--Identity true`) register/login/refresh-rotation/reuse-detection/
+  logout. One project covers both `--Persistence` choices — it drives the app over HTTP rather than
+  branching per persistence technology.
 
 ### Known limitations
 

@@ -296,7 +296,8 @@ Grouped by how much it blocks calling this "done."
   (Identity)`) and `MartenPersistence`'s `opts.Schema.For<RefreshToken>()` (Marten, `#if
   (Identity)`). Verified by generating both `Identity=true` variants (`marten`/`efcore`) via
   `dotnet new install` + `dotnet new wolverine-react` and building each — both compile clean.
-  Note: EF Core has no `Migrations/` folder yet in this template, so the index will land in
-  whatever initial migration a consumer generates, not as a standalone migration here.
+  (Originally landed before EF Core had any migrations at all; now baked into the
+  `Migrations.WithIdentity` initial migration added under "Build out the `tests/` project" above —
+  see `IX_RefreshTokens_TokenHash` / `IX_RefreshTokens_UserId` there.)
 - ~~The repo itself is not yet a git repository~~ — **fixed**: repo is now version-controlled and
   pushed to `origin/main`.
