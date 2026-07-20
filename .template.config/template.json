@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "WolverineFx-React",
+  "classifications": [ "Web", "React", "Wolverine" ],
+  "name": "WolverineFx + React",
+  "identity": "WolverineFx.React.Template",
+  "shortName": "wolverine-react",
+  "sourceName": "Api",
+  "preferNameDirectory": true,
+  "symbols": {
+    "Persistence": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        { "choice": "marten", "description": "Marten document DB / event sourcing over PostgreSQL" },
+        { "choice": "efcore", "description": "Entity Framework Core over PostgreSQL" }
+      ],
+      "defaultValue": "marten",
+      "description": "Which persistence technology to use"
+    },
+    "IsMarten": {
+      "type": "computed",
+      "value": "(Persistence == \"marten\")"
+    },
+    "IsEfCore": {
+      "type": "computed",
+      "value": "(Persistence == \"efcore\")"
+    },
+    "Identity": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "description": "Include JWT-based authentication (register/login/refresh/logout) using ASP.NET Core Identity"
+    },
+    "IncludeTests": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include the test projects"
+    }
+  },
+  "sources": [
+    {
+      "exclude": [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/bin/**",
+        "**/obj/**",
+        "**/.vs/**",
+        "**/.idea/**",
+        "**/*.user",
+        ".template.config/**",
+        "SPEC.md",
+        "README.md",
+        "WolverineFxReact.Templates.csproj",
+        ".git/**"
+      ],
+      "modifiers": [
+        {
+          "condition": "(!IsMarten)",
+          "exclude": [ "src/Api/Data/Marten/**", "src/Api/Identity/Marten/**" ]
+        },
+        {
+          "condition": "(!IsEfCore)",
+          "exclude": [ "src/Api/Data/EfCore/**", "src/Api/Identity/EfCore/**" ]
+        },
+        {
+          "condition": "(!Identity)",
+          "exclude": [ "src/Api/Identity/**", "src/Client/src/features/auth/**", "src/Client/src/App.WithIdentity.tsx" ]
+        },
+        {
+          "condition": "(Identity)",
+          "exclude": [ "src/Client/src/App.tsx" ],
+          "rename": { "src/Client/src/App.WithIdentity.tsx": "src/Client/src/App.tsx" }
+        },
+        {
+          "condition": "(!IncludeTests)",
+          "exclude": [ "tests/**" ]
+        }
+      ]
+    }
+  ]
+}
