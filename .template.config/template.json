@@ -5,7 +5,7 @@
   "name": "WolverineFx + React",
   "identity": "WolverineFx.React.Template",
   "shortName": "wolverine-react",
-  "sourceName": "Api",
+  "sourceName": "ApiHost",
   "preferNameDirectory": true,
   "symbols": {
     "Persistence": {
@@ -58,15 +58,20 @@
       "modifiers": [
         {
           "condition": "(!IsMarten)",
-          "exclude": [ "src/Api/Data/Marten/**", "src/Api/Identity/Marten/**" ]
+          "exclude": [ "src/ApiHost/Data/Marten/**", "src/ApiHost/Identity/Marten/**" ]
         },
         {
           "condition": "(!IsEfCore)",
-          "exclude": [ "src/Api/Data/EfCore/**", "src/Api/Identity/EfCore/**" ]
+          "exclude": [ "src/ApiHost/Data/EfCore/**", "src/ApiHost/Identity/EfCore/**" ]
         },
         {
           "condition": "(!Identity)",
-          "exclude": [ "src/Api/Identity/**", "src/Client/src/features/auth/**", "src/Client/src/App.WithIdentity.tsx" ]
+          "exclude": [
+            "src/ApiHost/Identity/**",
+            "src/Client/src/features/auth/**",
+            "src/Client/src/App.WithIdentity.tsx",
+            "tests/ApiHost.Tests/AuthEndpointsTests.cs"
+          ]
         },
         {
           "condition": "(Identity)",
@@ -76,6 +81,24 @@
         {
           "condition": "(!IncludeTests)",
           "exclude": [ "tests/**" ]
+        },
+        {
+          "condition": "(IsEfCore && !Identity)",
+          "exclude": [ "src/ApiHost/Data/EfCore/Migrations.WithIdentity/**" ],
+          "rename": {
+            "src/ApiHost/Data/EfCore/Migrations.NoIdentity/20260720161356_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20260720161356_InitialCreate.cs",
+            "src/ApiHost/Data/EfCore/Migrations.NoIdentity/20260720161356_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20260720161356_InitialCreate.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.NoIdentity/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
+          }
+        },
+        {
+          "condition": "(IsEfCore && Identity)",
+          "exclude": [ "src/ApiHost/Data/EfCore/Migrations.NoIdentity/**" ],
+          "rename": {
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260720161418_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20260720161418_InitialCreate.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260720161418_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20260720161418_InitialCreate.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
+          }
         }
       ]
     }

@@ -46,7 +46,9 @@ Inspiration:
 ```
 WolverineFx-React.sln
 /src
-  /Api                      (Wolverine host: HTTP endpoints, message handlers, Program.cs)
+  /ApiHost                  (Wolverine host: HTTP endpoints, message handlers, Program.cs — sourceName
+                             for templating; the whole token is replaced by `-n` in generated instances,
+                             e.g. `-n MyApp` yields `src/MyApp`, not `src/MyAppHost`)
     /Data
       /Marten                (present only if --persistence=marten)
       /EfCore                (present only if --persistence=efcore)
@@ -60,8 +62,8 @@ WolverineFx-React.sln
       /lib/api               (generated/shared API client, typed against server DTOs)
     vite.config.ts
 /tests
-  /Api.Tests                 (WolverineFx.Http + handler tests, Alba/xUnit)
-  /Client.Tests               (Vitest + React Testing Library)
+  /ApiHost.Tests             (WolverineFx.Http + handler tests, Alba/xUnit — see §11)
+  /Client.Tests               (Vitest + React Testing Library — not built, see §11)
 .template.config/
   template.json
   ide.host.json (optional, for IDE gallery metadata)
@@ -140,7 +142,7 @@ case they'd rather it live under their org's naming/versioning from day one.
 - **`WolverineFx.RuntimeCompilation`** is a separate package as of Wolverine 6.x (no longer bundled in core). Required for `TypeLoadMode.Dynamic` (the dev-time default). For production, Wolverine recommends pre-generating code (`dotnet run -- codegen write` + `TypeLoadMode.Static`) to drop the Roslyn dependency and cut startup time — **not yet implemented**, currently shipping with runtime compilation in both dev and prod. Follow-up before calling this template production-ready.
 - **Client stack confirmed working**: Vite + React 19 + TS 6.0.3 + Tailwind v4 (via `@tailwindcss/vite`) + `openapi-fetch`/`openapi-typescript`. `openapi-typescript@7.13.0`'s peer range doesn't yet include TS 6, so `src/Client/.npmrc` sets `legacy-peer-deps=true` — functionally fine (verified: codegen ran correctly against the live OpenAPI spec), just a peer-range lag, not a real incompatibility.
 - **Dev wiring verified**: `vite.config.ts` proxies `/api/*` to `http://localhost:5299` (no CORS needed, single-origin from the browser's perspective). Confirmed via a live 502 from the Vite proxy when the API wasn't running — proxy target and path are correct.
-- **Prod wiring verified**: `Api.csproj` has a `PublishClient` target (`AfterTargets="ComputeFilesToPublish"`) that runs `npm install && npm run build` in `src/Client` and copies `dist/**` into the published `wwwroot`. Confirmed via a real `dotnet publish -c Release` that `wwwroot/index.html` and hashed asset files land correctly in the publish output.
+- **Prod wiring verified**: `ApiHost.csproj` has a `PublishClient` target (`AfterTargets="ComputeFilesToPublish"`) that runs `npm install && npm run build` in `src/Client` and copies `dist/**` into the published `wwwroot`. Confirmed via a real `dotnet publish -c Release` that `wwwroot/index.html` and hashed asset files land correctly in the publish output.
 - **Runtime CRUD not yet verified against a live database** — no Docker available in the build environment. Verified instead: (a) app reaches Marten/Wolverine storage migration and fails only on Postgres connection-refused (proves DI/registration wiring is correct), and (b) with `.IntegrateWithWolverine()` temporarily removed, captured the real OpenAPI spec and generated working TS types from it, matching the three endpoints (`GET /api/todos`, `POST /api/todos`, `POST /api/todos/{id}/complete`). A full CRUD pass against a live Postgres (e.g. via `docker compose up`) is still outstanding.
 - **`docker-compose.yml`** added at repo root (Postgres 16) — this isn't a template toggle, it's baseline dev infra since both persistence options now target Postgres (§2 EF Core decision).
 
@@ -154,8 +156,8 @@ case they'd rather it live under their org's naming/versioning from day one.
 
 All decisions in this document were carried through to a working, verified template:
 
-- **Both persistence variants** live in the real repo under `src/Api/Data/Marten/` and
-  `src/Api/Data/EfCore/`, gated by a `Persistence` choice symbol (`marten`/`efcore`) with computed
+- **Both persistence variants** live in the real repo under `src/ApiHost/Data/Marten/` and
+  `src/ApiHost/Data/EfCore/`, gated by a `Persistence` choice symbol (`marten`/`efcore`) with computed
   booleans `IsMarten`/`IsEfCore` used for in-file `#if` gating (raw C# `#if` only supports plain
   symbols, not the string-equality expressions `template.json` itself supports for folder
   exclusion — this distinction cost a round of debugging, worth knowing if extending this template).
@@ -194,6 +196,18 @@ Grouped by how much it blocks calling this "done."
 
 ### Blocking before real use
 
+- ~~`sourceName: "Api"` collides with substrings of unrelated identifiers~~ — **fixed 2026-07-20**:
+  renamed the source project (folder, `.csproj`, namespaces) from `Api` to `ApiHost` everywhere —
+  `src/Api` → `src/ApiHost`, `Api.csproj` → `ApiHost.csproj`, `namespace Api.X` → `namespace
+  ApiHost.X`, `.template.config/template.json`'s `sourceName` and its path-based modifiers, and
+  `WolverineFxReact.slnx`. `"ApiHost"` isn't a substring of `"OpenApi"` or any other package/type
+  name in the template, so the collision is gone. Verified by generating all 4
+  `{marten,efcore} × {Identity=true,false}` combinations with `-n MyApp` (a name that previously
+  triggered the bug) and confirming every one builds with 0 errors and `OpenApi`-related types are
+  untouched. Note for anyone extending this template: because `dotnet new`'s `sourceName`
+  replacement swaps the *entire* token for `-n`'s value, `src/ApiHost` becomes `src/MyApp` in a
+  generated instance (not `src/MyAppHost`) — this was already true before the fix (with `Api` ->
+  `MyApp`), so no behavior change for end users, just no more collision.
 - **Live runtime verification.** Everything so far proves wiring (DI resolves, codegen succeeds,
   builds pass) but nothing has actually hit a real Postgres. Run `docker compose up -d`, then for
   each of the 8 parameter combinations: register a user (if `Identity=true`), log in, create/list/
@@ -214,19 +228,47 @@ Grouped by how much it blocks calling this "done."
   code (`dotnet run -- codegen write`) and set `TypeLoadMode.Static` for production, dropping the
   Roslyn dependency and cutting startup time. Not yet done in either persistence branch.
 - **`Microsoft.OpenApi` NU1903 advisory — investigated, currently blocked, not just unexamined.**
-  `Microsoft.AspNetCore.OpenApi 10.0.9` (latest stable as of this check) pulls in the vulnerable
-  `Microsoft.OpenApi 2.0.0` transitively. Tried pinning `Microsoft.OpenApi` directly to the patched
-  `3.8.0`: this breaks the build — `Microsoft.AspNetCore.OpenApi 10.0.9`'s XML-comment source
-  generator targets the 2.x API shape (`IOpenApiMediaType.Example` is writable in 2.0.0, read-only
-  in 3.8.0, a breaking change between OpenApi major versions), so it fails with `CS0200` at
-  compile time. The only newer `Microsoft.AspNetCore.OpenApi` line is `11.0.0-preview.*` — not
-  something to depend on in a template. No action to take until Microsoft ships a stable
-  `Microsoft.AspNetCore.OpenApi` release built against a patched `Microsoft.OpenApi`; re-check
-  when one lands.
-- **Build out the `tests/` project.** The `IncludeTests` toggle exists and correctly
-  includes/excludes the `tests/` folder, but no actual test project was ever created inside it —
-  right now toggling it just includes/excludes an empty directory. Needs at least one xUnit/Alba
-  project per persistence choice exercising the Todo and (if `Identity=true`) auth endpoints.
+  `Microsoft.AspNetCore.OpenApi 10.0.9` (latest stable as of the original check) pulls in the
+  vulnerable `Microsoft.OpenApi 2.0.0` transitively. Tried pinning `Microsoft.OpenApi` directly to
+  the patched `3.8.0`: this breaks the build — `Microsoft.AspNetCore.OpenApi 10.0.9`'s XML-comment
+  source generator targets the 2.x API shape (`IOpenApiMediaType.Example` is writable in 2.0.0,
+  read-only in 3.8.0, a breaking change between OpenApi major versions), so it fails with `CS0200`
+  at compile time.
+  **Re-checked 2026-07-20** against the then-current `Microsoft.AspNetCore.OpenApi 10.0.10` +
+  `Microsoft.OpenApi 3.9.0`: same `CS0200` failure, still unresolved (confirmed via a standalone
+  probe project, not just re-reading the advisory). No `11.x` stable line has shipped yet either.
+  No action to take until Microsoft ships a stable `Microsoft.AspNetCore.OpenApi` release built
+  against a patched `Microsoft.OpenApi`; re-check again periodically.
+- ~~Build out the `tests/` project~~ — **fixed 2026-07-20**: added `tests/ApiHost.Tests`
+  (xUnit + Alba + `Testcontainers.PostgreSql`), persistence-agnostic (hits the app over HTTP, so
+  one project covers both `marten`/`efcore` without `#if`). `AppFixture` spins up a real Postgres
+  container per test collection and boots the app via `AlbaHost.For<Program>` (`Program.cs` needed
+  a trailing `public partial class Program;` for `WebApplicationFactory`/Alba to reference the
+  entry point). `TodoEndpointsTests` covers create/list/complete and a 404 case; `AuthEndpointsTests`
+  (excluded via `template.json` when `Identity=false`, same mechanism as the App.tsx swap) covers
+  register/login/wrong-password/the `[Authorize]` `/me` endpoint/refresh-rotation/reuse-detection/
+  logout. Verified: all 4 `{marten,efcore} × {Identity=true,false}` combinations build clean and
+  `dotnet test --list-tests` discovers exactly the expected tests per combination (Auth tests only
+  appear when `Identity=true`). **Not verified**: actually running the tests — no Docker in this
+  environment either (same constraint as §8a), so `Testcontainers.PostgreSql` can't start a
+  container here. The Todo-creation assertions deliberately avoid depending on the exact
+  status/headers Wolverine's `CreationResponse`/`IHttpAware` sets (couldn't pin that down without a
+  live run) and instead verify behavior by title lookup — lower risk if that assumption were wrong,
+  but still unexecuted code. Run `dotnet test` from `tests/ApiHost.Tests` somewhere with Docker
+  before trusting it.
+  **Bug found and fixed along the way**: the EF Core variant had no `Migrations/` folder and
+  nothing called `Database.Migrate()`/`EnsureCreated()` — so, contrary to what "wiring verified"
+  in §8a implied, a fresh EF Core instance would have failed on the very first query (`relation
+  "Todos" does not exist"`) even with a reachable Postgres. Generated real migrations
+  (`dotnet ef migrations add InitialCreate`) for both `Identity=true` and `Identity=false` (the
+  schemas differ — Identity tables + `RefreshTokens`), checked them into
+  `src/ApiHost/Data/EfCore/Migrations.{NoIdentity,WithIdentity}/`, and added `template.json`
+  modifiers that exclude the unused variant and rename the other to `Migrations/` at generation
+  time. `Program.cs` now calls `Database.Migrate()` on startup for the EF Core branch (`#if
+  (IsEfCore)`), mirroring Marten's own auto-create-on-first-use behavior. This was necessary for
+  the EF Core tests to have any chance of passing, not optional scope creep — but it's still only
+  wiring-verified (migration C# compiles and the `CreateIndex`/`CreateTable` calls look right), not
+  run against a live Postgres, for the same Docker-availability reason as everything else here.
 - **No CI.** Nothing automatically re-runs the 8-combination build matrix on changes. Worth a
   GitHub Actions workflow (or equivalent) that regenerates and builds all 8 combinations, since
   that's exactly the kind of regression that's easy to introduce silently (e.g. the nested
@@ -246,11 +288,15 @@ Grouped by how much it blocks calling this "done."
 
 ### Minor / cosmetic
 
-- `src/Client/README.md` is still Vite's default scaffold readme (describes the starter's ESLint
-  config, not this project) — copies into every generated instance unedited. Low priority, but
-  worth swapping for something project-specific before a public release.
-- `MartenRefreshTokenStore`/`EfCoreRefreshTokenStore` query refresh tokens by `TokenHash` with no
-  explicit index — fine at template scale, worth a note (or an index) if this becomes a real app
-  with meaningful login volume.
-- The repo itself is not yet a git repository (no commits exist) — nothing has been version
-  controlled during this build.
+- ~~`src/Client/README.md` is still Vite's default scaffold readme~~ — **fixed**: replaced with a
+  project-specific readme (dev commands, script table, API-client regeneration note).
+- ~~`MartenRefreshTokenStore`/`EfCoreRefreshTokenStore` query refresh tokens by `TokenHash` with no
+  explicit index~~ — **fixed**: added a unique index on `TokenHash` (plus a non-unique index on
+  `UserId`, used by `RevokeAllForUserAsync`) to both `AppDbContext.OnModelCreating` (EF Core, `#if
+  (Identity)`) and `MartenPersistence`'s `opts.Schema.For<RefreshToken>()` (Marten, `#if
+  (Identity)`). Verified by generating both `Identity=true` variants (`marten`/`efcore`) via
+  `dotnet new install` + `dotnet new wolverine-react` and building each — both compile clean.
+  Note: EF Core has no `Migrations/` folder yet in this template, so the index will land in
+  whatever initial migration a consumer generates, not as a standalone migration here.
+- ~~The repo itself is not yet a git repository~~ — **fixed**: repo is now version-controlled and
+  pushed to `origin/main`.

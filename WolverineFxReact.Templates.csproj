@@ -21,7 +21,8 @@
     <Content Include=".template.config\**\*" />
     <Content Include="src\**\*"
              Exclude="src\**\bin\**;src\**\obj\**;src\**\node_modules\**;src\**\dist\**;src\**\*.user" />
-    <Content Include="tests\**\*" />
+    <Content Include="tests\**\*"
+             Exclude="tests\**\bin\**;tests\**\obj\**;tests\**\*.user" />
     <Content Include="docker-compose.yml" />
     <Content Include="WolverineFxReact.slnx" />
   </ItemGroup>

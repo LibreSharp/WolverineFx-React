@@ -19,7 +19,7 @@ dotnet new wolverine-react -n MyApp
 cd MyApp
 docker compose up -d          # starts Postgres
 cd src/Client && npm install
-cd ../Api && dotnet run        # API on the port shown; Vite dev server proxies /api to it
+cd ../MyApp && dotnet run      # API on the port shown; Vite dev server proxies /api to it
 ```
 
 In a separate terminal:
