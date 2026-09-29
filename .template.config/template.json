@@ -39,6 +39,23 @@
       "description": "Include the test projects"
     }
   },
+  "SpecialCustomOperations": {
+    "**/*.slnx": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "actionableIf": [ "<!--#if" ],
+            "actionableElse": [ "#else", "<!--#else" ],
+            "actionableElseif": [ "#elseif", "<!--#elseif" ],
+            "endif": [ "#endif", "<!--#endif" ],
+            "trim": "true",
+            "wholeLine": "true"
+          }
+        }
+      ]
+    }
+  },
   "sources": [
     {
       "exclude": [
@@ -54,7 +71,8 @@
         "README.md",
         "REVIEW.md",
         "WolverineFxReact.Templates.csproj",
-        ".git/**"
+        ".git/**",
+        ".github/**"
       ],
       "modifiers": [
         {

@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  template:
+    name: ${{ matrix.persistence }} · identity=${{ matrix.identity }} · tests=${{ matrix.tests }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        persistence: [marten, efcore]
+        identity: [false, true]
+        tests: [false, true]
+
+    env:
+      APP_DIR: ${{ github.workspace }}/../generated/MyApp
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/Client/package-lock.json
+
+      - name: Install template
+        run: dotnet new install ./
+
+      # -n MyApp exercises sourceName replacement (see SPEC.md §11 for the collision it once caused).
+      - name: Generate project
+        run: >
+          dotnet new wolverine-react -n MyApp -o "$APP_DIR"
+          --Persistence ${{ matrix.persistence }}
+          --Identity ${{ matrix.identity }}
+          --IncludeTests ${{ matrix.tests }}
+
+      - name: Build API
+        working-directory: ${{ env.APP_DIR }}
+        run: dotnet build WolverineFxReact.slnx
+
+      - name: Build client
+        working-directory: ${{ env.APP_DIR }}/src/Client
+        run: |
+          npm ci
+          npm run build
+
+      # Testcontainers starts a throwaway Postgres; GitHub's Ubuntu runners have Docker preinstalled.
+      - name: Test
+        if: ${{ matrix.tests }}
+        working-directory: ${{ env.APP_DIR }}
+        run: dotnet test WolverineFxReact.slnx --no-build --logger "console;verbosity=normal"

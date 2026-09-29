@@ -2,7 +2,9 @@
   <Folder Name="/src/">
     <Project Path="src/ApiHost/ApiHost.csproj" />
   </Folder>
+<!--#if (IncludeTests) -->
   <Folder Name="/tests/">
     <Project Path="tests/ApiHost.Tests/ApiHost.Tests.csproj" />
   </Folder>
+<!--#endif -->
 </Solution>
