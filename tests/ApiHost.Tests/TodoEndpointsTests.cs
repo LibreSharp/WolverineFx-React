@@ -14,18 +14,41 @@ public class TodoEndpointsTests
         _fixture = fixture;
     }
 
+    // With Identity, the Todo endpoints require a bearer token; without it, token is null.
+    private async Task<string?> GetTokenAsync()
+    {
+#if (Identity)
+        return await _fixture.CreateUserAndGetAccessTokenAsync();
+#else
+        return await Task.FromResult<string?>(null);
+#endif
+    }
+
+    private Task<IScenarioResult> Send(string? token, Action<Scenario> configure)
+    {
+        return _fixture.Host.Scenario(s =>
+        {
+            if (token is not null)
+            {
+                s.WithBearerToken(token);
+            }
+            configure(s);
+        });
+    }
+
     [Fact]
     public async Task create_list_and_complete_a_todo()
     {
+        var token = await GetTokenAsync();
         var title = $"Write tests {Guid.NewGuid()}";
 
-        await _fixture.Host.Scenario(s =>
+        await Send(token, s =>
         {
             s.Post.Json(new CreateTodo(title)).ToUrl("/api/todos");
             s.StatusCodeShouldBeSuccess();
         });
 
-        var afterCreate = await _fixture.Host.Scenario(s =>
+        var afterCreate = await Send(token, s =>
         {
             s.Get.Url("/api/todos");
             s.StatusCodeShouldBeOk();
@@ -34,13 +57,13 @@ public class TodoEndpointsTests
         var created = Assert.Single(todosAfterCreate!, t => t.Title == title);
         Assert.False(created.IsComplete);
 
-        await _fixture.Host.Scenario(s =>
+        await Send(token, s =>
         {
             s.Post.Url($"/api/todos/{created.Id}/complete");
             s.StatusCodeShouldBeSuccess();
         });
 
-        var afterComplete = await _fixture.Host.Scenario(s =>
+        var afterComplete = await Send(token, s =>
         {
             s.Get.Url("/api/todos");
             s.StatusCodeShouldBeOk();
@@ -52,7 +75,9 @@ public class TodoEndpointsTests
     [Fact]
     public async Task completing_an_unknown_todo_returns_not_found()
     {
-        await _fixture.Host.Scenario(s =>
+        var token = await GetTokenAsync();
+
+        await Send(token, s =>
         {
             s.Post.Url($"/api/todos/{Guid.NewGuid()}/complete");
             s.StatusCodeShouldBe(HttpStatusCode.NotFound);

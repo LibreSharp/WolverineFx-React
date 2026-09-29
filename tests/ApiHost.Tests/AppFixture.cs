@@ -1,3 +1,7 @@
+#if (Identity)
+using System.Net;
+using ApiHost.Identity.Endpoints;
+#endif
 using Alba;
 using Microsoft.AspNetCore.Hosting;
 using Testcontainers.PostgreSql;
@@ -26,6 +30,29 @@ public class AppFixture : IAsyncLifetime
         });
     }
 
+#if (Identity)
+    // Registers a fresh user and returns an access token for them.
+    public async Task<string> CreateUserAndGetAccessTokenAsync()
+    {
+        var email = $"{Guid.NewGuid():N}@example.com";
+        const string password = "P@ssword123!";
+
+        await Host.Scenario(s =>
+        {
+            s.Post.Json(new RegisterRequest(email, password)).ToUrl("/api/auth/register");
+            s.StatusCodeShouldBe(HttpStatusCode.Created);
+        });
+
+        var login = await Host.Scenario(s =>
+        {
+            s.Post.Json(new LoginRequest(email, password)).ToUrl("/api/auth/login");
+            s.StatusCodeShouldBeOk();
+        });
+
+        return login.ReadAsJson<LoginResponse>()!.AccessToken;
+    }
+
+#endif
     public async Task DisposeAsync()
     {
         await Host.DisposeAsync();

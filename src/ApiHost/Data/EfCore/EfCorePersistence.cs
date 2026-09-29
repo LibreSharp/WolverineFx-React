@@ -20,6 +20,9 @@ public static class EfCorePersistence
                 x => x.UseNpgsql(connectionString));
 
             opts.UseEntityFrameworkCoreTransactions();
+
+            // Call SaveChangesAsync after any handler/endpoint that uses AppDbContext.
+            opts.Policies.AutoApplyTransactions();
         });
     }
 }

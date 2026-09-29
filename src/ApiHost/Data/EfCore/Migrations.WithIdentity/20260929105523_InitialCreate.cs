@@ -73,6 +73,7 @@ namespace ApiHost.Data.EfCore.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OwnerId = table.Column<string>(type: "text", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     IsComplete = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -234,6 +235,11 @@ namespace ApiHost.Data.EfCore.Migrations
                 name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Todos_OwnerId",
+                table: "Todos",
+                column: "OwnerId");
         }
 
         /// <inheritdoc />

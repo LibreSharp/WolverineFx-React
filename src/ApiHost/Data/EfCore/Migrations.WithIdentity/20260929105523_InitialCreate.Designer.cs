@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiHost.Data.EfCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260720161418_InitialCreate")]
+    [Migration("20260929105523_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -35,11 +35,17 @@ namespace ApiHost.Data.EfCore.Migrations
                     b.Property<bool>("IsComplete")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Todos");
                 });

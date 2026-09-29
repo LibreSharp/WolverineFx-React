@@ -11,13 +11,14 @@ namespace ApiHost.Identity;
 
 public static class IdentityJwtSetup
 {
-    public static void AddIdentityJwt(this IServiceCollection services, IConfiguration configuration)
+    public static void AddIdentityJwt(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<JwtTokenService>();
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("Missing 'Jwt' configuration section");
+        ValidateSigningKey(jwtOptions.SigningKey, environment);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -38,5 +39,22 @@ public static class IdentityJwtSetup
         services.AddAuthorization();
 
         services.AddApplicationIdentity();
+    }
+
+    // Fail at startup rather than sign tokens with a missing, weak, or publicly known key.
+    private static void ValidateSigningKey(string signingKey, IHostEnvironment environment)
+    {
+        if (Encoding.UTF8.GetByteCount(signingKey) < JwtOptions.MinimumSigningKeyBytes)
+        {
+            throw new InvalidOperationException(
+                $"'Jwt:SigningKey' must be at least {JwtOptions.MinimumSigningKeyBytes} bytes. " +
+                "Set it via user-secrets, the 'Jwt__SigningKey' environment variable, or a secret store.");
+        }
+
+        if (!environment.IsDevelopment() && signingKey.Contains(JwtOptions.DevOnlyKeyMarker, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "'Jwt:SigningKey' is the development key. Configure a real secret outside Development.");
+        }
     }
 }

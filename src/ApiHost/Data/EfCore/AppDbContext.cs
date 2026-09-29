@@ -34,6 +34,9 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<RefreshToken>()
             .HasIndex(t => t.UserId);
+
+        modelBuilder.Entity<Todo>()
+            .HasIndex(t => t.OwnerId);
     }
 #endif
 }

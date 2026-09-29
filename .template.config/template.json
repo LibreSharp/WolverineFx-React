@@ -52,6 +52,7 @@
         ".template.config/**",
         "SPEC.md",
         "README.md",
+        "REVIEW.md",
         "WolverineFxReact.Templates.csproj",
         ".git/**"
       ],
@@ -70,7 +71,8 @@
             "src/ApiHost/Identity/**",
             "src/Client/src/features/auth/**",
             "src/Client/src/App.WithIdentity.tsx",
-            "tests/ApiHost.Tests/AuthEndpointsTests.cs"
+            "tests/ApiHost.Tests/AuthEndpointsTests.cs",
+            "tests/ApiHost.Tests/TodoAuthorizationTests.cs"
           ]
         },
         {
@@ -95,8 +97,8 @@
           "condition": "(IsEfCore && Identity)",
           "exclude": [ "src/ApiHost/Data/EfCore/Migrations.NoIdentity/**" ],
           "rename": {
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260720161418_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20260720161418_InitialCreate.cs",
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260720161418_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20260720161418_InitialCreate.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260929105523_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20260929105523_InitialCreate.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260929105523_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20260929105523_InitialCreate.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
           }
         }

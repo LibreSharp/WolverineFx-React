@@ -1,4 +1,5 @@
 #if (Identity)
+using ApiHost.Features.Todos;
 using ApiHost.Identity;
 #endif
 using Marten;
@@ -20,6 +21,9 @@ public static class MartenPersistence
             opts.Schema.For<RefreshToken>()
                 .Index(t => t.TokenHash, x => x.IsUnique = true)
                 .Index(t => t.UserId);
+
+            opts.Schema.For<Todo>()
+                .Index(t => t.OwnerId);
 #endif
         }).IntegrateWithWolverine();
     }

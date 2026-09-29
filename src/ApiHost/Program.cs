@@ -17,7 +17,11 @@ builder.Services.AddOpenApi();
 
 #if (IsMarten)
 builder.Services.AddMartenPersistence(builder.Configuration);
-builder.Host.UseWolverine();
+builder.Host.UseWolverine(opts =>
+{
+    // Commit the IDocumentSession after any handler/endpoint that uses it.
+    opts.Policies.AutoApplyTransactions();
+});
 #elif (IsEfCore)
 builder.Host.UseEfCorePersistence(builder.Configuration);
 #endif
@@ -25,7 +29,7 @@ builder.Host.UseEfCorePersistence(builder.Configuration);
 builder.Services.AddWolverineHttp();
 
 #if (Identity)
-builder.Services.AddIdentityJwt(builder.Configuration);
+builder.Services.AddIdentityJwt(builder.Configuration, builder.Environment);
 #endif
 
 var app = builder.Build();

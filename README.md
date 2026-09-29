@@ -56,6 +56,10 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   reuse-detection (a previously-rotated-away token being replayed revokes the whole chain).
   Client-side tokens are held only in memory (not `sessionStorage`/`localStorage`) to avoid
   exposing them to an injected script — the trade-off is that a hard page reload forces re-login.
+  The Todo endpoints require login and each user sees only their own Todos. The dev signing key
+  lives in `appsettings.Development.json` only; outside Development, set `Jwt:SigningKey` (≥ 32
+  bytes) via user-secrets, the `Jwt__SigningKey` environment variable, or a secret store — startup
+  fails if it's missing or still the dev key.
 - (`--IncludeTests true`, the default) A `tests/` project (xUnit + [Alba](https://jasperfx.github.io/alba/)
   + Testcontainers) that boots the real app against a throwaway Postgres container and exercises
   the Todo endpoints, plus (when `--Identity true`) register/login/refresh-rotation/reuse-detection/

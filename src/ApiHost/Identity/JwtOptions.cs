@@ -3,6 +3,8 @@ namespace ApiHost.Identity;
 public class JwtOptions
 {
     public const string SectionName = "Jwt";
+    public const int MinimumSigningKeyBytes = 32;
+    public const string DevOnlyKeyMarker = "DEV_ONLY";
 
     public string SigningKey { get; set; } = string.Empty;
     public string Issuer { get; set; } = string.Empty;
