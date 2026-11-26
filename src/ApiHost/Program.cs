@@ -9,6 +9,9 @@ using Wolverine;
 using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
+using Wolverine.SignalR;
+using ApiHost.Features.Todos;
+using ApiHost.Realtime;
 #if (Identity)
 using ApiHost.Identity;
 #endif
@@ -37,6 +40,11 @@ builder.Host.UseWolverine(opts =>
 
     // Register the app's FluentValidation validators (e.g. CreateTodoValidator).
     opts.UseFluentValidation();
+
+    // Realtime updates: AppHub is a SignalR hub that is also a Wolverine transport, and
+    // TodoChanged messages are pushed to connected browsers through it.
+    opts.UseSignalR<AppHub>();
+    opts.PublishMessage<TodoChanged>().ToSignalR();
 });
 
 builder.Services.AddWolverineHttp();
@@ -76,6 +84,8 @@ app.MapWolverineEndpoints(opts =>
     // Run a request's validator before the endpoint; failures return 400 ProblemDetails.
     opts.UseFluentValidationProblemDetailMiddleware();
 });
+
+app.MapWolverineSignalRHub<AppHub>(AppHub.Path);
 
 if (!app.Environment.IsDevelopment())
 {

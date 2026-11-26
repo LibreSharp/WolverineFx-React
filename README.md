@@ -75,6 +75,11 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
     a queryable Todo document in step.
   - **Validation.** A FluentValidation validator rejects an empty or over-long title with a 400
     `ProblemDetails` response before the endpoint runs; the React form shows the message.
+  - **Realtime updates with SignalR.** Creating or completing a Todo pushes a `todo-changed`
+    message to the browser through Wolverine's SignalR transport (`AppHub` at `/api/hub`), so
+    every open tab refreshes its list. Completion travels the whole chain: endpoint →
+    `TodoCompleted` (outbox) → background handler → SignalR. With `--Identity true`, updates go
+    only to the signed-in user's own tabs (a per-user SignalR group), and the hub requires login.
 - Vite dev server proxies `/api/*` to the API in development (no CORS); in production, the
   client is built and served as static files from the same Kestrel host (`dotnet publish` builds
   the client automatically).
@@ -90,8 +95,8 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   fails if it's missing or still the dev key.
 - (`--IncludeTests true`, the default) A `tests/` project (xUnit + [Alba](https://jasperfx.github.io/alba/)
   + Testcontainers) that boots the real app against a throwaway Postgres container and exercises
-  the Todo endpoints, validation, and (using Wolverine's message tracking) the background
-  `TodoCompleted` handler, plus (when `--Identity true`) register/login/refresh-rotation/
+  the Todo endpoints, validation, (using Wolverine's message tracking) the background
+  `TodoCompleted` handler, and SignalR notifications received by real hub clients, plus (when `--Identity true`) register/login/refresh-rotation/
   reuse-detection/logout. It drives the app over HTTP, so one project covers both `--Persistence`
   choices; the Marten version adds a test of the Todo event stream.
 

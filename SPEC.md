@@ -307,6 +307,20 @@ Grouped by how much it blocks calling this "done."
   events and the handler's log line. Note: existing Marten dev databases hold pre-event-sourcing
   Todo documents with no stream, so completing those returns 404 — reset the dev database.
 
+- ~~SignalR demo (was deferred)~~ — **done 2026-11-26**, no new parameter: `WolverineFx.SignalR`
+  with `AppHub : WolverineHub` at `/api/hub`. `TodoChanged` (`[MessageIdentity("todo-changed")]`)
+  is cascaded by the create endpoint and by `TodoCompletedHandler`; routed with
+  `PublishMessage<TodoChanged>().ToSignalR()` (everyone) or, with Identity, wrapped with
+  `ToWebSocketGroup("user:{id}")` — the package has connection/group/all locators but no per-user
+  one, so `AppHub.OnConnectedAsync` joins each connection to its user's group. Identity: hub is
+  `[Authorize]`, and `JwtBearerEvents.OnMessageReceived` accepts `?access_token=` on the hub path
+  (browsers can't send headers on WebSockets). Client: `useTodoChanges` refetches on
+  `todo-changed` and after reconnect; Vite proxy has `ws: true`. A SharedWorker was considered
+  and rejected (little saving, conflicts with per-tab in-memory tokens). Verified: 56/56 tests
+  (`TodoRealtimeTests`: create/complete notify, owner's two tabs notified but not another user,
+  anonymous 401 — long polling against the test server), plus a real WebSocket check through the
+  Vite proxy with two connections.
+
 ### Documented but intentionally deferred (not a defect, just scoped out)
 
 - **RS256/JWKS signing.** Shipped with HS256 (shared secret) as decided; upgrading to asymmetric

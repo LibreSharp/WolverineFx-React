@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ApiHost.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Wolverine;
@@ -45,6 +46,22 @@ public static class IdentityJwtSetup
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
                     ClockSkew = TimeSpan.FromSeconds(30)
+                };
+
+                // Browsers can't set an Authorization header on a WebSocket, so the SignalR
+                // client sends the token as ?access_token=; accept it for the hub only.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var token = context.Request.Query["access_token"].ToString();
+                        if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(AppHub.Path))
+                        {
+                            context.Token = token;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

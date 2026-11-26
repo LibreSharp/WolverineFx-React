@@ -11,6 +11,7 @@
     "gen:api": "openapi-typescript http://localhost:5133/openapi/v1.json -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
+    "@microsoft/signalr": "^11.0.0",
     "@tailwindcss/vite": "^4.3.2",
     "openapi-fetch": "^0.17.0",
     "react": "^19.2.7",

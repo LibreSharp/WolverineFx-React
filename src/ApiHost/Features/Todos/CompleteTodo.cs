@@ -44,7 +44,11 @@ public static class CompleteTodoEndpoint
             return (Results.NoContent(), [], []);
         }
 
+#if (Identity)
+        var completed = new TodoCompleted(todo.Id, todo.Title, todo.OwnerId);
+#else
         var completed = new TodoCompleted(todo.Id, todo.Title);
+#endif
         return (Results.NoContent(), [completed], [completed]);
     }
 #elif (IsEfCore)
@@ -75,7 +79,11 @@ public static class CompleteTodoEndpoint
 
         // Cascaded message: Wolverine saves it to the outbox in the same transaction as
         // the change above (AutoApplyTransactions), then TodoCompletedHandler runs it.
+#if (Identity)
+        return (Results.NoContent(), [new TodoCompleted(todo.Id, todo.Title, todo.OwnerId)]);
+#else
         return (Results.NoContent(), [new TodoCompleted(todo.Id, todo.Title)]);
+#endif
     }
 #endif
 }

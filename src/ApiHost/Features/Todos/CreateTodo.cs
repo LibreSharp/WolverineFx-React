@@ -9,6 +9,7 @@ using ApiHost.Identity;
 using Microsoft.AspNetCore.Authorization;
 #endif
 using FluentValidation;
+using Wolverine;
 using Wolverine.Http;
 
 namespace ApiHost.Features.Todos;
@@ -46,25 +47,33 @@ public static class CreateTodoEndpoint
 #if (IsMarten)
     // Event sourcing: a new Todo is a new event stream that starts with TodoCreated.
     // The inline snapshot projection (MartenPersistence) writes the Todo document
-    // that GET /api/todos reads, in the same transaction.
+    // that GET /api/todos reads, in the same transaction. The TodoChanged notification
+    // goes through the outbox, so open tabs only hear about the Todo once it is saved.
 #if (Identity)
-    public static (TodoCreationResponse, IStartStream) Post(CreateTodo command, ClaimsPrincipal user)
+    public static (TodoCreationResponse, IStartStream, OutgoingMessages) Post(CreateTodo command, ClaimsPrincipal user)
     {
         var id = Guid.CreateVersion7();
-        return (new TodoCreationResponse(id), MartenOps.StartStream<Todo>(id, new TodoCreated(command.Title, user.GetUserId())));
+        var ownerId = user.GetUserId();
+        return (
+            new TodoCreationResponse(id),
+            MartenOps.StartStream<Todo>(id, new TodoCreated(command.Title, ownerId)),
+            [TodoNotifications.Changed(id, ownerId)]);
     }
 #else
-    public static (TodoCreationResponse, IStartStream) Post(CreateTodo command)
+    public static (TodoCreationResponse, IStartStream, OutgoingMessages) Post(CreateTodo command)
     {
         var id = Guid.CreateVersion7();
-        return (new TodoCreationResponse(id), MartenOps.StartStream<Todo>(id, new TodoCreated(command.Title)));
+        return (
+            new TodoCreationResponse(id),
+            MartenOps.StartStream<Todo>(id, new TodoCreated(command.Title)),
+            [TodoNotifications.Changed(id)]);
     }
 #endif
 #elif (IsEfCore)
 #if (Identity)
-    public static TodoCreationResponse Post(CreateTodo command, AppDbContext db, ClaimsPrincipal user)
+    public static (TodoCreationResponse, OutgoingMessages) Post(CreateTodo command, AppDbContext db, ClaimsPrincipal user)
 #else
-    public static TodoCreationResponse Post(CreateTodo command, AppDbContext db)
+    public static (TodoCreationResponse, OutgoingMessages) Post(CreateTodo command, AppDbContext db)
 #endif
     {
         var todo = new Todo
@@ -79,7 +88,12 @@ public static class CreateTodoEndpoint
 
         db.Todos.Add(todo);
 
-        return new TodoCreationResponse(todo.Id);
+        // Saved to the outbox with the new row, so open tabs only hear about it once it exists.
+#if (Identity)
+        return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id, todo.OwnerId)]);
+#else
+        return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id)]);
+#endif
     }
 #endif
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api/client'
 import type { components } from '../../lib/api/schema'
+import { useTodoChanges } from './useTodoChanges'
 
 type Todo = components['schemas']['Todo']
 
@@ -19,6 +20,9 @@ export function TodoList() {
   useEffect(() => {
     refresh()
   }, [])
+
+  // Live updates: refetch when this or another tab creates or completes a Todo.
+  useTodoChanges(refresh)
 
   async function addTodo(event: React.FormEvent) {
     event.preventDefault()

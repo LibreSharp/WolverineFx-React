@@ -10,6 +10,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5133',
         changeOrigin: true,
+        // Also proxy the SignalR WebSocket (/api/hub) used for live updates.
+        ws: true,
       },
     },
   },
