@@ -19,7 +19,7 @@ public class AppFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _postgres = new PostgreSqlBuilder("postgres:16").Build();
+        _postgres = new PostgreSqlBuilder("postgres:18-alpine").Build();
         await _postgres.StartAsync();
 
         Host = await AlbaHost.For<Program>(builder =>
