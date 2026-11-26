@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { AuthProvider, useAuth } from './features/auth/AuthContext'
+import { AuthProvider } from './features/auth/AuthContext'
+import { useAuth } from './features/auth/useAuth'
 import { LoginForm } from './features/auth/LoginForm'
 import { RegisterForm } from './features/auth/RegisterForm'
 import { ProtectedRoute } from './features/auth/ProtectedRoute'

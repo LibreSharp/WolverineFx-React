@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from './AuthContext'
+import { useAuth } from './useAuth'
 
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const { register } = useAuth()

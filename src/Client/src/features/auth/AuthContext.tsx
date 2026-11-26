@@ -1,15 +1,7 @@
-import { createContext, useCallback, useContext, useSyncExternalStore, type ReactNode } from 'react'
+import { useCallback, useSyncExternalStore, type ReactNode } from 'react'
 import { api } from '../../lib/api/client'
 import { getTokens, setTokens, subscribeTokens } from '../../lib/api/authTokens'
-
-interface AuthContextValue {
-  isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<{ ok: true } | { ok: false; error: string }>
-  register: (email: string, password: string) => Promise<{ ok: true } | { ok: false; error: string }>
-  logout: () => Promise<void>
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null)
+import { AuthContext } from './useAuth'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const tokens = useSyncExternalStore(subscribeTokens, getTokens)
@@ -44,12 +36,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }

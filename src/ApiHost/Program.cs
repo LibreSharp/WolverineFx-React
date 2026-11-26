@@ -59,7 +59,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Development (including the tests) runs over plain HTTP with no HTTPS port to redirect
+// to; the middleware would only log a warning on every run.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 #if (Identity)
 app.UseAuthentication();

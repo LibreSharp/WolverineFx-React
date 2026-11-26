@@ -4,6 +4,18 @@ A `dotnet new` template pairing a [WolverineFx](https://wolverinefx.net/) backen
 endpoints + message bus) with a React ([Vite](https://vite.dev/) + TypeScript + Tailwind CSS)
 frontend, built as a single deployable ASP.NET Core host.
 
+## Prerequisites
+
+- **.NET 11 SDK.** Check with `dotnet --list-sdks`. If you installed it with the
+  `dotnet-install` script, it lives in `~/.dotnet`, which isn't on your `PATH` by default: add
+  `export DOTNET_ROOT=$HOME/.dotnet` and `export PATH=$DOTNET_ROOT:$PATH` to your shell profile.
+- **Node.js 22 or later**, with npm.
+- **Docker with the Compose plugin.** Postgres runs in Docker for development, and the tests
+  start their own throwaway Postgres container. Check with `docker compose version`. On
+  Ubuntu/Debian/Mint, the `docker.io` package doesn't include Compose: also install
+  `docker-compose-v2`, and add yourself to the `docker` group
+  (`sudo usermod -aG docker $USER`, then log out and back in).
+
 ## Install
 
 ```bash
@@ -28,6 +40,10 @@ In a separate terminal:
 cd MyApp/src/Client
 npm run dev                    # http://localhost:5173, proxies /api/* to the API
 ```
+
+With `--Identity true`, a demo user (`demo@example.com` / `Demo123!`) is created at startup in
+Development only, and the dev server pre-fills the login form with it. Change it under
+`DevelopmentUser` in `appsettings.Development.json` and in `src/Client/.env.development`.
 
 ### Parameters
 

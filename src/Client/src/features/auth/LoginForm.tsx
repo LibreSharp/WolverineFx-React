@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from './AuthContext'
+import { useAuth } from './useAuth'
 
 // The demo login the API creates in Development (see .env.development). Both values are
 // undefined in a production build, so nothing is pre-filled there.
