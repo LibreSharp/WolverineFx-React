@@ -18,7 +18,7 @@ public static class OpenTelemetrySetup
             .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
             .WithTracing(tracing => tracing
                 // Skip health check requests: frequent, and not interesting.
-                .AddAspNetCoreInstrumentation(options => options.Filter = context => !context.Request.Path.StartsWithSegments("/health"))
+                .AddAspNetCoreInstrumentation(options => options.Filter = context => !context.Request.Path.StartsWithSegments("/health", StringComparison.OrdinalIgnoreCase))
                 .AddHttpClientInstrumentation()
                 .AddSource("Wolverine", "Marten", "Npgsql"))
             .WithMetrics(metrics => metrics

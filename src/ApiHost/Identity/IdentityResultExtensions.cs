@@ -9,8 +9,8 @@ public static class IdentityResultExtensions
     // password...) as IdentityErrors; return them as a 400 ValidationProblem, the same shape
     // FluentValidation failures use, so the client shows both the same way.
     public static ValidationProblem ToValidationProblem(this IdentityResult result)
-        => TypedResults.ValidationProblem(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
+        => TypedResults.ValidationProblem(result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }, StringComparer.Ordinal));
 
     public static ValidationProblem ValidationProblem(string field, string message)
-        => TypedResults.ValidationProblem(new Dictionary<string, string[]> { [field] = [message] });
+        => TypedResults.ValidationProblem(new Dictionary<string, string[]>(StringComparer.Ordinal) { [field] = [message] });
 }

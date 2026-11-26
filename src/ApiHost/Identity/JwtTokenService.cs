@@ -34,7 +34,7 @@ public class JwtTokenService
         {
             Issuer = _options.Issuer,
             Audience = _options.Audience,
-            Claims = claims.ToDictionary(c => c.Type, c => (object)c.Value),
+            Claims = claims.ToDictionary(c => c.Type, c => (object)c.Value, StringComparer.Ordinal),
             Expires = expiresAtUtc.UtcDateTime,
             SigningCredentials = credentials
         });

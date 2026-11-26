@@ -33,6 +33,8 @@
     <Content Include="docker-compose.yml" />
     <Content Include="deploy\**\*" />
     <Content Include="ApiHost.slnx" />
+    <Content Include="Directory.Packages.props" />
+    <Content Include=".editorconfig" />
     <!-- Root dotfiles for the generated app (EnableDefaultItems is off, so list them). -->
     <Content Include=".gitignore" />
     <!-- Becomes README.md in the generated app (see template.json); README.md here is the template's. -->

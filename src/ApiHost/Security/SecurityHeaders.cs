@@ -18,7 +18,7 @@ public static class SecurityHeaders
         {
             var headers = context.Response.Headers;
             // The Development-only API reference (/scalar) runs its own inline setup script.
-            if (!context.Request.Path.StartsWithSegments("/scalar"))
+            if (!context.Request.Path.StartsWithSegments("/scalar", StringComparison.OrdinalIgnoreCase))
             {
                 headers.ContentSecurityPolicy = ContentSecurityPolicy;
             }

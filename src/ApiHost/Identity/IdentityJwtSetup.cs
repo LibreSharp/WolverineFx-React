@@ -26,9 +26,37 @@ public static class IdentityJwtSetup
 
         services.AddApplicationIdentity();
 
-        // AddIdentity (above) makes Identity's cookie scheme the default, which would answer an
-        // unauthenticated API call with a 302 redirect to a login page. This is a bearer-token API,
-        // so JWT must be the default for authenticate and challenge (401), set after AddIdentity.
+        services.AddJwtBearerAuthentication(jwtOptions);
+
+        services.AddAuthorization();
+
+        // Limits login, registration and password attempts per client IP (see AuthRateLimiting).
+        services.AddAuthRateLimiting();
+
+        // UserManager<T> takes IServiceProvider in its constructor, so Wolverine can't build it inline
+        // in generated endpoint code, and its default ServiceLocationPolicy.NotAllowed then fails the
+        // request. Explicitly allow resolving it from the container.
+        services.ConfigureWolverine(opts =>
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>());
+
+        // A ready-made login for local development only.
+        if (environment.IsDevelopment())
+        {
+            services.AddHostedService<DevelopmentUserSeeder>();
+        }
+
+        // Password reset links are valid for an hour (the Identity default is a day).
+        services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(1));
+
+        services.AddAccountEmail(configuration, environment);
+    }
+
+    private static void AddJwtBearerAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
+    {
+        // AddIdentity (in AddApplicationIdentity, which must run first) makes Identity's cookie
+        // scheme the default, which would answer an unauthenticated API call with a 302 redirect to
+        // a login page. This is a bearer-token API, so JWT must be the default for authenticate and
+        // challenge (401), set after AddIdentity.
         services.AddAuthentication(options =>
             {
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,7 +84,7 @@ public static class IdentityJwtSetup
                     OnMessageReceived = context =>
                     {
                         var token = context.Request.Query["access_token"].ToString();
-                        if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(AppHub.Path))
+                        if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(AppHub.Path, StringComparison.OrdinalIgnoreCase))
                         {
                             context.Token = token;
                         }
@@ -65,27 +93,10 @@ public static class IdentityJwtSetup
                     }
                 };
             });
+    }
 
-        services.AddAuthorization();
-
-        // Limits login, registration and password attempts per client IP (see AuthRateLimiting).
-        services.AddAuthRateLimiting();
-
-        // UserManager<T> takes IServiceProvider in its constructor, so Wolverine can't build it inline
-        // in generated endpoint code, and its default ServiceLocationPolicy.NotAllowed then fails the
-        // request. Explicitly allow resolving it from the container.
-        services.ConfigureWolverine(opts =>
-            opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>());
-
-        // A ready-made login for local development only.
-        if (environment.IsDevelopment())
-        {
-            services.AddHostedService<DevelopmentUserSeeder>();
-        }
-
-        // Password reset links are valid for an hour (the Identity default is a day).
-        services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(1));
-
+    private static void AddAccountEmail(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    {
         // Account email (password reset): SMTP when configured; otherwise the log in
         // Development, and a warning without the link elsewhere. See Identity/Email/.
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));

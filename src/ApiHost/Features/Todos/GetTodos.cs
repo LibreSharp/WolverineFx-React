@@ -31,15 +31,15 @@ public static class GetTodosEndpoint
         return session.Query<Todo>().ToListAsync(cancellationToken);
     }
 #elif (IsEfCore && Identity)
-    public static Task<List<Todo>> Get(AppDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken)
+    public static async Task<IReadOnlyList<Todo>> Get(AppDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
         var userId = user.GetUserId();
-        return db.Todos.AsNoTracking().Where(t => t.OwnerId == userId).ToListAsync(cancellationToken);
+        return await db.Todos.AsNoTracking().Where(t => t.OwnerId == userId).ToListAsync(cancellationToken);
     }
 #elif (IsEfCore)
-    public static Task<List<Todo>> Get(AppDbContext db, CancellationToken cancellationToken)
+    public static async Task<IReadOnlyList<Todo>> Get(AppDbContext db, CancellationToken cancellationToken)
     {
-        return db.Todos.AsNoTracking().ToListAsync(cancellationToken);
+        return await db.Todos.AsNoTracking().ToListAsync(cancellationToken);
     }
 #endif
 }

@@ -1,0 +1,28 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# Meziantou.Analyzer rules turned off for this codebase (see Directory.Packages.props):
+# ASP.NET Core has no SynchronizationContext, so ConfigureAwait(false) changes nothing here.
+dotnet_diagnostic.MA0004.severity = none
+# Vertical slices keep a request, its validator and its endpoint together in one file.
+dotnet_diagnostic.MA0048.severity = none
+# `==` on strings is already ordinal in C#, and LINQ providers (Marten, EF Core) only translate `==`.
+dotnet_diagnostic.MA0006.severity = none
+# Flags comments containing "TODO", which the example Todo feature mentions everywhere.
+dotnet_diagnostic.MA0026.severity = none
+
+# EF Core migrations are generated: don't analyze them.
+[**/Migrations/*.cs]
+generated_code = true
+
+[*.{json,yml,yaml,ts,tsx,css,html,md}]
+indent_style = space
+indent_size = 2

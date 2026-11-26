@@ -1,0 +1,68 @@
+<Project>
+  <!-- Central package management: every NuGet package version for the solution is set here, and
+       the projects reference packages by name only. Dependabot (.github/dependabot.yml) updates
+       these versions. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- A free code analyzer (MIT) applied to every project: it flags likely bugs, performance
+       and API-usage issues as build warnings. Tune or silence rules in .editorconfig. -->
+  <ItemGroup>
+    <GlobalPackageReference Include="Meziantou.Analyzer" Version="3.0.342" />
+  </ItemGroup>
+
+  <!-- The app (src/ApiHost) -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="3.2.1" />
+    <PackageVersion Include="WolverineFx" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.Http" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.Http.FluentValidation" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.SignalR" Version="6.65.1" />
+    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.21.0" />
+<!--#if (IsMarten) -->
+    <PackageVersion Include="Marten" Version="9.63.0" />
+    <PackageVersion Include="Marten.AspNetCore" Version="9.63.0" />
+    <PackageVersion Include="WolverineFx.Marten" Version="6.65.1" />
+<!--#endif -->
+<!--#if (IsEfCore) -->
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0" />
+    <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="6.65.1" />
+    <PackageVersion Include="WolverineFx.Postgresql" Version="6.65.1" />
+    <!-- Roslyn 5.9: see the note in src/ApiHost/ApiHost.csproj. -->
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Scripting" Version="5.9.0" />
+<!--#endif -->
+<!--#if (Identity && IsMarten) -->
+    <PackageVersion Include="Marten.AspNetIdentity" Version="11.0.1" />
+<!--#endif -->
+<!--#if (Identity) -->
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
+<!--#endif -->
+<!--#if (Identity && IsEfCore) -->
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="11.0.0" />
+<!--#endif -->
+  </ItemGroup>
+<!--#if (IncludeTests) -->
+
+  <!-- Tests (tests/ApiHost.Tests) -->
+  <ItemGroup>
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="Alba" Version="8.5.3" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.17.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="11.0.0" />
+  </ItemGroup>
+<!--#endif -->
+</Project>

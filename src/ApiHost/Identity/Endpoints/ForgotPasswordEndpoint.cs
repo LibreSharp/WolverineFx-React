@@ -38,7 +38,7 @@ public static class ForgotPasswordEndpoint
         {
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var link = QueryHelpers.AddQueryString($"{ClientUrl(configuration, httpContext)}/reset-password",
-                new Dictionary<string, string?> { ["email"] = user.Email, ["token"] = token });
+                new Dictionary<string, string?>(StringComparer.Ordinal) { ["email"] = user.Email, ["token"] = token });
             await emailSender.SendPasswordResetAsync(user.Email, link, cancellationToken);
         }
 

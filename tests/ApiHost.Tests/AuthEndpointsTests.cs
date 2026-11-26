@@ -119,7 +119,7 @@ public class AuthEndpointsTests
             s.StatusCodeShouldBeOk();
         });
         var rotated = refresh.ReadAsJson<RefreshResponse>();
-        Assert.NotEqual(original!.RefreshToken, rotated!.RefreshToken);
+        Assert.NotEqual(original!.RefreshToken, rotated!.RefreshToken, StringComparer.Ordinal);
 
         // Reusing the now-rotated-away token must be rejected.
         await _fixture.Host.Scenario(s =>

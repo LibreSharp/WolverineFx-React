@@ -11,44 +11,44 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
-    <PackageReference Include="Scalar.AspNetCore" Version="3.2.1" />
-    <PackageReference Include="WolverineFx" Version="6.65.1" />
-    <PackageReference Include="WolverineFx.Http" Version="6.65.1" />
-    <PackageReference Include="WolverineFx.RuntimeCompilation" Version="6.65.1" />
-    <PackageReference Include="WolverineFx.Http.FluentValidation" Version="6.65.1" />
-    <PackageReference Include="WolverineFx.SignalR" Version="6.65.1" />
-    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.21.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+    <PackageReference Include="WolverineFx" />
+    <PackageReference Include="WolverineFx.Http" />
+    <PackageReference Include="WolverineFx.RuntimeCompilation" />
+    <PackageReference Include="WolverineFx.Http.FluentValidation" />
+    <PackageReference Include="WolverineFx.SignalR" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
 <!--#if (IsMarten) -->
-    <PackageReference Include="Marten" Version="9.63.0" />
-    <PackageReference Include="Marten.AspNetCore" Version="9.63.0" />
-    <PackageReference Include="WolverineFx.Marten" Version="6.65.1" />
+    <PackageReference Include="Marten" />
+    <PackageReference Include="Marten.AspNetCore" />
+    <PackageReference Include="WolverineFx.Marten" />
 <!--#endif -->
 <!--#if (IsEfCore) -->
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0" />
-    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="6.65.1" />
-    <PackageReference Include="WolverineFx.Postgresql" Version="6.65.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" />
+    <PackageReference Include="WolverineFx.Postgresql" />
     <!-- EF Core Design 11 needs Roslyn 5.9, but WolverineFx.RuntimeCompilation pulls the Roslyn 5.0
          metapackages (which pin their VB/Scripting parts to exactly 5.0). Lift them to 5.9 to avoid NU1608.
          Remove once dynamic codegen is dropped or Wolverine ships against Roslyn 5.9+. -->
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="5.9.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="5.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" />
 <!--#endif -->
 <!--#if (Identity && IsMarten) -->
-    <PackageReference Include="Marten.AspNetIdentity" Version="11.0.1" />
+    <PackageReference Include="Marten.AspNetIdentity" />
 <!--#endif -->
 <!--#if (Identity) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 <!--#endif -->
 <!--#if (Identity && IsEfCore) -->
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="11.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="11.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
 <!--#endif -->
   </ItemGroup>
 
