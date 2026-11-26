@@ -41,7 +41,7 @@ jobs:
       - name: Install template
         run: dotnet new install ./
 
-      # -n MyApp exercises sourceName replacement (see SPEC.md §11 for the collision it once caused).
+      # -n MyApp exercises sourceName replacement: the solution, namespaces and project become MyApp.
       - name: Generate project
         run: >
           dotnet new wolverine-react -n MyApp -o "$APP_DIR"
@@ -51,7 +51,7 @@ jobs:
 
       - name: Build API
         working-directory: ${{ env.APP_DIR }}
-        run: dotnet build ApiHost.slnx
+        run: dotnet build MyApp.slnx
 
       - name: Build client
         working-directory: ${{ env.APP_DIR }}/src/Client
@@ -63,4 +63,4 @@ jobs:
       - name: Test
         if: ${{ matrix.tests }}
         working-directory: ${{ env.APP_DIR }}
-        run: dotnet test ApiHost.slnx --no-build --logger "console;verbosity=normal"
+        run: dotnet test MyApp.slnx --no-build --logger "console;verbosity=normal"
