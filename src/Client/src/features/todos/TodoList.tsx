@@ -18,7 +18,7 @@ export function TodoList() {
   }
 
   return (
-    <div className="mx-auto max-w-md p-8">
+    <div className="mx-auto max-w-xl px-6 py-10">
       <h1 className="mb-4 text-2xl font-semibold">Todos</h1>
 
       <form onSubmit={addTodo} className="mb-4 flex gap-2">

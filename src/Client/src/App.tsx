@@ -1,13 +1,15 @@
 import { createBrowserRouter, RouterProvider } from 'react-router'
-import { Layout } from './components/Layout'
+import { HomePage } from './components/HomePage'
+import { Layout, NavItem } from './components/Layout'
 import { NotFound } from './components/NotFound'
 import { TodoList } from './features/todos/TodoList'
 
 const router = createBrowserRouter([
   {
-    element: <Layout />,
+    element: <Layout nav={<NavItem to="/todos">Todos</NavItem>} />,
     children: [
-      { index: true, element: <TodoList /> },
+      { index: true, element: <HomePage /> },
+      { path: 'todos', element: <TodoList /> },
       { path: '*', element: <NotFound /> },
     ],
   },

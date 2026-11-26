@@ -33,6 +33,9 @@ only talks to one origin.
 Log in as **demo@example.com** / **Demo123!**. This user is created at startup in Development
 only, and the dev server pre-fills the login form with it. Change it under `DevelopmentUser` in
 `src/ApiHost/appsettings.Development.json` and in `src/Client/.env.development`.
+
+In Development, emails aren't sent: "Forgot your password?" writes the reset link to the API's
+console output, where you can open it.
 <!--#endif -->
 
 To try the API without the UI, open `src/ApiHost/ApiHost.http` in Visual Studio, Rider, or VS Code
@@ -55,13 +58,16 @@ src/ApiHost/
   Data/EfCore/            AppDbContext, migrations, and migrate-on-startup
 <!--#endif -->
 <!--#if (Identity) -->
-  Identity/               Users, JWT tokens, refresh tokens, auth endpoints
+  Identity/               Users, JWT tokens, refresh tokens, auth and account endpoints
+  Identity/Email/         Account emails (password reset): SMTP, or the log in Development
 <!--#endif -->
 src/Client/src/
   App.tsx                 Routes (React Router)
+  components/             Layout (header, navigation, footer), home page, not-found page
   features/todos/         Todo page, TanStack Query hooks, SignalR hook
 <!--#if (Identity) -->
-  features/auth/          Login and register pages, route guards
+  features/auth/          Login, register and password reset pages, route guards
+  features/account/       Settings page and the header's user menu
 <!--#endif -->
   lib/api/                Typed API client generated from the OpenAPI document
 <!--#if (IncludeTests) -->
@@ -98,12 +104,20 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   client refreshes automatically when a request gets a 401, each refresh replaces the refresh
   token, and reusing an old one revokes the user's tokens. Tokens are kept in memory, not in
   browser storage, so reloading the page logs you out. Each user sees only their own Todos.
+- **Account settings** (`/settings`). Users can change their email and display name, change
+  their password (which signs out their other sessions), and delete their account (password
+  required). Deleting publishes an `AccountDeleted` message; each feature that stores user data
+  handles it to delete that data (see `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`).
+- **Forgot password.** `/forgot-password` emails a link to `/reset-password` with a one-time
+  token valid for an hour. The API answers the same whether or not the email has an account, so
+  it can't be used to find out who is registered.
 <!--#endif -->
 
 ## Adding a feature
 
 1. Create `src/ApiHost/Features/<Name>/` with your endpoint classes, request records, and any
-   messages and handlers (a class with a `Handle` method). No registration is needed.
+   messages and handlers. No registration is needed: Wolverine finds endpoints by their
+   attributes, and handlers by name (a class ending in `Handler` with a `Handle` method).
 2. Add a validator (`AbstractValidator<TRequest>`) for any request that needs one.
 <!--#if (IsMarten) -->
 3. Store documents with `IDocumentSession` (Marten saves them for you after the endpoint runs),
@@ -114,8 +128,15 @@ The Todo feature is a working example of each pattern. Copy it when you add your
 <!--#endif -->
 4. To push a message to browsers, add `opts.PublishMessage<YourMessage>().ToSignalR();` in
    `Program.cs`.
+<!--#if (Identity) -->
+5. If the feature stores data about a user, add a handler for `AccountDeleted` that deletes it,
+   like `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`.
+6. With the API running, update the client's types with `npm run gen:api` (in `src/Client`), then
+   add a folder under `src/Client/src/features/` and a route in `App.tsx`.
+<!--#else -->
 5. With the API running, update the client's types with `npm run gen:api` (in `src/Client`), then
    add a folder under `src/Client/src/features/` and a route in `App.tsx`.
+<!--#endif -->
 
 ## Common tasks
 
@@ -180,9 +201,12 @@ Configure it with environment variables (or any ASP.NET Core configuration sourc
 | `ASPNETCORE_URLS` | `http://+:8080` |
 <!--#if (Identity) -->
 | `Jwt__SigningKey` | A random secret of at least 32 bytes |
+| `Email__Smtp__Host`, `Email__Smtp__Port`, `Email__Smtp__UserName`, `Email__Smtp__Password`, `Email__Smtp__From` | Your email service's SMTP settings, for password reset emails |
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still
-the development key. The demo user is never created outside Development.
+the development key. The demo user is never created outside Development. Without
+`Email:Smtp:Host`, password reset emails can't be sent; the app logs a warning instead (never the
+link).
 <!--#endif -->
 
 ## Created from a template

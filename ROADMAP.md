@@ -78,6 +78,10 @@ billing records but no payment provider (see the
 
 ### v0.2: production-ready basics (no new options; CI stays at 8 combinations)
 
+- [x] **App shell:** header navigation with a user menu, a public home page and a footer.
+- [x] **Account settings** (Identity): change email and display name, change password, delete
+      account (with an `AccountDeleted` message features handle to delete their data), and
+      forgot/reset password by email.
 - [ ] **Container publishing and cheap hosting:** `dotnet publish /t:PublishContainer`, a
       production `docker-compose` with Postgres and [Caddy](https://caddyserver.com/)
       (Apache-2.0) for automatic HTTPS, and a deployment guide for a small VPS.

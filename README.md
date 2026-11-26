@@ -108,6 +108,12 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   generated code in, and Production loads it ready-made (`TypeLoadMode.Static`): a faster start,
   no runtime compilation, and a clear error at startup if anything is missing. The generated
   code is never committed (`Internal/Generated/` is ignored), so it can't go stale.
+- **An app shell:** a header with navigation and (with `--Identity true`) a user menu, a public
+  home page, a footer, and a not-found page.
+- **Account settings** (`--Identity true`): change email and display name, change password
+  (signs out other sessions), delete account (deletes the user's data through an
+  `AccountDeleted` message each feature handles), and forgot/reset password by email (SMTP when
+  configured; the reset link is logged in Development).
 - **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With
   `--Identity true`, `/login` and `/register` are real routes, signed-out users are redirected
   to `/login` and returned to the page they wanted afterwards. In production, unknown paths serve

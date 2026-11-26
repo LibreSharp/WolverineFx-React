@@ -1,42 +1,70 @@
-import { createBrowserRouter, RouterProvider } from 'react-router'
-import { Layout } from './components/Layout'
+import { createBrowserRouter, Link, RouterProvider } from 'react-router'
+import { HomePage } from './components/HomePage'
+import { Layout, NavItem } from './components/Layout'
 import { NotFound } from './components/NotFound'
+import { SettingsPage } from './features/account/SettingsPage'
+import { UserMenu } from './features/account/UserMenu'
 import { AuthProvider } from './features/auth/AuthContext'
+import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
+import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { GuestOnly, RequireAuth } from './features/auth/routeGuards'
 import { useAuth } from './features/auth/useAuth'
 import { TodoList } from './features/todos/TodoList'
 
 const router = createBrowserRouter([
   {
-    element: <Layout actions={<AccountActions />} />,
+    element: <Layout nav={<Navigation />} actions={<AccountActions />} />,
     children: [
+      { index: true, element: <HomePage /> },
       {
+        // Signed-out pages; a signed-in user is sent on to the Todos.
         element: <GuestOnly />,
         children: [
           { path: 'login', element: <LoginPage /> },
           { path: 'register', element: <RegisterPage /> },
+          { path: 'forgot-password', element: <ForgotPasswordPage /> },
+          { path: 'reset-password', element: <ResetPasswordPage /> },
         ],
       },
       {
+        // Pages that need a login; a signed-out user is sent to /login and brought back.
         element: <RequireAuth />,
-        children: [{ index: true, element: <TodoList /> }],
+        children: [
+          { path: 'todos', element: <TodoList /> },
+          { path: 'settings', element: <SettingsPage /> },
+        ],
       },
       { path: '*', element: <NotFound /> },
     ],
   },
 ])
 
-function AccountActions() {
-  const { isAuthenticated, logout } = useAuth()
+function Navigation() {
+  const { isAuthenticated } = useAuth()
   if (!isAuthenticated) return null
-
-  // Logging out clears the tokens; RequireAuth then redirects to /login.
   return (
-    <button type="button" onClick={() => void logout()} className="text-sm text-gray-500 hover:underline">
-      Log out
-    </button>
+    <>
+      <NavItem to="/todos">Todos</NavItem>
+      <NavItem to="/settings">Settings</NavItem>
+    </>
+  )
+}
+
+function AccountActions() {
+  const { isAuthenticated } = useAuth()
+  if (isAuthenticated) return <UserMenu />
+
+  return (
+    <div className="flex items-center gap-3 text-sm">
+      <Link to="/login" className="text-gray-600 hover:text-gray-900">
+        Log in
+      </Link>
+      <Link to="/register" className="rounded bg-indigo-600 px-3 py-1.5 text-white hover:bg-indigo-700">
+        Register
+      </Link>
+    </div>
   )
 }
 

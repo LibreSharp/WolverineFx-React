@@ -8,7 +8,7 @@ export function RegisterPage() {
   return (
     <div>
       <RegisterForm
-        onSuccess={() => navigate('/login', { state: { registered: true } satisfies AuthLocationState })}
+        onSuccess={() => navigate('/login', { state: { notice: 'Account created. Log in to continue.' } satisfies AuthLocationState })}
       />
       <p className="text-center text-sm text-gray-500">
         Already have an account?{' '}

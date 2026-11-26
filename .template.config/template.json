@@ -96,6 +96,7 @@
             "src/ApiHost/Identity/**",
             "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.cs",
             "src/Client/src/features/auth/**",
+            "src/Client/src/features/account/**",
             "src/Client/.env.development",
             "src/Client/src/App.WithIdentity.tsx",
             "src/ApiHost/ApiHost.WithIdentity.http",

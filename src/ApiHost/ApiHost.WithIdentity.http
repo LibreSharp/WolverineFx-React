@@ -38,6 +38,19 @@ Content-Type: application/json
 
 { "title": "" }
 
+### Update your profile (email is also the login name)
+PUT {{baseUrl}}/api/account/profile
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "email": "demo@example.com", "displayName": "Demo User" }
+
+### Ask for a password reset email (in Development the link is written to the API's console)
+POST {{baseUrl}}/api/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "demo@example.com" }
+
 ### Without a token, the Todo endpoints answer 401
 GET {{baseUrl}}/api/todos
 
