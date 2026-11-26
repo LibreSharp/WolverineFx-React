@@ -20,7 +20,7 @@ have something to talk to.
 | `npm run build` | Type-check (`tsc -b`) and build for production |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint` | Run Oxlint |
-| `npm run gen:api` | Regenerate `src/lib/api/schema.d.ts` from the API's live OpenAPI spec (requires the API running on `localhost:5299`) |
+| `npm run gen:api` | Regenerate `src/lib/api/schema.d.ts` from the API's live OpenAPI spec (requires the API running on `localhost:5133`) |
 
 ## API client
 
