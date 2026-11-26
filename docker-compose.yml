@@ -1,3 +1,4 @@
+# Local development services. `docker compose up -d` starts PostgreSQL only.
 services:
   postgres:
     image: postgres:16-alpine
@@ -9,6 +10,19 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+  # Optional: see the app's traces, metrics and logs at http://localhost:18888.
+  #   docker compose --profile observability up -d
+  # then run the API with OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 (see README.md).
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.5
+    profiles: [observability]
+    environment:
+      # Local use only: no login for the dashboard.
+      ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
+    ports:
+      - "18888:18888"   # dashboard
+      - "4317:18889"    # OTLP over gRPC, where the app sends telemetry
 
 volumes:
   postgres-data:

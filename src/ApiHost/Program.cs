@@ -12,6 +12,7 @@ using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 using Wolverine.SignalR;
 using ApiHost.Features.Todos;
+using ApiHost.Observability;
 using ApiHost.Realtime;
 using ApiHost.Security;
 #if (Identity)
@@ -21,6 +22,7 @@ using ApiHost.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.AddAppOpenTelemetry();
 
 #if (IsMarten)
 builder.Services.AddMartenPersistence(builder.Configuration);

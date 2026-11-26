@@ -3,6 +3,7 @@ using ApiHost.Features.Todos;
 using ApiHost.Identity;
 #endif
 using JasperFx.Events.Projections;
+using JasperFx.OpenTelemetry;
 using Marten;
 using Wolverine.Marten;
 
@@ -17,6 +18,9 @@ public static class MartenPersistence
             opts.Connection(configuration.GetConnectionString("Marten")
                 ?? throw new InvalidOperationException("Missing 'Marten' connection string"));
             opts.UseSystemTextJsonForSerialization();
+
+            // Trace Marten's database work (exported by OpenTelemetry; see Observability/).
+            opts.OpenTelemetry.TrackConnections = TrackLevel.Normal;
 
             // Todos are event-sourced. The inline snapshot keeps a Todo document up to date
             // in the same transaction as each appended event, so queries read documents

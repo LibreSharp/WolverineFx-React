@@ -88,8 +88,9 @@ billing records but no payment provider (see the
 - [x] **Health checks:** `/health/live` and `/health/ready` (with a Postgres check,
       `AspNetCore.HealthChecks.NpgSql`, Apache-2.0); CI checks `/health/ready` on every published
       combination.
-- [ ] **OpenTelemetry** (Apache-2.0) traces, metrics and logs. Wolverine and Marten already emit
-      traces.
+- [x] **OpenTelemetry** (Apache-2.0) traces, metrics and logs from ASP.NET Core, HTTP clients,
+      Npgsql, Wolverine and Marten, exported over OTLP only when `OTEL_EXPORTER_OTLP_ENDPOINT` is
+      set; an optional Aspire dashboard in `docker-compose` (`--profile observability`).
 - [x] **Persist ASP.NET Core Data Protection keys to Postgres,** so tokens survive container
       restarts and work with more than one instance (EF Core: Microsoft's package; Marten: a
       small `IXmlRepository` storing documents).

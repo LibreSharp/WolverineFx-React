@@ -138,6 +138,26 @@ The Todo feature is a working example of each pattern. Copy it when you add your
    add a folder under `src/Client/src/features/` and a route in `App.tsx`.
 <!--#endif -->
 
+## Observability
+
+The app records traces, metrics and logs with OpenTelemetry: HTTP requests, SQL commands,
+<!--#if (IsMarten) -->
+Wolverine messages and handlers, Marten, and .NET runtime metrics
+<!--#else -->
+Wolverine messages and handlers, and .NET runtime metrics
+<!--#endif -->
+(`src/ApiHost/Observability/OpenTelemetrySetup.cs`). Nothing is sent anywhere until you set
+`OTEL_EXPORTER_OTLP_ENDPOINT`. To see it locally in the Aspire dashboard:
+
+```bash
+docker compose --profile observability up -d     # dashboard on http://localhost:18888
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 dotnet run --project src/ApiHost
+```
+
+(`dotnet run` itself also reports to the dashboard, as `dotnet-cli`; the app is `ApiHost`.) In
+production, point `OTEL_EXPORTER_OTLP_ENDPOINT` (and, if needed, `OTEL_EXPORTER_OTLP_HEADERS`) at
+any OpenTelemetry backend, such as Grafana, Honeycomb or a self-hosted Jaeger.
+
 ## Common tasks
 
 | Task | Command |
