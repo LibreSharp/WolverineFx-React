@@ -96,7 +96,9 @@ jobs:
         run: |
           dotnet publish src/MyApp -c Release -o "$RUNNER_TEMP/publish"
           test -d src/MyApp/Internal/Generated || { echo "codegen did not run"; exit 1; }
-          dotnet "$RUNNER_TEMP/publish/MyApp.dll" > "$RUNNER_TEMP/app.log" 2>&1 &
+          # Run from the publish folder, as a deployment would: the content root (and so wwwroot,
+          # the bundled React app) is the current directory.
+          (cd "$RUNNER_TEMP/publish" && dotnet MyApp.dll > "$RUNNER_TEMP/app.log" 2>&1 &)
           fail() { echo "$1"; cat "$RUNNER_TEMP/app.log"; exit 1; }
           curl -fsS -o /dev/null --retry 30 --retry-delay 1 --retry-all-errors http://localhost:5000/ \
             || fail "The published app did not serve the client."
