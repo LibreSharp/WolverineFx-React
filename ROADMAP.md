@@ -85,8 +85,9 @@ billing records but no payment provider (see the
 - [ ] **Container publishing and cheap hosting:** `dotnet publish /t:PublishContainer`, a
       production `docker-compose` with Postgres and [Caddy](https://caddyserver.com/)
       (Apache-2.0) for automatic HTTPS, and a deployment guide for a small VPS.
-- [ ] **Health checks:** liveness and readiness endpoints, with a Postgres check
-      (`AspNetCore.HealthChecks.NpgSql`, Apache-2.0).
+- [x] **Health checks:** `/health/live` and `/health/ready` (with a Postgres check,
+      `AspNetCore.HealthChecks.NpgSql`, Apache-2.0); CI checks `/health/ready` on every published
+      combination.
 - [ ] **OpenTelemetry** (Apache-2.0) traces, metrics and logs. Wolverine and Marten already emit
       traces.
 - [ ] **Persist ASP.NET Core Data Protection keys to Postgres,** so tokens survive container

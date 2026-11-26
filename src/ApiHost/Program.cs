@@ -1,5 +1,6 @@
 using JasperFx;
 using JasperFx.CodeGeneration;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 #if (IsMarten)
 using ApiHost.Data.Marten;
 #elif (IsEfCore)
@@ -64,6 +65,16 @@ builder.Services.CritterStackDefaults(x =>
 
 builder.Services.AddWolverineHttp();
 
+// Health checks for load balancers and container platforms: /health/live says the process is
+// running; /health/ready also checks that PostgreSQL is reachable. The connection string is read
+// when a check runs, so configuration supplied later (tests, environment variables) is used.
+builder.Services.AddHealthChecks()
+#if (IsMarten)
+    .AddNpgSql(sp => sp.GetRequiredService<IConfiguration>().GetConnectionString("Marten")!, name: "postgres", tags: ["ready"]);
+#else
+    .AddNpgSql(sp => sp.GetRequiredService<IConfiguration>().GetConnectionString("Postgres")!, name: "postgres", tags: ["ready"]);
+#endif
+
 #if (Identity)
 builder.Services.AddIdentityJwt(builder.Configuration, builder.Environment);
 #endif
@@ -94,6 +105,9 @@ app.MapWolverineEndpoints(opts =>
 });
 
 app.MapWolverineSignalRHub<AppHub>(AppHub.Path);
+
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 
 if (!app.Environment.IsDevelopment())
 {

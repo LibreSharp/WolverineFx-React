@@ -105,4 +105,6 @@ jobs:
           expected=${{ matrix.identity && '401' || '200' }}
           status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/api/todos)
           [ "$status" = "$expected" ] || fail "GET /api/todos returned $status, expected $expected."
-          echo "Published app is running: GET / 200, GET /api/todos $status."
+          ready=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/health/ready)
+          [ "$ready" = "200" ] || fail "GET /health/ready returned $ready, expected 200."
+          echo "Published app is running: GET / 200, GET /api/todos $status, GET /health/ready 200."

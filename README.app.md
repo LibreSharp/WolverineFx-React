@@ -189,6 +189,9 @@ cd publish
 ASPNETCORE_ENVIRONMENT=Production dotnet ApiHost.dll
 ```
 
+For your host's health checks, use `/health/live` (the process is running) and `/health/ready`
+(it can also reach PostgreSQL).
+
 Configure it with environment variables (or any ASP.NET Core configuration source):
 
 | Setting | Example |
