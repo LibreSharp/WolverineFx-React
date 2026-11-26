@@ -210,6 +210,10 @@ The app refuses to start outside Development if `Jwt:SigningKey` is missing, too
 the development key. The demo user is never created outside Development. Without
 `Email:Smtp:Host`, password reset emails can't be sent; the app logs a warning instead (never the
 link).
+
+ASP.NET Core Data Protection keys, which protect password reset tokens, are stored in PostgreSQL,
+so reset links keep working across restarts and on every instance of the app. They're stored
+unencrypted, like the rest of your data: protect database access and backups accordingly.
 <!--#endif -->
 
 ## Created from a template

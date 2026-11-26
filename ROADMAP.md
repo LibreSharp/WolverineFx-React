@@ -90,8 +90,9 @@ billing records but no payment provider (see the
       combination.
 - [ ] **OpenTelemetry** (Apache-2.0) traces, metrics and logs. Wolverine and Marten already emit
       traces.
-- [ ] **Persist ASP.NET Core Data Protection keys to Postgres,** so tokens survive container
-      restarts and work with more than one instance.
+- [x] **Persist ASP.NET Core Data Protection keys to Postgres,** so tokens survive container
+      restarts and work with more than one instance (EF Core: Microsoft's package; Marten: a
+      small `IXmlRepository` storing documents).
 - [ ] **Hardening:** rate limiting on the auth endpoints (built-in rate limiter) and security
       headers.
 - [ ] **API reference page** in Development with [Scalar](https://scalar.com/) (MIT).

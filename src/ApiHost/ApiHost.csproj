@@ -38,6 +38,7 @@
 <!--#endif -->
 <!--#if (Identity && IsEfCore) -->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="11.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="11.0.0" />
 <!--#endif -->
   </ItemGroup>
 

@@ -130,8 +130,8 @@
           "condition": "(IsEfCore && Identity)",
           "exclude": [ "src/ApiHost/Data/EfCore/Migrations.NoIdentity/**" ],
           "rename": {
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126125555_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20261126125555_InitialCreate.cs",
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126125555_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261126125555_InitialCreate.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126130647_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20261126130647_InitialCreate.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126130647_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261126130647_InitialCreate.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
           }
         }

@@ -16,7 +16,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261126125555_InitialCreate";
+    public override string LastMigrationId => "20261126130647_InitialCreate";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -154,6 +154,25 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("UserId");
 
                 b.ToTable("RefreshTokens");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(id);
+
+                b.Property<string>("FriendlyName")
+                    .HasColumnType("text");
+
+                b.Property<string>("Xml")
+                    .HasColumnType("text");
+
+                b.HasKey("Id");
+
+                b.ToTable("DataProtectionKeys");
             });
 
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

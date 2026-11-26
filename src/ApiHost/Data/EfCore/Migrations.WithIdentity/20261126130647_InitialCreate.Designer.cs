@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiHost.Data.EfCore.Migrations;
 
 [DbContext(typeof(AppDbContext))]
-[Migration("20261126125555_InitialCreate")]
-partial class _20261126125555_InitialCreate
+[Migration("20261126130647_InitialCreate")]
+partial class _20261126130647_InitialCreate
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -152,6 +152,25 @@ partial class _20261126125555_InitialCreate
                 b.HasIndex("UserId");
 
                 b.ToTable("RefreshTokens");
+            });
+
+        modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+            {
+                var id = b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("integer");
+
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(id);
+
+                b.Property<string>("FriendlyName")
+                    .HasColumnType("text");
+
+                b.Property<string>("Xml")
+                    .HasColumnType("text");
+
+                b.HasKey("Id");
+
+                b.ToTable("DataProtectionKeys");
             });
 
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

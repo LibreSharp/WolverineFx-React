@@ -4,6 +4,7 @@ using ApiHost.Features.Todos;
 using ApiHost.Identity;
 using ApiHost.Identity.Endpoints;
 #if (IsMarten)
+using ApiHost.Identity.Marten;
 using Marten;
 #elif (IsEfCore)
 using ApiHost.Data.EfCore;
@@ -250,5 +251,28 @@ public class AccountEndpointsTests
         });
 
         await LoginAsync(email, Password, HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task data_protection_keys_are_kept_in_the_database()
+    {
+        // Creating a reset token uses (and if needed creates) a Data Protection key.
+        var email = NewEmail();
+        await RegisterAndLoginAsync(email);
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ForgotPasswordRequest(email)).ToUrl("/api/auth/forgot-password");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        });
+
+        // Stored in PostgreSQL, so reset links survive restarts and work on every instance.
+        using var scope = _fixture.Host.Services.CreateScope();
+#if (IsMarten)
+        var session = scope.ServiceProvider.GetRequiredService<IQuerySession>();
+        Assert.True(await session.Query<DataProtectionKeyDocument>().AnyAsync());
+#elif (IsEfCore)
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        Assert.True(await db.DataProtectionKeys.AnyAsync());
+#endif
     }
 }

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ApiHost.Data.EfCore.Migrations;
 
 /// <inheritdoc />
-public partial class _20261126125555_InitialCreate : Migration
+public partial class _20261126130647_InitialCreate : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,6 +50,20 @@ public partial class _20261126125555_InitialCreate : Migration
             constraints: table =>
             {
                 table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+            });
+
+        migrationBuilder.CreateTable(
+            name: "DataProtectionKeys",
+            columns: table => new
+            {
+                Id = table.Column<int>(type: "integer", nullable: false)
+                    .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                FriendlyName = table.Column<string>(type: "text", nullable: true),
+                Xml = table.Column<string>(type: "text", nullable: true)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_DataProtectionKeys", x => x.Id);
             });
 
         migrationBuilder.CreateTable(
@@ -260,6 +274,9 @@ public partial class _20261126125555_InitialCreate : Migration
 
         migrationBuilder.DropTable(
             name: "AspNetUserTokens");
+
+        migrationBuilder.DropTable(
+            name: "DataProtectionKeys");
 
         migrationBuilder.DropTable(
             name: "RefreshTokens");
