@@ -24,11 +24,25 @@ package.
 
 ## Install
 
+The template is on nuget.org as
+[LibreSharp.Templates.WolverineFxReact](https://www.nuget.org/packages/LibreSharp.Templates.WolverineFxReact).
+Install it once, then create projects with `dotnet new wolverine-react`:
+
 ```bash
 dotnet new install LibreSharp.Templates.WolverineFxReact
 ```
 
-(Not on nuget.org yet. Until then, install from a clone: `dotnet new install ./`.)
+| To | Run |
+|---|---|
+| Update to the latest version | `dotnet new update` |
+| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact::0.1.1` |
+| See the template's options | `dotnet new wolverine-react --help` |
+| Uninstall | `dotnet new uninstall LibreSharp.Templates.WolverineFxReact` |
+
+Updating the template only affects projects you create afterwards.
+
+To try unreleased changes, install from a clone of this repository instead:
+`dotnet new install ./` (run `dotnet new uninstall ./` to remove it).
 
 ## Usage
 
