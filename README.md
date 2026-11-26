@@ -122,7 +122,5 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 
 CI generates and builds all 8 parameter combinations on every push, and runs the integration
 tests against a real Postgres (Testcontainers). The app has also been checked by hand in the
-browser (Marten + Identity), including realtime updates across two tabs. See `SPEC.md` §11
-("Remaining work") for what's left before the first nuget.org release.
-
-See `SPEC.md` for the full design history and rationale.
+browser (Marten + Identity), including realtime updates across two tabs. See
+[ROADMAP.md](ROADMAP.md) for what's next, starting with the first nuget.org release.
