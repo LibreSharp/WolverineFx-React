@@ -1,8 +1,14 @@
-# WolverineFx + React Template
+# LibreSharp WolverineFx + React Template
 
 A `dotnet new` template pairing a [WolverineFx](https://wolverinefx.net/) backend (HTTP
 endpoints + message bus) with a React ([Vite](https://vite.dev/) + TypeScript + Tailwind CSS)
 frontend, built as a single deployable ASP.NET Core host.
+
+Part of [LibreSharp](https://libresharp.github.io), which collects free alternatives to .NET
+packages that went commercial. This template does the jobs often given to MediatR (in-process
+messaging) and MassTransit (message bus and transactional outbox) with Wolverine, on a stack of
+free, open-source libraries. It is a community template, not an official WolverineFx/JasperFx
+package.
 
 ## Prerequisites
 
@@ -19,10 +25,10 @@ frontend, built as a single deployable ASP.NET Core host.
 ## Install
 
 ```bash
-dotnet new install WolverineFxReact.Templates
+dotnet new install LibreSharp.Templates.WolverineFxReact
 ```
 
-(Package not yet published — see "Open decisions" below.)
+(Not on nuget.org yet. Until then, install from a clone: `dotnet new install ./`.)
 
 ## Usage
 
@@ -111,22 +117,12 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   is used in both dev and prod right now. For production, consider switching to
   `TypeLoadMode.Static` with pre-generated code (`dotnet run -- codegen write`) to drop the
   Roslyn dependency and cut startup time.
-- Full CRUD and login/refresh runtime verification was done at the wiring level (reaches
-  Postgres, fails only on connection-refused) rather than against a live database, since Docker
-  wasn't available in the environment this template was built in. Run `docker compose up -d`
-  and exercise the endpoints before trusting this in anger.
 
-## Open decisions
+## Status
 
-- **Package id / publishing**: currently packaged as `WolverineFxReact.Templates` (placeholder).
-  Decide whether to self-publish under your own NuGet id, or pursue upstreaming into
-  WolverineFx's own repo (a different, higher-bar path — see `SPEC.md` §7).
-
-## What's left
-
-See `SPEC.md` §11 ("Remaining work") for the full punch list. Top of it: nothing has been
-exercised against a live Postgres yet (`docker compose up -d` + a manual pass through
-register/login/CRUD/refresh/logout across all 8 parameter combinations) — that's the one gap
-that could still hide a real bug.
+CI generates and builds all 8 parameter combinations on every push, and runs the integration
+tests against a real Postgres (Testcontainers). The app has also been checked by hand in the
+browser (Marten + Identity), including realtime updates across two tabs. See `SPEC.md` §11
+("Remaining work") for what's left before the first nuget.org release.
 
 See `SPEC.md` for the full design history and rationale.

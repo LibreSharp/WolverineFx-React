@@ -1,9 +1,9 @@
 {
   "$schema": "http://json.schemastore.org/template",
-  "author": "WolverineFx-React",
+  "author": "LibreSharp",
   "classifications": [ "Web", "React", "Wolverine" ],
-  "name": "WolverineFx + React",
-  "identity": "WolverineFx.React.Template",
+  "name": "LibreSharp WolverineFx + React",
+  "identity": "LibreSharp.Templates.WolverineFxReact",
   "shortName": "wolverine-react",
   "sourceName": "ApiHost",
   "preferNameDirectory": true,
@@ -70,8 +70,11 @@
         "SPEC.md",
         "README.md",
         "REVIEW.md",
-        "WolverineFxReact.Templates.csproj",
+        "LibreSharp.Templates.WolverineFxReact.csproj",
         ".git/**",
+        "LICENSE",
+        ".claude/**",
+        ".token-optimizer/**",
         ".github/**"
       ],
       "modifiers": [

@@ -51,7 +51,7 @@ jobs:
 
       - name: Build API
         working-directory: ${{ env.APP_DIR }}
-        run: dotnet build WolverineFxReact.slnx
+        run: dotnet build ApiHost.slnx
 
       - name: Build client
         working-directory: ${{ env.APP_DIR }}/src/Client
@@ -63,4 +63,4 @@ jobs:
       - name: Test
         if: ${{ matrix.tests }}
         working-directory: ${{ env.APP_DIR }}
-        run: dotnet test WolverineFxReact.slnx --no-build --logger "console;verbosity=normal"
+        run: dotnet test ApiHost.slnx --no-build --logger "console;verbosity=normal"

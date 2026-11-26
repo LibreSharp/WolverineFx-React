@@ -225,7 +225,16 @@ Grouped by how much it blocks calling this "done."
   each of the 8 parameter combinations: register a user (if `Identity=true`), log in, create/list/
   complete a Todo, refresh the access token, log out, and confirm a revoked/reused refresh token
   is rejected. This is the single biggest gap — nothing below matters if this turns up a bug.
-- **Package id + publish.** Currently packaged under the placeholder id `WolverineFxReact.Templates`
+- **Package id decided 2026-11-26: `LibreSharp.Templates.WolverineFxReact`** (self-published under
+  the author's LibreSharp org, a catalogue of free alternatives to .NET packages that went
+  commercial; not upstreamed to JasperFx). Template identity/author rebranded to LibreSharp so it
+  no longer reads as an official WolverineFx product, and generated apps no longer carry template
+  branding: the solution, JWT issuer/audience and database name now derive from `-n` (via the
+  `ApiHost` sourceName, e.g. `MyApp.slnx`, `myapp`). Also fixed packaging: the .nupkg now ships the
+  root `.gitignore`/`.gitattributes` (previously missing for NuGet installs), and folder installs
+  no longer copy `LICENSE`, `.claude/` or `.token-optimizer/`. Still to do: publish to nuget.org
+  and reserve the `LibreSharp.` ID prefix. Previous note: **Package id + publish.** Previously
+  packaged under the placeholder id `WolverineFxReact.Templates`
   (see README.md and §9). Pick a real id, then `dotnet pack` + push to nuget.org. The pack step
   also warned the package is missing its own NuGet-level readme (distinct from the repo's
   `README.md` — NuGet renders a `<PackageReadmeFile>` on the package listing page); add one if

@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageType>Template</PackageType>
+    <PackageId>LibreSharp.Templates.WolverineFxReact</PackageId>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Title>LibreSharp WolverineFx + React Template</Title>
+    <Authors>LibreSharp</Authors>
+    <Description>A dotnet new template pairing a WolverineFx backend with a React (Vite + TypeScript + Tailwind) frontend: HTTP endpoints, messaging with a transactional outbox, Marten event sourcing or EF Core, validation, SignalR realtime updates, and optional JWT-based Identity. Built entirely on free, open-source libraries. A community template from LibreSharp, not an official WolverineFx/JasperFx package.</Description>
+    <PackageTags>dotnet-new;templates;wolverine;wolverinefx;marten;react;vite;signalr;libresharp</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://libresharp.github.io</PackageProjectUrl>
+    <!-- Update after the repository moves into the LibreSharp organization. -->
+    <RepositoryUrl>https://github.com/waynethompson/WolverineFx-React</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include=".template.config\**\*" />
+    <Content Include="src\**\*"
+             Exclude="src\**\bin\**;src\**\obj\**;src\**\node_modules\**;src\**\dist\**;src\**\*.user" />
+    <Content Include="tests\**\*"
+             Exclude="tests\**\bin\**;tests\**\obj\**;tests\**\*.user" />
+    <Content Include="docker-compose.yml" />
+    <Content Include="ApiHost.slnx" />
+    <!-- Root dotfiles for the generated app (EnableDefaultItems is off, so list them). -->
+    <Content Include=".gitignore" />
+    <Content Include=".gitattributes" />
+  </ItemGroup>
+
+</Project>
