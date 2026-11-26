@@ -99,6 +99,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseDefaultFiles();
     app.MapStaticAssets();
+    // Unknown paths serve the React app, so client-side routes such as /login load directly;
+    // unknown API paths still get a 404 rather than the app's HTML.
+    app.MapFallback("/api/{**path}", () => Results.NotFound());
     app.MapFallbackToFile("index.html");
 }
 

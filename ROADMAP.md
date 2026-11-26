@@ -27,8 +27,8 @@ issues.
   signed-in user when Identity is on.
 - **Identity** (`--Identity true`): JWT access tokens with rotating refresh tokens and reuse
   detection, per-user Todos, and a Development-only demo login.
-- **Frontend:** React, Vite, TypeScript and Tailwind CSS, with an API client generated from the
-  OpenAPI document. Single deployable: Kestrel serves the built client in production.
+- **Frontend:** React, Vite, TypeScript and Tailwind CSS, React Router and TanStack Query, with an
+  API client generated from the OpenAPI document. Single deployable: Kestrel serves the built client in production.
 - **Tests** (`--IncludeTests true`): xUnit, Alba and Testcontainers against a real Postgres,
   covering the endpoints, auth, messaging, the event stream and SignalR.
 - **CI:** all 8 option combinations on every push: build, tests, and a Production publish
@@ -58,8 +58,9 @@ issues.
 
 ## Then: frontend
 
-- [ ] **TanStack Query** for data fetching and caching; SignalR messages invalidate the cache.
-- [ ] **React Router** for real URLs on the login and Todo pages.
+- [x] **TanStack Query** for data fetching and caching; SignalR messages invalidate the cache,
+      and logout clears it.
+- [x] **React Router** (v8) for real URLs on the login, register and Todo pages.
 - [ ] **daisyUI** components on top of Tailwind, including dark mode.
 
 ## Later, if users ask
@@ -77,12 +78,3 @@ issues.
 - WolverineFx 7 and Marten 10 once stable (both are release candidates as of November 2026).
 - xUnit v3, Alba 9, TypeScript 7, and the current Node LTS in CI.
 
-## Decided against
-
-- **A SharedWorker to share one SignalR connection across tabs.** One connection per tab is
-  cheap, and a worker would need access to tokens that are deliberately kept per tab.
-  `BroadcastChannel` is the lighter route if one connection per browser is ever needed.
-- **Loading the CSS framework from a CDN.** Vite builds only the classes the app uses, pins the
-  version, and avoids a runtime third-party dependency.
-- **Handing the template to the WolverineFx maintainers.** It is published independently by
-  LibreSharp as a community template; that can be revisited if they are interested.

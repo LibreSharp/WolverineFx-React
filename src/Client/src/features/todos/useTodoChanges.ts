@@ -1,15 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { getTokens } from '../../lib/api/authTokens'
+import { todoKeys } from './todoQueries'
 
-// Calls onChange whenever the API reports that a Todo was created or completed, including
-// from another tab. The API pushes "todo-changed" messages over SignalR (AppHub at /api/hub);
-// the caller simply refetches, which keeps this in sync without merging changes by hand.
-export function useTodoChanges(onChange: () => void) {
-  const onChangeRef = useRef(onChange)
-  useEffect(() => {
-    onChangeRef.current = onChange
-  })
+// Keeps the cached Todo list current when it changes elsewhere, including in another tab.
+// The API pushes "todo-changed" messages over SignalR (AppHub at /api/hub); each one marks the
+// list stale, and TanStack Query refetches it wherever it's shown.
+export function useTodoChanges() {
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
@@ -26,12 +25,12 @@ export function useTodoChanges(onChange: () => void) {
     connection.on('ReceiveMessage', (json: string) => {
       const message = JSON.parse(json) as { type?: string }
       if (message.type === 'todo-changed') {
-        onChangeRef.current()
+        void queryClient.invalidateQueries({ queryKey: todoKeys.all })
       }
     })
 
     // Changes may have been missed while disconnected.
-    connection.onreconnected(() => onChangeRef.current())
+    connection.onreconnected(() => void queryClient.invalidateQueries({ queryKey: todoKeys.all }))
 
     const started = connection.start().catch((error: unknown) => {
       // React's StrictMode mounts twice in development, stopping the first connection
@@ -42,5 +41,5 @@ export function useTodoChanges(onChange: () => void) {
     return () => {
       void started.then(() => connection.stop())
     }
-  }, [])
+  }, [queryClient])
 }

@@ -11,7 +11,7 @@ went commercial. This is a community template, not an official WolverineFx/Jaspe
 
 ## Get started
 
-You need the .NET 11 SDK, Node.js 22 or later, and Docker with Compose.
+You need the .NET 11 SDK, Node.js 22.22 or later, and Docker with Compose.
 
 ```bash
 dotnet new install LibreSharp.Templates.WolverineFxReact

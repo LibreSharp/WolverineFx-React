@@ -1,10 +1,18 @@
-import { useCallback, useSyncExternalStore, type ReactNode } from 'react'
+import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api/client'
 import { getTokens, setTokens, subscribeTokens } from '../../lib/api/authTokens'
 import { AuthContext } from './useAuth'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const tokens = useSyncExternalStore(subscribeTokens, getTokens)
+  const queryClient = useQueryClient()
+
+  // Signed out (logout, or a refresh token that was rejected): drop all cached data, so the
+  // next person to log in on this browser never sees the previous user's Todos.
+  useEffect(() => {
+    if (!tokens) queryClient.clear()
+  }, [tokens, queryClient])
 
   const login = useCallback(async (email: string, password: string) => {
     const { data, response } = await api.POST('/api/auth/login', { body: { email, password } })

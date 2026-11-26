@@ -1,47 +1,20 @@
-import { useEffect, useState } from 'react'
-import { api } from '../../lib/api/client'
-import type { components } from '../../lib/api/schema'
+import { useState } from 'react'
+import { useCompleteTodo, useCreateTodo, useTodos } from './todoQueries'
 import { useTodoChanges } from './useTodoChanges'
 
-type Todo = components['schemas']['Todo']
-
 export function TodoList() {
-  const [todos, setTodos] = useState<Todo[]>([])
   const [title, setTitle] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  async function refresh() {
-    const { data } = await api.GET('/api/todos')
-    setTodos(data ?? [])
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    refresh()
-  }, [])
+  const todos = useTodos()
+  const createTodo = useCreateTodo()
+  const completeTodo = useCompleteTodo()
 
   // Live updates: refetch when this or another tab creates or completes a Todo.
-  useTodoChanges(refresh)
+  useTodoChanges()
 
-  async function addTodo(event: React.FormEvent) {
+  function addTodo(event: React.FormEvent) {
     event.preventDefault()
     if (!title.trim()) return
-    const { error } = await api.POST('/api/todos', { body: { title } })
-    if (error) {
-      // The API validates with FluentValidation and answers 400 with ProblemDetails.
-      const messages = Object.values(error.errors ?? {}).flat()
-      setError(messages.join(' ') || error.title || 'Could not add the todo.')
-      return
-    }
-    setError(null)
-    setTitle('')
-    await refresh()
-  }
-
-  async function completeTodo(id: string) {
-    await api.POST('/api/todos/{id}/complete', { params: { path: { id } } })
-    await refresh()
+    createTodo.mutate(title, { onSuccess: () => setTitle('') })
   }
 
   return (
@@ -57,23 +30,28 @@ export function TodoList() {
         />
         <button
           type="submit"
-          className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          disabled={createTodo.isPending}
+          className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
         >
           Add
         </button>
       </form>
 
-      {error && (
+      {createTodo.error && (
         <p role="alert" className="mb-4 text-sm text-red-600">
-          {error}
+          {createTodo.error.message}
         </p>
       )}
 
-      {loading ? (
+      {todos.isPending ? (
         <p className="text-gray-500">Loading…</p>
+      ) : todos.isError ? (
+        <p role="alert" className="text-red-600">
+          {todos.error.message}
+        </p>
       ) : (
         <ul className="space-y-2">
-          {todos.map((todo) => (
+          {todos.data.map((todo) => (
             <li
               key={todo.id}
               className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
@@ -84,8 +62,9 @@ export function TodoList() {
               {!todo.isComplete && (
                 <button
                   type="button"
-                  onClick={() => completeTodo(todo.id!)}
-                  className="text-sm text-indigo-600 hover:underline"
+                  onClick={() => completeTodo.mutate(todo.id!)}
+                  disabled={completeTodo.isPending}
+                  className="text-sm text-indigo-600 hover:underline disabled:opacity-50"
                 >
                   Complete
                 </button>

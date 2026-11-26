@@ -15,7 +15,7 @@ package.
 - **.NET 11 SDK.** Check with `dotnet --list-sdks`. If you installed it with the
   `dotnet-install` script, it lives in `~/.dotnet`, which isn't on your `PATH` by default: add
   `export DOTNET_ROOT=$HOME/.dotnet` and `export PATH=$DOTNET_ROOT:$PATH` to your shell profile.
-- **Node.js 22 or later**, with npm.
+- **Node.js 22.22 or later** (React Router 8 needs it), with npm.
 - **Docker with the Compose plugin.** Postgres runs in Docker for development, and the tests
   start their own throwaway Postgres container. Check with `docker compose version`. On
   Ubuntu/Debian/Mint, the `docker.io` package doesn't include Compose: also install
@@ -94,6 +94,13 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   generated code in, and Production loads it ready-made (`TypeLoadMode.Static`): a faster start,
   no runtime compilation, and a clear error at startup if anything is missing. The generated
   code is never committed (`Internal/Generated/` is ignored), so it can't go stale.
+- **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With
+  `--Identity true`, `/login` and `/register` are real routes, signed-out users are redirected
+  to `/login` and returned to the page they wanted afterwards. In production, unknown paths serve
+  the app (so these routes load directly) and unknown `/api` paths return 404.
+- **TanStack Query** for server data: the Todo list is a cached query, adding and completing are
+  mutations that invalidate it, and SignalR `todo-changed` messages invalidate it too. The cache
+  is cleared on logout, so the next user never sees the previous user's data.
 - An OpenAPI-generated, fully-typed TypeScript client (`openapi-typescript` + `openapi-fetch`) —
   regenerate after changing API contracts with `npm run gen:api` (requires the API running).
 - (`--Identity true`) JWT access tokens (HS256, 15 min) + rotating refresh tokens (14 days) with
