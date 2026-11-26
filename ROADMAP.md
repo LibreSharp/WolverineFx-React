@@ -58,8 +58,9 @@ issues.
       November 2026). `Marten.AspNetIdentity` states MIT only in its GitHub repo, not in its
       package metadata, so licence scanners report it as unlicensed; worth raising with its author.
 - [ ] **Reserve the `LibreSharp.` ID prefix** on nuget.org after the first package is out.
-- [ ] **List the template** on the LibreSharp site and in the `dotnet/templating` wiki's list
-      of available templates.
+- [x] **List the template** on the [LibreSharp site](https://libresharp.github.io/templates/#libresharp-wolverinefx-react)
+      (26 November 2026).
+- [ ] **List the template** in the `dotnet/templating` wiki's list of available templates.
 
 ## Then: frontend
 
@@ -67,11 +68,88 @@ issues.
       and logout clears it.
 - [x] **React Router** (v8) for real URLs on the login, register and Todo pages.
 
+## Next: a comprehensive free SaaS template
+
+The goal of the next phases is a template that covers everything paid .NET starter kits sell,
+on free, open-source packages, and that deploys to cheap hosting. No free template does this
+today: PlatformPlatform has Stripe billing but deploys only to Azure, and fullstackhero has
+billing records but no payment provider (see the
+[template comparison](https://libresharp.github.io/templates/)).
+
+### v0.2: production-ready basics (no new options; CI stays at 8 combinations)
+
+- [ ] **Container publishing and cheap hosting:** `dotnet publish /t:PublishContainer`, a
+      production `docker-compose` with Postgres and [Caddy](https://caddyserver.com/)
+      (Apache-2.0) for automatic HTTPS, and a deployment guide for a small VPS.
+- [ ] **Health checks:** liveness and readiness endpoints, with a Postgres check
+      (`AspNetCore.HealthChecks.NpgSql`, Apache-2.0).
+- [ ] **OpenTelemetry** (Apache-2.0) traces, metrics and logs. Wolverine and Marten already emit
+      traces.
+- [ ] **Persist ASP.NET Core Data Protection keys to Postgres,** so tokens survive container
+      restarts and work with more than one instance.
+- [ ] **Hardening:** rate limiting on the auth endpoints (built-in rate limiter) and security
+      headers.
+- [ ] **API reference page** in Development with [Scalar](https://scalar.com/) (MIT).
+- [ ] **Scheduled message example:** a "remind me later" Todo using Wolverine's scheduled
+      messages, to show scheduled background work with no new dependency.
+- [ ] **Generated-app housekeeping:** an `AGENTS.md`/`CLAUDE.md` describing the app's patterns
+      for AI coding assistants, Dependabot config, central package management
+      (`Directory.Packages.props`), and a free analyzer (Roslynator or Meziantou.Analyzer, not
+      SonarAnalyzer, which is no longer open source).
+
+### v0.3: better accounts (inside `--Identity true`; still 8 combinations)
+
+- [ ] **Email:** confirmation, password reset and invitations, sent through the Wolverine outbox
+      so no email is lost on a restart. [MailKit](https://github.com/jstedfast/MailKit) (MIT) to
+      send, and [Mailpit](https://github.com/axllent/mailpit) (MIT) in `docker-compose` to catch
+      emails in development.
+- [ ] **Roles and a small admin page:** list users, lock and unlock accounts, change roles.
+- [ ] **External sign-in** with Google and GitHub.
+- [ ] **Passkeys** with ASP.NET Core Identity (added in .NET 10; confirm the API first).
+- [ ] **Account lockout** after repeated failed logins.
+
+### v0.4: SaaS option
+
+- [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
+      2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option.
+- [ ] **Organisations (multi-tenancy)** in `saas`: Marten's built-in multi-tenancy or EF Core
+      query filters, with Wolverine carrying the tenant ID through messages.
+- [ ] **Team invitations** by email.
+- [ ] **Stripe subscriptions:** Checkout and the customer portal, with Stripe webhooks turned
+      into durable Wolverine messages (the outbox makes webhook handling reliable).
+      [Stripe.net](https://github.com/stripe/stripe-dotnet) is open source (Apache-2.0); Stripe
+      itself charges fees. Keep payments behind an interface so others can add Paddle or Lemon
+      Squeezy, which handle sales tax and VAT.
+- [ ] **Plan limits** enforced per organisation.
+- [ ] **Admin back office:** organisations, users and subscriptions.
+
+### Frontend quality (any time)
+
+- [ ] **Frontend tests:** Vitest and React Testing Library for components, and
+      [Playwright](https://playwright.dev/) end-to-end tests in CI covering login and realtime
+      updates.
+- [ ] **UI components:** [shadcn/ui](https://ui.shadcn.com/) (MIT) with dark mode, so admin and
+      billing screens look finished.
+- [ ] **Translations** with react-i18next (MIT), if users ask.
+
+### Keep out
+
+- JasperFx's paid tooling (for example CritterWatch) and commercial UI kits. Everything stays
+  free and open source.
+
+### Open decisions
+
+- [ ] Should the `saas` option support both Marten and EF Core, or start Marten-only (simpler
+      tenancy, fewer CI combinations)?
+- [ ] Should email be on by default whenever Identity is on (Mailpit in development, SMTP
+      settings in production)?
+- [ ] Which cheap host should the deployment guide target first: a VPS with Docker Compose and
+      Caddy, or Fly.io or Railway?
+
 ## Later, if users ask
 
 - [ ] **.NET Aspire option:** an app host that starts Postgres, the API and Vite together, in
       place of Docker Compose.
-- [ ] **Container publishing option** (`dotnet publish /t:PublishContainer`).
 - [ ] **RS256 signing with a JWKS endpoint,** for when a separate service must verify tokens
       without sharing the signing secret. HS256 is enough for this API and its own client.
 - [ ] **`sessionStorage` token option,** so logins survive a page reload. Tokens are kept in
