@@ -3,7 +3,7 @@
 # Only Caddy is reachable from outside (ports 80 and 443); the app and database are not.
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: apihost
