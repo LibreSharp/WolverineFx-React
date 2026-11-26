@@ -61,7 +61,6 @@ issues.
 - [x] **TanStack Query** for data fetching and caching; SignalR messages invalidate the cache,
       and logout clears it.
 - [x] **React Router** (v8) for real URLs on the login, register and Todo pages.
-- [ ] **daisyUI** components on top of Tailwind, including dark mode.
 
 ## Later, if users ask
 
