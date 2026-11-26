@@ -41,10 +41,13 @@ issues.
       runtime and missing code fails at startup. CI publishes every combination and runs it in
       Production. (Development still compiles at runtime, so the Roslyn package and the EF Core
       option's `Microsoft.CodeAnalysis` pin stay.)
-- [ ] **NuGet readme** (`PackageReadmeFile`) written for people browsing nuget.org.
+- [x] **NuGet readme** (`nuget/README.md`, packed as `PackageReadmeFile`) written for people
+      browsing nuget.org.
 - [ ] **Publish from CI** when a `v*` tag is pushed, using a nuget.org API key stored as a
       GitHub secret.
-- [ ] **Confirm every dependency's licence** before describing the stack as free in public.
+- [x] **Confirm every dependency's licence:** all MIT, Apache-2.0 or PostgreSQL (checked
+      November 2026). `Marten.AspNetIdentity` states MIT only in its GitHub repo, not in its
+      package metadata, so licence scanners report it as unlicensed; worth raising with its author.
 - [ ] **Reserve the `LibreSharp.` ID prefix** on nuget.org after the first package is out.
 - [ ] **List the template** on the LibreSharp site and in the `dotnet/templating` wiki's list
       of available templates.

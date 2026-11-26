@@ -68,6 +68,7 @@
         "**/*.user",
         ".template.config/**",
         "ROADMAP.md",
+        "nuget/**",
         "README.md",
         "LibreSharp.Templates.WolverineFxReact.csproj",
         ".git/**",

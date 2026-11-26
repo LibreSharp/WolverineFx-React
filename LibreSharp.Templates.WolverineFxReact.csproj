@@ -13,6 +13,8 @@
     <PackageProjectUrl>https://libresharp.github.io</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LibreSharp/WolverineFx-React</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <!-- nuget/README.md is written for the nuget.org page; the repo README is for contributors. -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
@@ -22,6 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="nuget/README.md" Pack="true" PackagePath="/" />
     <Content Include=".template.config\**\*" />
     <Content Include="src\**\*"
              Exclude="src\**\bin\**;src\**\obj\**;src\**\node_modules\**;src\**\dist\**;src\**\*.user" />
