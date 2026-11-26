@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ApiHost.Identity.Email;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -77,6 +78,25 @@ public static class IdentityJwtSetup
         if (environment.IsDevelopment())
         {
             services.AddHostedService<DevelopmentUserSeeder>();
+        }
+
+        // Password reset links are valid for an hour (the Identity default is a day).
+        services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(1));
+
+        // Account email (password reset): SMTP when configured; otherwise the log in
+        // Development, and a warning without the link elsewhere. See Identity/Email/.
+        services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
+        if (!string.IsNullOrWhiteSpace(configuration[$"{SmtpOptions.SectionName}:Host"]))
+        {
+            services.AddSingleton<IAccountEmailSender, SmtpAccountEmailSender>();
+        }
+        else if (environment.IsDevelopment())
+        {
+            services.AddSingleton<IAccountEmailSender, LoggingAccountEmailSender>();
+        }
+        else
+        {
+            services.AddSingleton<IAccountEmailSender, NotConfiguredAccountEmailSender>();
         }
     }
 

@@ -21,8 +21,7 @@ public static class RegisterEndpoint
         var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            return TypedResults.ValidationProblem(
-                result.Errors.ToDictionary(e => e.Code, e => new[] { e.Description }));
+            return result.ToValidationProblem();
         }
 
         return TypedResults.Created();

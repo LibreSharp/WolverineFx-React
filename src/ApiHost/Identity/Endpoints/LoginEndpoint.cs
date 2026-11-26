@@ -24,19 +24,6 @@ public static class LoginEndpoint
             return TypedResults.Unauthorized();
         }
 
-        var roles = await userManager.GetUserRolesAsync(user);
-        var (accessToken, expiresAtUtc) = tokenService.CreateAccessToken(user, roles);
-
-        var refreshTokenPlaintext = JwtTokenService.GenerateRefreshTokenPlaintext();
-        await refreshTokenStore.StoreAsync(new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            TokenHash = JwtTokenService.HashToken(refreshTokenPlaintext),
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            ExpiresAtUtc = tokenService.RefreshTokenExpiry()
-        }, cancellationToken);
-
-        return TypedResults.Ok(new LoginResponse(accessToken, refreshTokenPlaintext, expiresAtUtc));
+        return TypedResults.Ok(await TokenIssuing.IssueAsync(user, userManager, tokenService, refreshTokenStore, cancellationToken));
     }
 }

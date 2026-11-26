@@ -1,6 +1,9 @@
 #if (Identity)
+using System.Collections.Concurrent;
 using System.Net;
+using ApiHost.Identity.Email;
 using ApiHost.Identity.Endpoints;
+using Microsoft.Extensions.DependencyInjection;
 #endif
 using Alba;
 using Microsoft.AspNetCore.Hosting;
@@ -22,6 +25,10 @@ public class AppFixture : IAsyncLifetime
         Host = await AlbaHost.For<Program>(builder =>
         {
             builder.UseEnvironment("Development");
+#if (Identity)
+            // Keep account emails (password reset) so tests can follow their links.
+            builder.ConfigureServices(services => services.AddSingleton<IAccountEmailSender>(Emails));
+#endif
 #if (IsMarten)
             builder.UseSetting("ConnectionStrings:Marten", _postgres.GetConnectionString());
 #elif (IsEfCore)
@@ -31,6 +38,8 @@ public class AppFixture : IAsyncLifetime
     }
 
 #if (Identity)
+    public CapturedEmails Emails { get; } = new();
+
     // Registers a fresh user and returns an access token for them.
     public async Task<string> CreateUserAndGetAccessTokenAsync()
     {
@@ -60,5 +69,21 @@ public class AppFixture : IAsyncLifetime
     }
 }
 
+#if (Identity)
+// Records password reset emails instead of sending them.
+public class CapturedEmails : IAccountEmailSender
+{
+    private readonly ConcurrentDictionary<string, string> _resetLinks = new(StringComparer.OrdinalIgnoreCase);
+
+    public Task SendPasswordResetAsync(string toEmail, string resetLink, CancellationToken cancellationToken)
+    {
+        _resetLinks[toEmail] = resetLink;
+        return Task.CompletedTask;
+    }
+
+    public string? ResetLinkFor(string email) => _resetLinks.GetValueOrDefault(email);
+}
+
+#endif
 [CollectionDefinition("api")]
 public class ApiCollection : ICollectionFixture<AppFixture>;

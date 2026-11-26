@@ -26,13 +26,16 @@ public static class RefreshEndpoint
             return TypedResults.Unauthorized();
         }
 
-        if (existing.RevokedAtUtc is not null)
+        if (existing.ReplacedByTokenHash is not null)
         {
-            // Reuse of an already-rotated-away token: treat as compromised and revoke the whole chain.
+            // Reuse of a token that was already rotated away (replaced by a newer one): someone
+            // may have copied it, so treat it as compromised and revoke all the user's tokens.
             await refreshTokenStore.RevokeAllForUserAsync(existing.UserId, cancellationToken);
             return TypedResults.Unauthorized();
         }
 
+        // Revoked without a replacement (logout, password change or reset) or expired: refuse
+        // it, but don't sign out the user's other sessions.
         if (!existing.IsActive)
         {
             return TypedResults.Unauthorized();

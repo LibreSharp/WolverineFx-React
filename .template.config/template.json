@@ -94,11 +94,13 @@
           "condition": "(!Identity)",
           "exclude": [
             "src/ApiHost/Identity/**",
+            "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.cs",
             "src/Client/src/features/auth/**",
             "src/Client/.env.development",
             "src/Client/src/App.WithIdentity.tsx",
             "src/ApiHost/ApiHost.WithIdentity.http",
             "tests/ApiHost.Tests/AuthEndpointsTests.cs",
+            "tests/ApiHost.Tests/AccountEndpointsTests.cs",
             "tests/ApiHost.Tests/TodoAuthorizationTests.cs"
           ]
         },
@@ -127,8 +129,8 @@
           "condition": "(IsEfCore && Identity)",
           "exclude": [ "src/ApiHost/Data/EfCore/Migrations.NoIdentity/**" ],
           "rename": {
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260929105523_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20260929105523_InitialCreate.cs",
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20260929105523_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20260929105523_InitialCreate.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126125555_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20261126125555_InitialCreate.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126125555_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261126125555_InitialCreate.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
           }
         }

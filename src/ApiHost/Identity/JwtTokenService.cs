@@ -6,8 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ApiHost.Identity;
 
-public record IssuedTokens(string AccessToken, string RefreshToken, DateTimeOffset AccessTokenExpiresAtUtc);
-
 public class JwtTokenService
 {
     private readonly JwtOptions _options;
