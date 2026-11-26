@@ -35,6 +35,9 @@
     <Content Include="ApiHost.slnx" />
     <Content Include="Directory.Packages.props" />
     <Content Include=".editorconfig" />
+    <Content Include="dependabot.app.yml" />
+    <Content Include="AGENTS.app.md" />
+    <Content Include="CLAUDE.app.md" />
     <!-- Root dotfiles for the generated app (EnableDefaultItems is off, so list them). -->
     <Content Include=".gitignore" />
     <!-- Becomes README.md in the generated app (see template.json); README.md here is the template's. -->

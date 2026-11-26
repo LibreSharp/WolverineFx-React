@@ -138,6 +138,10 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   reuse-detection/logout. It drives the app over HTTP, so one project covers both `--Persistence`
   choices; the Marten version adds a test of the Todo event stream.
 
+- **Help for AI coding assistants:** `AGENTS.md` (with `CLAUDE.md` importing it) describes the
+  generated app's conventions and the rules that are easy to miss.
+- **Project housekeeping:** central package management (`Directory.Packages.props`), the free
+  Meziantou analyzer with a commented `.editorconfig`, and Dependabot for NuGet, npm and Docker.
 - **A README for the generated app** (`README.app.md`, renamed to `README.md` on generation):
   how to run it, the project layout, how the example works, how to add a feature, common
   commands and deployment, with sections matching the chosen options. A final "Created from a

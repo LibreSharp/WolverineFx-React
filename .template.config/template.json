@@ -95,7 +95,12 @@
       "modifiers": [
         {
           "condition": "(true)",
-          "rename": { "README.app.md": "README.md" }
+          "rename": {
+            "README.app.md": "README.md",
+            "CLAUDE.app.md": "CLAUDE.md",
+            "AGENTS.app.md": "AGENTS.md",
+            "dependabot.app.yml": ".github/dependabot.yml"
+          }
         },
         {
           "condition": "(!IsMarten)",

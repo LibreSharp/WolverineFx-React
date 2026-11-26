@@ -102,10 +102,9 @@ billing records but no payment provider (see the
       `/scalar`, serving its scripts from the app rather than a CDN.
 - [x] **Scheduled message example:** "Remind me…" on a Todo schedules a durable Wolverine message
       that pushes a reminder to the browser when due, unless the Todo was completed.
-- [ ] **Generated-app housekeeping:** an `AGENTS.md`/`CLAUDE.md` describing the app's patterns
-      for AI coding assistants, Dependabot config, central package management
-      (`Directory.Packages.props`), and a free analyzer (Roslynator or Meziantou.Analyzer, not
-      SonarAnalyzer, which is no longer open source).
+- [x] **Generated-app housekeeping:** an `AGENTS.md`/`CLAUDE.md` describing the app's patterns
+      for AI coding assistants, Dependabot config (grouped updates), central package management
+      (`Directory.Packages.props`), and the free Meziantou.Analyzer (0 warnings).
 
 ### v0.3: better accounts (inside `--Identity true`; still 8 combinations)
 

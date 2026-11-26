@@ -1,0 +1,30 @@
+# Dependabot keeps dependencies current with weekly pull requests. Related packages are grouped
+# so they update together (Wolverine and Marten versions must match each other).
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /                      # Directory.Packages.props
+    schedule:
+      interval: weekly
+    groups:
+      wolverine-and-marten:
+        patterns: ["WolverineFx*", "Marten*", "JasperFx*", "Weasel*"]
+      dotnet:
+        patterns: ["Microsoft.*", "System.*", "Npgsql*"]
+      opentelemetry:
+        patterns: ["OpenTelemetry*"]
+      tests:
+        patterns: ["xunit*", "Alba", "Testcontainers*", "coverlet*", "Microsoft.NET.Test.Sdk"]
+
+  - package-ecosystem: npm
+    directory: /src/Client
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directories: [/, /deploy]
+    schedule:
+      interval: weekly
