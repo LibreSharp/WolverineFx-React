@@ -8,6 +8,7 @@ export function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
   const [title, setTitle] = useState('')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   async function refresh() {
     const { data } = await api.GET('/api/todos')
@@ -22,7 +23,14 @@ export function TodoList() {
   async function addTodo(event: React.FormEvent) {
     event.preventDefault()
     if (!title.trim()) return
-    await api.POST('/api/todos', { body: { title } })
+    const { error } = await api.POST('/api/todos', { body: { title } })
+    if (error) {
+      // The API validates with FluentValidation and answers 400 with ProblemDetails.
+      const messages = Object.values(error.errors ?? {}).flat()
+      setError(messages.join(' ') || error.title || 'Could not add the todo.')
+      return
+    }
+    setError(null)
     setTitle('')
     await refresh()
   }
@@ -50,6 +58,12 @@ export function TodoList() {
           Add
         </button>
       </form>
+
+      {error && (
+        <p role="alert" className="mb-4 text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       {loading ? (
         <p className="text-gray-500">Loading…</p>

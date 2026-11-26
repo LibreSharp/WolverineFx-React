@@ -200,6 +200,7 @@ export interface components {
         Todo: {
             /** Format: uuid */
             id?: string;
+            ownerId?: string;
             title?: string;
             isComplete?: boolean;
         };
@@ -239,6 +240,13 @@ export interface operations {
                     "application/json": components["schemas"]["LoginResponse"];
                 };
             };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     POST_api_auth_logout: {
@@ -259,9 +267,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
         };
     };
@@ -307,6 +313,13 @@ export interface operations {
                     "application/json": components["schemas"]["RefreshResponse"];
                 };
             };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     POST_api_auth_register: {
@@ -327,9 +340,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
             /** @description Bad Request */
             400: {
@@ -367,9 +378,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
         };
     };
@@ -396,9 +405,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": unknown;
-                };
+                content?: never;
             };
         };
     };
@@ -422,6 +429,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TodoCreationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
         };

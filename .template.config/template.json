@@ -77,7 +77,7 @@
       "modifiers": [
         {
           "condition": "(!IsMarten)",
-          "exclude": [ "src/ApiHost/Data/Marten/**", "src/ApiHost/Identity/Marten/**" ]
+          "exclude": [ "src/ApiHost/Data/Marten/**", "src/ApiHost/Identity/Marten/**", "tests/ApiHost.Tests/TodoEventStreamTests.cs" ]
         },
         {
           "condition": "(!IsEfCore)",

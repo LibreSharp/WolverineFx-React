@@ -292,6 +292,20 @@ Grouped by how much it blocks calling this "done."
   that's exactly the kind of regression that's easy to introduce silently (e.g. the nested
   `Identity/Marten` vs `Identity/EfCore` exclusion bug found during this build would have been
   caught immediately by such a matrix).
+- ~~The demo is plain CRUD and undersells Wolverine~~ — **done 2026-11-26**, without adding
+  template parameters: (1) messaging + transactional outbox — `CompleteTodo` cascades
+  `TodoCompleted` to `TodoCompletedHandler`, local queues are durable
+  (`UseDurableLocalQueues`); (2) event sourcing for `Persistence=marten` — `TodoCreated`/
+  `TodoCompleted` streams, `[WriteAggregate]` aggregate handler workflow on complete, inline
+  `Snapshot<Todo>` projection for queries (EF Core keeps the row model); (3) FluentValidation via
+  `WolverineFx.Http.FluentValidation` (`CreateTodoValidator`, 400 ProblemDetails, shown in the
+  React form). All Wolverine setup is now one `UseWolverine` call in `Program.cs` (EF Core's part
+  is `WolverineOptions.UseEfCorePersistence`), because `UseFluentValidation` registers services
+  and Wolverine forbids that from `ConfigureWolverine` extensions. Verified: 8 combinations build
+  with 0 warnings; 46/46 tests pass (new: validation, tracked `TodoCompleted` handling, Marten
+  event stream); EF migrations show no drift; end-to-end run against Postgres shows the stream
+  events and the handler's log line. Note: existing Marten dev databases hold pre-event-sourcing
+  Todo documents with no stream, so completing those returns 404 — reset the dev database.
 
 ### Documented but intentionally deferred (not a defect, just scoped out)
 

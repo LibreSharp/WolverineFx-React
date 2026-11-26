@@ -46,7 +46,19 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 ## What you get
 
 - A vertical-slice `Features/Todos` example showing Wolverine HTTP endpoints
-  (`[WolverineGet]`/`[WolverinePost]`) wired to either Marten or EF Core.
+  (`[WolverineGet]`/`[WolverinePost]`) wired to either Marten or EF Core, and what Wolverine adds
+  beyond plain endpoints:
+  - **Messaging with a transactional outbox.** Completing a Todo cascades a `TodoCompleted`
+    message to `TodoCompletedHandler`, which runs in the background. Local queues are durable,
+    so the message is saved in the same database transaction as the Todo change: it survives a
+    restart and is never sent if the change rolls back.
+  - **Event sourcing** (`--Persistence marten`). Each Todo is an event stream (`TodoCreated`,
+    `TodoCompleted`). The complete endpoint uses Wolverine's aggregate handler workflow
+    (`[WriteAggregate]`): it receives the rebuilt Todo and returns the events to append and the
+    messages to send, with an optimistic concurrency check. An inline snapshot projection keeps
+    a queryable Todo document in step.
+  - **Validation.** A FluentValidation validator rejects an empty or over-long title with a 400
+    `ProblemDetails` response before the endpoint runs; the React form shows the message.
 - Vite dev server proxies `/api/*` to the API in development (no CORS); in production, the
   client is built and served as static files from the same Kestrel host (`dotnet publish` builds
   the client automatically).
@@ -62,9 +74,10 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   fails if it's missing or still the dev key.
 - (`--IncludeTests true`, the default) A `tests/` project (xUnit + [Alba](https://jasperfx.github.io/alba/)
   + Testcontainers) that boots the real app against a throwaway Postgres container and exercises
-  the Todo endpoints, plus (when `--Identity true`) register/login/refresh-rotation/reuse-detection/
-  logout. One project covers both `--Persistence` choices — it drives the app over HTTP rather than
-  branching per persistence technology.
+  the Todo endpoints, validation, and (using Wolverine's message tracking) the background
+  `TodoCompleted` handler, plus (when `--Identity true`) register/login/refresh-rotation/
+  reuse-detection/logout. It drives the app over HTTP, so one project covers both `--Persistence`
+  choices; the Marten version adds a test of the Todo event stream.
 
 ### Known limitations
 

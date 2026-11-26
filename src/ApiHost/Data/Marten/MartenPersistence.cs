@@ -1,7 +1,8 @@
-#if (Identity)
 using ApiHost.Features.Todos;
+#if (Identity)
 using ApiHost.Identity;
 #endif
+using JasperFx.Events.Projections;
 using Marten;
 using Wolverine.Marten;
 
@@ -16,6 +17,11 @@ public static class MartenPersistence
             opts.Connection(configuration.GetConnectionString("Marten")
                 ?? throw new InvalidOperationException("Missing 'Marten' connection string"));
             opts.UseSystemTextJsonForSerialization();
+
+            // Todos are event-sourced. The inline snapshot keeps a Todo document up to date
+            // in the same transaction as each appended event, so queries read documents
+            // instead of replaying streams.
+            opts.Projections.Snapshot<Todo>(SnapshotLifecycle.Inline);
 
 #if (Identity)
             opts.Schema.For<RefreshToken>()
