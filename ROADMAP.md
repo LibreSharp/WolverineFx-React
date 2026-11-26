@@ -43,8 +43,12 @@ issues.
       option's `Microsoft.CodeAnalysis` pin stay.)
 - [x] **NuGet readme** (`nuget/README.md`, packed as `PackageReadmeFile`) written for people
       browsing nuget.org.
-- [ ] **Publish from CI** when a `v*` tag is pushed, using a nuget.org API key stored as a
-      GitHub secret.
+- [x] **Publish from CI** when a `v*` tag is pushed (`release.yml`): runs the full CI matrix,
+      then publishes with nuget.org Trusted Publishing (no stored API key) and creates a GitHub
+      release.
+- [ ] **One-time nuget.org setup** (needs the account owner): a Trusted Publishing policy for
+      `release.yml`, and the `NUGET_USER` repository variable. See "Releasing" in the README.
+- [ ] **Tag `v0.1.0`.**
 - [x] **Confirm every dependency's licence:** all MIT, Apache-2.0 or PostgreSQL (checked
       November 2026). `Marten.AspNetIdentity` states MIT only in its GitHub repo, not in its
       package metadata, so licence scanners report it as unlicensed; worth raising with its author.

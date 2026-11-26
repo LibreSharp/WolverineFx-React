@@ -119,7 +119,25 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   secret, upgrade to asymmetric signing (RS256) with a `/.well-known/jwks.json` endpoint —
   not included here to keep the default lean.
 
-## Status
+## Releasing
+
+Push a version tag; `.github/workflows/release.yml` runs the full CI matrix, then packs the
+template with that version, pushes it to nuget.org and creates a GitHub release:
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0     # a tag with a hyphen (v0.2.0-beta.1) is a prerelease
+```
+
+One-time setup, so the workflow can publish without a stored API key (nuget.org Trusted
+Publishing):
+
+1. On nuget.org, under your account's **Trusted Publishing** settings, add a GitHub Actions
+   policy for owner `LibreSharp`, repository `WolverineFx-React`, workflow file `release.yml`.
+2. In this GitHub repository, add the **variable** (not secret) `NUGET_USER`, set to that
+   nuget.org account's username.
+
+The nuget.org page shows `nuget/README.md`; this README is for working on the template.
+
 
 CI generates and builds all 8 parameter combinations on every push, and runs the integration
 tests against a real Postgres (Testcontainers). The app has also been checked by hand in the
