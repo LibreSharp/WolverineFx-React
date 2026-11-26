@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -23,6 +24,7 @@ public static class ChangePasswordEndpoint
     // Changing the password signs out every other session (all refresh tokens are revoked) and
     // returns new tokens, so the session that made the change stays signed in.
     [Authorize]
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/account/password")]
     public static async Task<Results<Ok<LoginResponse>, ValidationProblem, UnauthorizedHttpResult>> Post(
         ChangePasswordRequest request,

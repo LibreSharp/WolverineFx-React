@@ -216,6 +216,19 @@ so reset links keep working across restarts and on every instance of the app. Th
 unencrypted, like the rest of your data: protect database access and backups accordingly.
 <!--#endif -->
 
+## Security
+
+- Every response carries browser security headers, including a Content-Security-Policy that only
+  allows scripts, styles and connections from the app's own origin
+  (`src/ApiHost/Security/SecurityHeaders.cs`). If you add a third-party script, font or analytics
+  service, add its origin there. Production also sends HSTS.
+<!--#if (Identity) -->
+- Login, registration, password reset and change, and account deletion allow 10 attempts a minute
+  per client IP, then answer 429 (`src/ApiHost/Identity/AuthRateLimiting.cs`). Behind a reverse
+  proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so the app sees each client's real
+  address, and only expose the app through the proxy.
+<!--#endif -->
+
 ## Created from a template
 
 This project was created from the

@@ -13,6 +13,7 @@ using Wolverine.Http.FluentValidation;
 using Wolverine.SignalR;
 using ApiHost.Features.Todos;
 using ApiHost.Realtime;
+using ApiHost.Security;
 #if (Identity)
 using ApiHost.Identity;
 #endif
@@ -91,11 +92,16 @@ if (app.Environment.IsDevelopment())
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
+    // Tells browsers to use HTTPS for this site from now on (sent over HTTPS only).
+    app.UseHsts();
 }
+
+app.UseSecurityHeaders();
 
 #if (Identity)
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 #endif
 
 app.MapWolverineEndpoints(opts =>

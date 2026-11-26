@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Wolverine;
+using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -24,6 +25,7 @@ public static class DeleteAccountEndpoint
     // token alone can't delete it. The user's data in other features is deleted by their
     // AccountDeleted handlers.
     [Authorize]
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/account/delete")]
     public static async Task<(Results<NoContent, ValidationProblem, UnauthorizedHttpResult>, OutgoingMessages)> Post(
         DeleteAccountRequest request,

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -10,6 +11,7 @@ public record LoginResponse(string AccessToken, string RefreshToken, DateTimeOff
 
 public static class LoginEndpoint
 {
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/login")]
     public static async Task<Results<Ok<LoginResponse>, UnauthorizedHttpResult>> Post(
         LoginRequest request,

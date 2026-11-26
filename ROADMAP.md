@@ -93,8 +93,9 @@ billing records but no payment provider (see the
 - [x] **Persist ASP.NET Core Data Protection keys to Postgres,** so tokens survive container
       restarts and work with more than one instance (EF Core: Microsoft's package; Marten: a
       small `IXmlRepository` storing documents).
-- [ ] **Hardening:** rate limiting on the auth endpoints (built-in rate limiter) and security
-      headers.
+- [x] **Hardening:** rate limiting on the auth endpoints (built-in rate limiter, 10 a minute per
+      client IP) and security headers (Content-Security-Policy, nosniff, frame and referrer
+      policies, HSTS in production).
 - [ ] **API reference page** in Development with [Scalar](https://scalar.com/) (MIT).
 - [ ] **Scheduled message example:** a "remind me later" Todo using Wolverine's scheduled
       messages, to show scheduled background work with no new dependency.

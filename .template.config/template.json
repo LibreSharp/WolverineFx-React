@@ -102,6 +102,7 @@
             "src/ApiHost/ApiHost.WithIdentity.http",
             "tests/ApiHost.Tests/AuthEndpointsTests.cs",
             "tests/ApiHost.Tests/AccountEndpointsTests.cs",
+            "tests/ApiHost.Tests/AuthRateLimitingTests.cs",
             "tests/ApiHost.Tests/TodoAuthorizationTests.cs"
           ]
         },

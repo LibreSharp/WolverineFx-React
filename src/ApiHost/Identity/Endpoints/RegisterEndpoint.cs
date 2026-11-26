@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -8,6 +9,7 @@ public record RegisterRequest(string Email, string Password);
 
 public static class RegisterEndpoint
 {
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/register")]
     public static async Task<Results<Created, ValidationProblem>> Post(
         RegisterRequest request, UserManager<ApplicationUser> userManager)

@@ -68,6 +68,9 @@ public static class IdentityJwtSetup
 
         services.AddAuthorization();
 
+        // Limits login, registration and password attempts per client IP (see AuthRateLimiting).
+        services.AddAuthRateLimiting();
+
         // UserManager<T> takes IServiceProvider in its constructor, so Wolverine can't build it inline
         // in generated endpoint code, and its default ServiceLocationPolicy.NotAllowed then fails the
         // request. Explicitly allow resolving it from the container.

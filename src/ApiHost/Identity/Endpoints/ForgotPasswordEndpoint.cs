@@ -3,6 +3,7 @@ using ApiHost.Identity.Email;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -22,6 +23,7 @@ public static class ForgotPasswordEndpoint
     // Always answers 202, whether or not the email has an account, so the endpoint can't be
     // used to find out who is registered. If it does, emails a link to the client's
     // /reset-password page carrying a one-time token (valid for an hour; see IdentityJwtSetup).
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/forgot-password")]
     public static async Task<Accepted> Post(
         ForgotPasswordRequest request,

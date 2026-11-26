@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -20,6 +21,7 @@ public class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequ
 public static class ResetPasswordEndpoint
 {
     // Sets a new password using the token from the reset email, and signs out every session.
+    [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/reset-password")]
     public static async Task<Results<NoContent, ValidationProblem>> Post(
         ResetPasswordRequest request,
