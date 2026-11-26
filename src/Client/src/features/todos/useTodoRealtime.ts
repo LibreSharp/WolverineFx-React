@@ -1,14 +1,21 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { getTokens } from '../../lib/api/authTokens'
 import { todoKeys } from './todoQueries'
 
-// Keeps the cached Todo list current when it changes elsewhere, including in another tab.
-// The API pushes "todo-changed" messages over SignalR (AppHub at /api/hub); each one marks the
-// list stale, and TanStack Query refetches it wherever it's shown.
-export function useTodoChanges() {
+export interface TodoReminder {
+  todoId: string
+  title: string
+}
+
+// Live updates over SignalR (AppHub at /api/hub), one connection per tab:
+// - "todo-changed": a Todo was created or completed, here or in another tab. It marks the
+//   cached Todo list stale, and TanStack Query refetches it.
+// - "todo-reminder": a "remind me" reminder is due. It's added to `reminders` to show.
+export function useTodoRealtime() {
   const queryClient = useQueryClient()
+  const [reminders, setReminders] = useState<TodoReminder[]>([])
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
@@ -23,9 +30,12 @@ export function useTodoChanges() {
 
     // Wolverine sends each message as CloudEvents JSON text: { type, data, ... }.
     connection.on('ReceiveMessage', (json: string) => {
-      const message = JSON.parse(json) as { type?: string }
+      const message = JSON.parse(json) as { type?: string; data?: TodoReminder }
       if (message.type === 'todo-changed') {
         void queryClient.invalidateQueries({ queryKey: todoKeys.all })
+      } else if (message.type === 'todo-reminder' && message.data) {
+        const reminder = message.data
+        setReminders((current) => [...current.filter((r) => r.todoId !== reminder.todoId), reminder])
       }
     })
 
@@ -42,4 +52,11 @@ export function useTodoChanges() {
       void started.then(() => connection.stop())
     }
   }, [queryClient])
+
+  const dismiss = useCallback(
+    (todoId: string) => setReminders((current) => current.filter((r) => r.todoId !== todoId)),
+    [],
+  )
+
+  return { reminders, dismiss }
 }

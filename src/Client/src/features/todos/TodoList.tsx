@@ -1,15 +1,24 @@
 import { useState } from 'react'
-import { useCompleteTodo, useCreateTodo, useTodos } from './todoQueries'
-import { useTodoChanges } from './useTodoChanges'
+import { useCompleteTodo, useCreateTodo, useRemindTodo, useTodos } from './todoQueries'
+import { useTodoRealtime } from './useTodoRealtime'
+
+// "Remind me" choices, in minutes.
+const reminderChoices = [
+  { minutes: 1, label: 'in 1 minute' },
+  { minutes: 60, label: 'in 1 hour' },
+  { minutes: 24 * 60, label: 'tomorrow' },
+]
 
 export function TodoList() {
   const [title, setTitle] = useState('')
   const todos = useTodos()
   const createTodo = useCreateTodo()
   const completeTodo = useCompleteTodo()
+  const remindTodo = useRemindTodo()
 
-  // Live updates: refetch when this or another tab creates or completes a Todo.
-  useTodoChanges()
+  // Live updates: refetch when this or another tab creates or completes a Todo, and collect
+  // reminders as they come due.
+  const { reminders, dismiss } = useTodoRealtime()
 
   function addTodo(event: React.FormEvent) {
     event.preventDefault()
@@ -37,6 +46,30 @@ export function TodoList() {
         </button>
       </form>
 
+      {reminders.map((reminder) => (
+        <div
+          key={reminder.todoId}
+          role="alert"
+          className="mb-4 flex items-center justify-between rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+        >
+          <span>Reminder: {reminder.title}</span>
+          <button type="button" onClick={() => dismiss(reminder.todoId)} className="hover:underline">
+            Dismiss
+          </button>
+        </div>
+      ))}
+
+      {remindTodo.isSuccess && (
+        <p role="status" className="mb-4 text-sm text-gray-600">
+          Reminder set for {new Date(remindTodo.data.remindAt).toLocaleString()}.
+        </p>
+      )}
+      {remindTodo.error && (
+        <p role="alert" className="mb-4 text-sm text-red-600">
+          {remindTodo.error.message}
+        </p>
+      )}
+
       {createTodo.error && (
         <p role="alert" className="mb-4 text-sm text-red-600">
           {createTodo.error.message}
@@ -60,14 +93,31 @@ export function TodoList() {
                 {todo.title}
               </span>
               {!todo.isComplete && (
-                <button
-                  type="button"
-                  onClick={() => completeTodo.mutate(todo.id!)}
-                  disabled={completeTodo.isPending}
-                  className="text-sm text-indigo-600 hover:underline disabled:opacity-50"
-                >
-                  Complete
-                </button>
+                <div className="flex items-center gap-3">
+                  <select
+                    aria-label={`Remind me about ${todo.title}`}
+                    value=""
+                    onChange={(event) => remindTodo.mutate({ id: todo.id!, minutes: Number(event.target.value) })}
+                    className="rounded border border-gray-200 bg-white px-1 py-0.5 text-sm text-gray-600"
+                  >
+                    <option value="" disabled>
+                      Remind me…
+                    </option>
+                    {reminderChoices.map((choice) => (
+                      <option key={choice.minutes} value={choice.minutes}>
+                        {choice.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => completeTodo.mutate(todo.id!)}
+                    disabled={completeTodo.isPending}
+                    className="text-sm text-indigo-600 hover:underline disabled:opacity-50"
+                  >
+                    Complete
+                  </button>
+                </div>
               )}
             </li>
           ))}

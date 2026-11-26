@@ -41,3 +41,17 @@ export function useCompleteTodo() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: todoKeys.all }),
   })
 }
+
+// Schedules a "remind me" reminder; it arrives later over SignalR (see useTodoRealtime).
+export function useRemindTodo() {
+  return useMutation({
+    mutationFn: async ({ id, minutes }: { id: string; minutes: number }) => {
+      const { data, error, response } = await api.POST('/api/todos/{id}/remind', {
+        params: { path: { id } },
+        body: { minutes },
+      })
+      if (!response.ok || !data) throw new Error(problemMessage(error, 'Could not set the reminder.'))
+      return data
+    },
+  })
+}

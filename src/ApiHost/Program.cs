@@ -47,9 +47,10 @@ builder.Host.UseWolverine(opts =>
     opts.UseFluentValidation();
 
     // Realtime updates: AppHub is a SignalR hub that is also a Wolverine transport, and
-    // TodoChanged messages are pushed to connected browsers through it.
+    // TodoChanged and TodoReminder messages are pushed to connected browsers through it.
     opts.UseSignalR<AppHub>();
     opts.PublishMessage<TodoChanged>().ToSignalR();
+    opts.PublishMessage<TodoReminder>().ToSignalR();
 });
 
 #if (IsEfCore)

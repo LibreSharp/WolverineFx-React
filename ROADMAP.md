@@ -99,8 +99,8 @@ billing records but no payment provider (see the
       policies, HSTS in production).
 - [x] **API reference page** in Development with [Scalar](https://scalar.com/) (MIT) at
       `/scalar`, serving its scripts from the app rather than a CDN.
-- [ ] **Scheduled message example:** a "remind me later" Todo using Wolverine's scheduled
-      messages, to show scheduled background work with no new dependency.
+- [x] **Scheduled message example:** "Remind me…" on a Todo schedules a durable Wolverine message
+      that pushes a reminder to the browser when due, unless the Todo was completed.
 - [ ] **Generated-app housekeeping:** an `AGENTS.md`/`CLAUDE.md` describing the app's patterns
       for AI coding assistants, Dependabot config, central package management
       (`Directory.Packages.props`), and a free analyzer (Roslynator or Meziantou.Analyzer, not

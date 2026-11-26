@@ -14,6 +14,12 @@ Content-Type: application/json
 
 { "title": "Try Wolverine" }
 
+### Remind me about the todo in a minute (a scheduled Wolverine message; it arrives in open browser tabs)
+POST {{baseUrl}}/api/todos/{{createTodo.response.body.$.id}}/remind
+Content-Type: application/json
+
+{ "minutes": 1 }
+
 ### Complete the todo created above (cascades TodoCompleted to a background handler; see the API log)
 POST {{baseUrl}}/api/todos/{{createTodo.response.body.$.id}}/complete
 

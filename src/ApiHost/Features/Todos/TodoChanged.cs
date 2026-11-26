@@ -20,8 +20,13 @@ public static class TodoNotifications
 
     public static object Changed(Guid todoId, string ownerId)
         => new TodoChanged(todoId).ToWebSocketGroup(UserGroup(ownerId));
+
+    public static object Reminder(Todo todo)
+        => new TodoReminder(todo.Id, todo.Title).ToWebSocketGroup(UserGroup(todo.OwnerId));
 #else
     // Sent to every connected browser, by the ToSignalR() routing rule in Program.cs.
     public static object Changed(Guid todoId) => new TodoChanged(todoId);
+
+    public static object Reminder(Todo todo) => new TodoReminder(todo.Id, todo.Title);
 #endif
 }

@@ -6,6 +6,7 @@ using ApiHost.Features.Todos;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
+using Wolverine.Tracking;
 
 namespace ApiHost.Tests;
 
@@ -28,13 +29,17 @@ public class TodoRealtimeTests
         public HubConnection Connection => connection;
 
         // Waits for the next "todo-changed" CloudEvent about this Todo, ignoring others.
-        public async Task<JsonElement> NextChangeForAsync(Guid todoId, TimeSpan timeout)
+        public Task<JsonElement> NextChangeForAsync(Guid todoId, TimeSpan timeout) =>
+            NextAsync("todo-changed", todoId, timeout);
+
+        // Waits for the next CloudEvent of this type about this Todo, ignoring others.
+        public async Task<JsonElement> NextAsync(string type, Guid todoId, TimeSpan timeout)
         {
             using var cts = new CancellationTokenSource(timeout);
             while (true)
             {
                 var message = await messages.Reader.ReadAsync(cts.Token);
-                if (message.GetProperty("type").GetString() == "todo-changed"
+                if (message.GetProperty("type").GetString() == type
                     && message.GetProperty("data").GetProperty("todoId").GetGuid() == todoId)
                 {
                     return message;
@@ -112,6 +117,31 @@ public class TodoRealtimeTests
             s.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
         await tab.NextChangeForAsync(id, Timeout);
+    }
+
+    [Fact]
+    public async Task a_due_reminder_is_pushed_to_the_browser()
+    {
+        var token = await GetTokenAsync();
+        await using var tab = await ConnectAsync(token);
+        var title = $"Remind me {Guid.NewGuid()}";
+        var id = await CreateTodoAsync(token, title);
+
+        // Schedule the reminder, then play the scheduled message now instead of in a minute.
+        var scheduling = await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            if (token is not null)
+            {
+                s.WithBearerToken(token);
+            }
+            s.Post.Json(new RemindTodo(1)).ToUrl($"/api/todos/{id}/remind");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        }));
+        Assert.Contains(scheduling.Scheduled.MessagesOf<TodoReminderDue>(), m => m.TodoId == id);
+        await scheduling.PlayScheduledMessagesAsync(Timeout);
+
+        var reminder = await tab.NextAsync("todo-reminder", id, Timeout);
+        Assert.Equal(title, reminder.GetProperty("data").GetProperty("title").GetString());
     }
 #if (Identity)
 

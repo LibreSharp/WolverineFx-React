@@ -66,7 +66,7 @@ src/ApiHost/
 src/Client/src/
   App.tsx                 Routes (React Router)
   components/             Layout (header, navigation, footer), home page, not-found page
-  features/todos/         Todo page, TanStack Query hooks, SignalR hook
+  features/todos/         Todo page, TanStack Query hooks, SignalR hook (useTodoRealtime)
 <!--#if (Identity) -->
   features/auth/          Login, register and password reset pages, route guards
   features/account/       Settings page and the header's user menu
@@ -94,6 +94,11 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   Todo from its events, and the method returns the events to append. An inline snapshot
   projection keeps a `Todo` document up to date for queries.
 <!--#endif -->
+- **Scheduled messages.** "Remind me…" on a Todo calls `POST /api/todos/{id}/remind`, which
+  schedules a `TodoReminderDue` message for later (`Features/Todos/RemindTodo.cs`). Scheduled
+  messages are stored in PostgreSQL, so reminders still fire after a restart. When it's due,
+  `TodoReminderDueHandler` pushes a `todo-reminder` to the browser, unless the Todo was completed
+  in the meantime.
 - **Realtime updates.** Creating or completing a Todo sends a `todo-changed` message to the
   browser over SignalR (`TodoChanged`, routed in `Program.cs`), and every open tab refetches.
 <!--#if (Identity) -->

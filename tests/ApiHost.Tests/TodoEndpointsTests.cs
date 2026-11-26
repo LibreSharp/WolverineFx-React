@@ -146,4 +146,59 @@ public class TodoEndpointsTests
         }));
         Assert.DoesNotContain(again.Executed.MessagesOf<TodoCompleted>(), m => m.TodoId == created.Id);
     }
+
+    [Fact]
+    public async Task reminders_need_a_delay_between_one_minute_and_a_week()
+    {
+        var token = await GetTokenAsync();
+        var id = await CreateAsync(token, $"Remind {Guid.NewGuid()}");
+
+        foreach (var minutes in new[] { 0, RemindTodoValidator.MaxMinutes + 1 })
+        {
+            await Send(token, s =>
+            {
+                s.Post.Json(new RemindTodo(minutes)).ToUrl($"/api/todos/{id}/remind");
+                s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+            });
+        }
+
+        await Send(token, s =>
+        {
+            s.Post.Json(new RemindTodo(5)).ToUrl($"/api/todos/{Guid.NewGuid()}/remind");
+            s.StatusCodeShouldBe(HttpStatusCode.NotFound);
+        });
+    }
+
+    [Fact]
+    public async Task a_reminder_for_a_todo_completed_in_the_meantime_does_nothing()
+    {
+        var token = await GetTokenAsync();
+        var id = await CreateAsync(token, $"Done before the reminder {Guid.NewGuid()}");
+
+        var scheduling = await _fixture.Host.ExecuteAndWaitAsync(() => Send(token, s =>
+        {
+            s.Post.Json(new RemindTodo(30)).ToUrl($"/api/todos/{id}/remind");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        }));
+        await Send(token, s =>
+        {
+            s.Post.Url($"/api/todos/{id}/complete");
+            s.StatusCodeShouldBe(HttpStatusCode.NoContent);
+        });
+
+        // Play the scheduled reminder now: it runs, but sends nothing for a completed Todo.
+        var played = await scheduling.PlayScheduledMessagesAsync(TimeSpan.FromSeconds(10));
+        Assert.Contains(played.Executed.MessagesOf<TodoReminderDue>(), m => m.TodoId == id);
+        Assert.DoesNotContain(played.Sent.MessagesOf<TodoReminder>(), m => m.TodoId == id);
+    }
+
+    private async Task<Guid> CreateAsync(string? token, string title)
+    {
+        var result = await Send(token, s =>
+        {
+            s.Post.Json(new CreateTodo(title)).ToUrl("/api/todos");
+            s.StatusCodeShouldBe(HttpStatusCode.Created);
+        });
+        return result.ReadAsJson<TodoCreationResponse>()!.Id;
+    }
 }

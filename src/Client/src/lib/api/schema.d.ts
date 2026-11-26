@@ -248,6 +248,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/todos/{id}/remind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_todos_id_remind
+         * @description POST_api_todos_id_remind
+         */
+        post: operations["POST_api_todos_id_remind"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -308,6 +328,10 @@ export interface components {
             email: string;
             password: string;
         };
+        RemindTodo: {
+            /** Format: int32 */
+            minutes: number | string;
+        };
         ResetPasswordRequest: {
             email: string;
             token: string;
@@ -324,6 +348,10 @@ export interface components {
             /** Format: uuid */
             id: string;
             url?: string;
+        };
+        TodoReminderScheduled: {
+            /** Format: date-time */
+            remindAt: string;
         };
         UpdateProfileRequest: {
             email: string;
@@ -746,6 +774,48 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    POST_api_todos_id_remind: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemindTodo"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TodoReminderScheduled"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
