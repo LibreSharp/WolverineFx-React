@@ -31,14 +31,16 @@ issues.
   OpenAPI document. Single deployable: Kestrel serves the built client in production.
 - **Tests** (`--IncludeTests true`): xUnit, Alba and Testcontainers against a real Postgres,
   covering the endpoints, auth, messaging, the event stream and SignalR.
-- **CI:** all 8 option combinations on every push.
+- **CI:** all 8 option combinations on every push: build, tests, and a Production publish
+  that is started and called.
 
 ## Next: v0.1.0 on nuget.org
 
-- [ ] **Pre-generated Wolverine code for production** (`TypeLoadMode.Static` and
-      `codegen write`): faster startup, no Roslyn at runtime, and removes the temporary
-      `Microsoft.CodeAnalysis` version pin in the EF Core option. Add a CI check that the
-      generated code is up to date.
+- [x] **Pre-generated Wolverine code for production:** `dotnet publish` runs `codegen write`
+      and Production loads the result (`TypeLoadMode.Static`), so no code is compiled at
+      runtime and missing code fails at startup. CI publishes every combination and runs it in
+      Production. (Development still compiles at runtime, so the Roslyn package and the EF Core
+      option's `Microsoft.CodeAnalysis` pin stay.)
 - [ ] **NuGet readme** (`PackageReadmeFile`) written for people browsing nuget.org.
 - [ ] **Publish from CI** when a `v*` tag is pushed, using a nuget.org API key stored as a
       GitHub secret.

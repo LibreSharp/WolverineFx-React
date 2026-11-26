@@ -1,9 +1,9 @@
 using JasperFx;
+using JasperFx.CodeGeneration;
 #if (IsMarten)
 using ApiHost.Data.Marten;
 #elif (IsEfCore)
 using ApiHost.Data.EfCore;
-using Microsoft.EntityFrameworkCore;
 #endif
 using Wolverine;
 using Wolverine.FluentValidation;
@@ -47,6 +47,21 @@ builder.Host.UseWolverine(opts =>
     opts.PublishMessage<TodoChanged>().ToSignalR();
 });
 
+#if (IsEfCore)
+// Apply EF Core migrations at startup (before anything else that uses the database).
+builder.Services.AddHostedService<MigrateDatabaseOnStartup>();
+
+#endif
+// Code generation: Development (and the tests) generate Wolverine's handler code at
+// runtime, so changes need no extra step. Production loads code that `dotnet publish`
+// generated ahead of time (see the GenerateWolverineCode target in the .csproj), for a
+// faster start; it fails at startup, not on the first request, if any of it is missing.
+builder.Services.CritterStackDefaults(x =>
+{
+    x.Production.GeneratedCodeMode = TypeLoadMode.Static;
+    x.Production.AssertAllPreGeneratedTypesExist = true;
+});
+
 builder.Services.AddWolverineHttp();
 
 #if (Identity)
@@ -54,13 +69,6 @@ builder.Services.AddIdentityJwt(builder.Configuration, builder.Environment);
 #endif
 
 var app = builder.Build();
-
-#if (IsEfCore)
-using (var migrationScope = app.Services.CreateScope())
-{
-    migrationScope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
-}
-#endif
 
 if (app.Environment.IsDevelopment())
 {

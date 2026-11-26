@@ -25,6 +25,22 @@ jobs:
     env:
       APP_DIR: ${{ github.workspace }}/../generated/MyApp
 
+    # Database for the published app in the "Publish and run" step (the tests use Testcontainers).
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: myapp
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - uses: actions/checkout@v5
 
@@ -64,3 +80,26 @@ jobs:
         if: ${{ matrix.tests }}
         working-directory: ${{ env.APP_DIR }}
         run: dotnet test MyApp.slnx --no-build --logger "console;verbosity=normal"
+
+      # Publish like a real deployment (pre-generated Wolverine code, bundled React client) and
+      # start it in Production. Static code loading makes the app fail at startup if any
+      # generated code is missing, so a successful response proves the publish is complete.
+      - name: Publish and run
+        working-directory: ${{ env.APP_DIR }}
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          ASPNETCORE_URLS: http://localhost:5000
+          ConnectionStrings__Marten: Host=localhost;Database=myapp;Username=postgres;Password=postgres
+          ConnectionStrings__Postgres: Host=localhost;Database=myapp;Username=postgres;Password=postgres
+          Jwt__SigningKey: ci-only-signing-key-that-is-long-enough-0123456789
+        run: |
+          dotnet publish src/MyApp -c Release -o "$RUNNER_TEMP/publish"
+          test -d src/MyApp/Internal/Generated || { echo "codegen did not run"; exit 1; }
+          dotnet "$RUNNER_TEMP/publish/MyApp.dll" > "$RUNNER_TEMP/app.log" 2>&1 &
+          fail() { echo "$1"; cat "$RUNNER_TEMP/app.log"; exit 1; }
+          curl -fsS -o /dev/null --retry 30 --retry-delay 1 --retry-all-errors http://localhost:5000/ \
+            || fail "The published app did not serve the client."
+          expected=${{ matrix.identity && '401' || '200' }}
+          status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/api/todos)
+          [ "$status" = "$expected" ] || fail "GET /api/todos returned $status, expected $expected."
+          echo "Published app is running: GET / 200, GET /api/todos $status."

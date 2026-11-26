@@ -89,6 +89,11 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 - Vite dev server proxies `/api/*` to the API in development (no CORS); in production, the
   client is built and served as static files from the same Kestrel host (`dotnet publish` builds
   the client automatically).
+- **Production-ready code generation.** In Development, Wolverine generates its handler code at
+  runtime, so changes need no extra step. `dotnet publish` runs `codegen write` and compiles the
+  generated code in, and Production loads it ready-made (`TypeLoadMode.Static`): a faster start,
+  no runtime compilation, and a clear error at startup if anything is missing. The generated
+  code is never committed (`Internal/Generated/` is ignored), so it can't go stale.
 - An OpenAPI-generated, fully-typed TypeScript client (`openapi-typescript` + `openapi-fetch`) —
   regenerate after changing API contracts with `npm run gen:api` (requires the API running).
 - (`--Identity true`) JWT access tokens (HS256, 15 min) + rotating refresh tokens (14 days) with
@@ -113,10 +118,6 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   tokens. If you actually need a *separate* service to verify tokens without sharing that
   secret, upgrade to asymmetric signing (RS256) with a `/.well-known/jwks.json` endpoint —
   not included here to keep the default lean.
-- **Dev-time code generation**: Wolverine's dynamic codegen (`WolverineFx.RuntimeCompilation`)
-  is used in both dev and prod right now. For production, consider switching to
-  `TypeLoadMode.Static` with pre-generated code (`dotnet run -- codegen write`) to drop the
-  Roslyn dependency and cut startup time.
 
 ## Status
 

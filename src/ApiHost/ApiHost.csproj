@@ -40,6 +40,31 @@
 <!--#endif -->
   </ItemGroup>
 
+  <!--
+    Pre-generated Wolverine code for production (TypeLoadMode.Static in Program.cs).
+    `dotnet publish` regenerates it with `codegen write` and compiles it in, so it always matches
+    the handlers being published and is never committed (Internal/Generated is in .gitignore).
+    Ordinary builds ignore the folder: Development generates the same code at runtime.
+  -->
+  <PropertyGroup>
+    <WolverineGeneratedDir>$(MSBuildProjectDirectory)/Internal/Generated/</WolverineGeneratedDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Internal/Generated/**" />
+  </ItemGroup>
+
+  <Target Name="GenerateWolverineCode" BeforeTargets="CoreCompile" Condition="'$(_IsPublishing)' == 'true'">
+    <RemoveDir Directories="$(WolverineGeneratedDir)" />
+    <!-- Development settings, so codegen needs no production secrets; the generated code is the same. -->
+    <Exec Command="dotnet run --no-restore --no-launch-profile --configuration Debug -- codegen write"
+          WorkingDirectory="$(MSBuildProjectDirectory)"
+          EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development;DOTNET_ENVIRONMENT=Development" />
+    <ItemGroup>
+      <Compile Include="Internal/Generated/**/*.cs" />
+    </ItemGroup>
+  </Target>
+
   <PropertyGroup>
     <ClientDir>$(MSBuildProjectDirectory)\..\Client\</ClientDir>
   </PropertyGroup>
