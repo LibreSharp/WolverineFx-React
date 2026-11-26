@@ -34,6 +34,8 @@
     <Content Include="ApiHost.slnx" />
     <!-- Root dotfiles for the generated app (EnableDefaultItems is off, so list them). -->
     <Content Include=".gitignore" />
+    <!-- Becomes README.md in the generated app (see template.json); README.md here is the template's. -->
+    <Content Include="README.app.md" />
     <Content Include=".gitattributes" />
   </ItemGroup>
 

@@ -31,6 +31,8 @@ issues.
   API client generated from the OpenAPI document. Single deployable: Kestrel serves the built client in production.
 - **Tests** (`--IncludeTests true`): xUnit, Alba and Testcontainers against a real Postgres,
   covering the endpoints, auth, messaging, the event stream and SignalR.
+- **Documentation in every generated app:** a README covering running, layout, patterns,
+  adding a feature, common tasks and deployment, tailored to the chosen options.
 - **Requests to try in your IDE:** a `.http` file with the app's requests (login first when
   Identity is on), each reusing earlier responses such as the new Todo's id.
 - **CI:** all 8 option combinations on every push: build, tests, and a Production publish

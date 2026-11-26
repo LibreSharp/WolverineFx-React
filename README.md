@@ -118,6 +118,11 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   reuse-detection/logout. It drives the app over HTTP, so one project covers both `--Persistence`
   choices; the Marten version adds a test of the Todo event stream.
 
+- **A README for the generated app** (`README.app.md`, renamed to `README.md` on generation):
+  how to run it, the project layout, how the example works, how to add a feature, common
+  commands and deployment, with sections matching the chosen options. A final "Created from a
+  template" section links back here and can be deleted.
+
 ### Known limitations
 
 - **HS256 vs RS256/JWKS**: the JWT signing key is a single shared secret (HS256). This is

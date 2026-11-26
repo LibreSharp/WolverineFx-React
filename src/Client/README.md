@@ -1,6 +1,6 @@
 # Client
 
-React + TypeScript + Vite frontend for this WolverineFx + React app.
+React + TypeScript + Vite frontend for ApiHost. See the README in the repository root.
 
 ## Development
 
@@ -9,7 +9,7 @@ npm install
 npm run dev             # http://localhost:5173, proxies /api/* to the API (see vite.config.ts)
 ```
 
-The API must be running separately (`dotnet run` from `src/Api`) for the proxy and `gen:api` to
+The API must be running separately (`dotnet run` from `src/ApiHost`) for the proxy and `gen:api` to
 have something to talk to.
 
 ## Scripts
@@ -25,5 +25,5 @@ have something to talk to.
 ## API client
 
 `src/lib/api/schema.d.ts` is generated, not hand-written — after changing an API contract in
-`src/Api`, run the API and then `npm run gen:api` to regenerate the typed client
+`src/ApiHost`, run the API and then `npm run gen:api` to regenerate the typed client
 (`openapi-fetch` + `openapi-typescript`).
