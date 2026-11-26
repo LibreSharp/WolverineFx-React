@@ -23,6 +23,11 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # TypeScript 7 (the native compiler) has no JavaScript API, which openapi-typescript
+      # (npm run gen:api) needs. Remove this once openapi-typescript supports TypeScript 7.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: docker-compose
     directories: [/, /deploy]

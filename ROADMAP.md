@@ -167,5 +167,8 @@ billing records but no payment provider (see the
 ## Upgrades to track
 
 - WolverineFx 7 and Marten 10 once stable (both are release candidates as of November 2026).
-- xUnit v3, Alba 9, TypeScript 7, and the current Node LTS in CI.
+- xUnit v3, Alba 9, and the current Node LTS in CI.
+- TypeScript 7: the client builds with it, but `npm run gen:api` doesn't, because
+  openapi-typescript (7.13.0) needs the TypeScript JavaScript API that TypeScript 7 removed
+  (tested November 2026). Dependabot skips TypeScript majors until that changes.
 
