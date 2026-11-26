@@ -11,8 +11,7 @@
     <PackageTags>dotnet-new;templates;wolverine;wolverinefx;marten;react;vite;signalr;libresharp</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://libresharp.github.io</PackageProjectUrl>
-    <!-- Update after the repository moves into the LibreSharp organization. -->
-    <RepositoryUrl>https://github.com/waynethompson/WolverineFx-React</RepositoryUrl>
+    <RepositoryUrl>https://github.com/LibreSharp/WolverineFx-React</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
