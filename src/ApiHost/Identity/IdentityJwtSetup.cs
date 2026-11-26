@@ -55,6 +55,12 @@ public static class IdentityJwtSetup
         // request. Explicitly allow resolving it from the container.
         services.ConfigureWolverine(opts =>
             opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>());
+
+        // A ready-made login for local development only.
+        if (environment.IsDevelopment())
+        {
+            services.AddHostedService<DevelopmentUserSeeder>();
+        }
     }
 
     // Fail at startup rather than sign tokens with a missing, weak, or publicly known key.

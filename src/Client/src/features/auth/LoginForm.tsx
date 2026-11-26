@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { useAuth } from './AuthContext'
 
+// The demo login the API creates in Development (see .env.development). Both values are
+// undefined in a production build, so nothing is pre-filled there.
+const devEmail: string = import.meta.env.DEV ? (import.meta.env.VITE_DEV_LOGIN_EMAIL ?? '') : ''
+const devPassword: string = import.meta.env.DEV ? (import.meta.env.VITE_DEV_LOGIN_PASSWORD ?? '') : ''
+
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const { login } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState(devEmail)
+  const [password, setPassword] = useState(devPassword)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -27,6 +32,12 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="mx-auto flex max-w-sm flex-col gap-3 p-8">
       <h1 className="text-2xl font-semibold">Log in</h1>
+
+      {devEmail && (
+        <p className="text-sm text-gray-500">
+          Development: pre-filled with the demo user <strong>{devEmail}</strong>.
+        </p>
+      )}
 
       <input
         type="email"

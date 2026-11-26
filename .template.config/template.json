@@ -88,6 +88,7 @@
           "exclude": [
             "src/ApiHost/Identity/**",
             "src/Client/src/features/auth/**",
+            "src/Client/.env.development",
             "src/Client/src/App.WithIdentity.tsx",
             "tests/ApiHost.Tests/AuthEndpointsTests.cs",
             "tests/ApiHost.Tests/TodoAuthorizationTests.cs"

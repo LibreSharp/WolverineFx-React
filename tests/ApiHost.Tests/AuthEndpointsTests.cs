@@ -1,6 +1,8 @@
 using System.Net;
 using Alba;
 using ApiHost.Identity.Endpoints;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ApiHost.Tests;
 
@@ -24,6 +26,24 @@ public class AuthEndpointsTests
             s.Post.Json(new RegisterRequest(email, password)).ToUrl("/api/auth/register");
             s.StatusCodeShouldBe(HttpStatusCode.Created);
         });
+    }
+
+    [Fact]
+    public async Task the_development_user_is_created_at_startup_and_can_log_in()
+    {
+        // The fixture runs the app in Development, which seeds DevelopmentUser from
+        // appsettings.Development.json.
+        var configuration = _fixture.Host.Services.GetRequiredService<IConfiguration>();
+        var email = configuration["DevelopmentUser:Email"]!;
+        var password = configuration["DevelopmentUser:Password"]!;
+
+        var login = await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new LoginRequest(email, password)).ToUrl("/api/auth/login");
+            s.StatusCodeShouldBeOk();
+        });
+
+        Assert.False(string.IsNullOrWhiteSpace(login.ReadAsJson<LoginResponse>()!.AccessToken));
     }
 
     [Fact]
