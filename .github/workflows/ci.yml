@@ -112,6 +112,14 @@ jobs:
           expected=${{ matrix.identity && '401' || '200' }}
           status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/api/todos)
           [ "$status" = "$expected" ] || fail "GET /api/todos returned $status, expected $expected."
+          # The page must actually work in a browser: its script loads, and React renders.
+          script=$(curl -s http://localhost:5000/ | grep -oE 'src="/assets/[^"]+\.js"' | head -1 | cut -d'"' -f2)
+          type=$(curl -s -o /dev/null -w '%{content_type}' "http://localhost:5000$script")
+          [[ "$type" == text/javascript* ]] || fail "The client script $script was served as '$type'."
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=10000 \
+            --dump-dom http://localhost:5000/ > "$RUNNER_TEMP/page.html" 2>/dev/null
+          grep -q "Welcome to MyApp" "$RUNNER_TEMP/page.html" \
+            || fail "The React app didn't render in Chrome: $(head -c 600 "$RUNNER_TEMP/page.html")"
           ready=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/health/ready)
           [ "$ready" = "200" ] || fail "GET /health/ready returned $ready, expected 200."
-          echo "Published app is running: GET / 200, GET /api/todos $status, GET /health/ready 200."
+          echo "Published app works: renders in Chrome, GET /api/todos $status, GET /health/ready 200."

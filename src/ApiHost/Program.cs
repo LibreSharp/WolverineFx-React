@@ -124,8 +124,21 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check 
 
 if (!app.Environment.IsDevelopment())
 {
+    // Serve the React app that `dotnet publish` builds into wwwroot. (MapStaticAssets would only
+    // serve files known at build time, and the client is copied in later, during publish.)
+    // Vite puts a content hash in every file name under /assets, so browsers can cache those
+    // for a year; index.html isn't cached, so a new deployment is picked up straight away.
     app.UseDefaultFiles();
-    app.MapStaticAssets();
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        OnPrepareResponse = context =>
+        {
+            if (context.Context.Request.Path.StartsWithSegments("/assets", StringComparison.OrdinalIgnoreCase))
+            {
+                context.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+            }
+        },
+    });
     // Unknown paths serve the React app, so client-side routes such as /login load directly;
     // unknown API paths still get a 404 rather than the app's HTML.
     app.MapFallback("/api/{**path}", () => Results.NotFound());
