@@ -1,6 +1,8 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Wolverine;
 #if (IsMarten)
 using ApiHost.Identity.Marten;
 #elif (IsEfCore)
@@ -20,7 +22,17 @@ public static class IdentityJwtSetup
             ?? throw new InvalidOperationException("Missing 'Jwt' configuration section");
         ValidateSigningKey(jwtOptions.SigningKey, environment);
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddApplicationIdentity();
+
+        // AddIdentity (above) makes Identity's cookie scheme the default, which would answer an
+        // unauthenticated API call with a 302 redirect to a login page. This is a bearer-token API,
+        // so JWT must be the default for authenticate and challenge (401), set after AddIdentity.
+        services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -38,7 +50,11 @@ public static class IdentityJwtSetup
 
         services.AddAuthorization();
 
-        services.AddApplicationIdentity();
+        // UserManager<T> takes IServiceProvider in its constructor, so Wolverine can't build it inline
+        // in generated endpoint code, and its default ServiceLocationPolicy.NotAllowed then fails the
+        // request. Explicitly allow resolving it from the container.
+        services.ConfigureWolverine(opts =>
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>());
     }
 
     // Fail at startup rather than sign tokens with a missing, weak, or publicly known key.

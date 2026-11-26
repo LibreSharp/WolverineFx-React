@@ -45,7 +45,7 @@ public class TodoEndpointsTests
         await Send(token, s =>
         {
             s.Post.Json(new CreateTodo(title)).ToUrl("/api/todos");
-            s.StatusCodeShouldBeSuccess();
+            s.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var afterCreate = await Send(token, s =>
@@ -60,7 +60,7 @@ public class TodoEndpointsTests
         await Send(token, s =>
         {
             s.Post.Url($"/api/todos/{created.Id}/complete");
-            s.StatusCodeShouldBeSuccess();
+            s.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
 
         var afterComplete = await Send(token, s =>

@@ -22,7 +22,7 @@ public class TodoAuthorizationTests
         {
             s.Post.Json(new CreateTodo(title)).ToUrl("/api/todos");
             s.WithBearerToken(token);
-            s.StatusCodeShouldBeSuccess();
+            s.StatusCodeShouldBe(HttpStatusCode.Created);
         });
 
         var todos = await ListTodosAsync(token);

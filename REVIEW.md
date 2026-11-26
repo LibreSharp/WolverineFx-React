@@ -53,10 +53,11 @@ A template that includes auth should show how to protect a feature endpoint: `[A
 - [x] Add regression tests: anonymous create/complete return 401, and user B can't see user A's Todos (`TodoAuthorizationTests`)
 - [x] Move the signing key out of `appsettings.json` and fail fast outside Development
 - [ ] Add a CI workflow covering the 8-combination matrix, including `dotnet test`
+- [x] Run the integration tests against live Postgres (2026-11-26: 28/28 pass after three fixes; see `SPEC.md` §11)
 - [ ] Run the full manual pass against live Postgres (`SPEC.md` §11, "Live runtime verification")
 
 ## Deferred (from `SPEC.md` §11, still valid)
 
 - Switch production to pre-generated Wolverine code (`TypeLoadMode.Static` + `codegen write`) and drop `WolverineFx.RuntimeCompilation`.
-- `Microsoft.OpenApi` security advisory NU1903: blocked until a patched `Microsoft.AspNetCore.OpenApi` ships; re-check periodically.
+- ~~`Microsoft.OpenApi` security advisory NU1903~~: fixed 2026-11-26 by the .NET 11 upgrade (`Microsoft.AspNetCore.OpenApi 11.0.0` uses the patched `Microsoft.OpenApi 3.11`).
 - Package ID and publishing: choose a real ID, add a `<PackageReadmeFile>`, and decide between self-publishing and pitching to JasperFx (the WolverineFx maintainers). Findings 1–3 should be fixed before any public release.

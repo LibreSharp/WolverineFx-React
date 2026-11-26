@@ -25,7 +25,7 @@ Inspiration:
 | Persistence | **Toggle**: Marten (Postgres, document/event store) or EF Core (relational) | Matches Wolverine's own sample split; avoids picking a side that undersells either the "Critter Stack" story or the familiar relational path. Accepted tradeoff: two code paths to maintain and test. |
 | Frontend/backend wiring | **Single deployable**: Vite dev server proxied through Kestrel in dev (`npm run dev` + `ASPNETCORE`'s SPA proxy or a `vite dev` reverse-proxy middleware), `dist/` served as static files by Kestrel in production | No CORS to configure, one process to deploy, matches the convention ASP.NET Core's own SPA templates use. |
 | Optional feature surface (v1) | **Lean**: Identity toggle + persistence toggle only | Keep the parameter matrix small until there's real usage feedback; broader toggles (Docker Compose, SignalR demo, CI workflow) are explicitly deferred, not designed for yet. |
-| .NET target | **.NET 10** | Matches react-templates.net's ".NET 10" branding; accepted risk of being newest/least battle-tested. |
+| .NET target | **.NET 11** (originally .NET 10; moved 2026-11-26) | .NET 11 (STS) and .NET 10 (LTS) both reach end of support on 2028-11-14 now that STS gets 24 months, so the newest release costs nothing in support window. It also clears the NU1903 advisory (see §11). |
 | EF Core database | **PostgreSQL** (same engine as Marten) | One Docker Compose / connection-string story for local dev regardless of which persistence option is picked. |
 | Frontend styling | **Tailwind CSS** | Matches react-templates.net's default across all variants; speeds up scaffolding auth pages. |
 | API typing | **OpenAPI-generated TS client** (e.g. `openapi-typescript`) | Real type-safety guarantee, matches the "full type safety" pitch; accepted cost of a codegen step in the dev workflow. |
@@ -208,6 +208,18 @@ Grouped by how much it blocks calling this "done."
   replacement swaps the *entire* token for `-n`'s value, `src/ApiHost` becomes `src/MyApp` in a
   generated instance (not `src/MyAppHost`) — this was already true before the fix (with `Api` ->
   `MyApp`), so no behavior change for end users, just no more collision.
+- **Integration tests run against real Postgres — 2026-11-26.** First run (Docker + Testcontainers,
+  .NET 11) of all 4 test-bearing combinations: 28/28 pass after fixing three bugs the run exposed:
+  (1) with Identity, `AddIdentity` made Identity's cookie scheme the default, so unauthenticated API
+  calls got a 302 login redirect instead of 401 — `IdentityJwtSetup` now sets JWT as the default
+  authenticate/challenge scheme after `AddIdentity`; (2) with Identity, every endpoint taking
+  `UserManager<ApplicationUser>` returned 500 because its constructor takes `IServiceProvider` and
+  Wolverine's default `ServiceLocationPolicy.NotAllowed` rejects that — fixed with
+  `AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>()`; (3) Marten + Identity login/refresh
+  returned 500 because `Marten.AspNetIdentity`'s store has no `IUserRoleStore` (roles live on
+  `IClaimsUser.RoleClaims`) — added `Identity/UserRoles.cs` (`GetUserRolesAsync`). Also corrected
+  tests that expected 200 from create (201) and complete (204). The manual end-to-end pass below
+  (browser + `docker compose`) is still outstanding.
 - **Live runtime verification.** Everything so far proves wiring (DI resolves, codegen succeeds,
   builds pass) but nothing has actually hit a real Postgres. Run `docker compose up -d`, then for
   each of the 8 parameter combinations: register a user (if `Identity=true`), log in, create/list/
@@ -227,7 +239,13 @@ Grouped by how much it blocks calling this "done."
   (Roslyn) is referenced and used in both dev and prod. Wolverine's own guidance is to pre-generate
   code (`dotnet run -- codegen write`) and set `TypeLoadMode.Static` for production, dropping the
   Roslyn dependency and cutting startup time. Not yet done in either persistence branch.
-- **`Microsoft.OpenApi` NU1903 advisory — investigated, currently blocked, not just unexamined.**
+- ~~**`Microsoft.OpenApi` NU1903 advisory**~~ — **fixed 2026-11-26** by moving to .NET 11:
+  `Microsoft.AspNetCore.OpenApi 11.0.0` depends on the patched `Microsoft.OpenApi 3.11.x`. All 8
+  combinations build with 0 warnings. Same upgrade: WolverineFx 6.65.1, Marten 9.63.0,
+  Marten.AspNetIdentity 11.0.1, Npgsql EF 11.0.0, Testcontainers 4.17.0. EF Core variants pin
+  `Microsoft.CodeAnalysis`/`.Scripting` 5.9.0 to reconcile EF Design 11's Roslyn with
+  `WolverineFx.RuntimeCompilation`'s (drop the pin with runtime compilation). `dotnet ef migrations
+  has-pending-model-changes` (EF 11) reports no drift for either migration set. History:
   `Microsoft.AspNetCore.OpenApi 10.0.9` (latest stable as of the original check) pulls in the
   vulnerable `Microsoft.OpenApi 2.0.0` transitively. Tried pinning `Microsoft.OpenApi` directly to
   the patched `3.8.0`: this breaks the build — `Microsoft.AspNetCore.OpenApi 10.0.9`'s XML-comment

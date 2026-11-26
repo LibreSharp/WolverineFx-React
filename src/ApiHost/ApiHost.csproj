@@ -1,35 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
-    <PackageReference Include="WolverineFx" Version="6.16.0" />
-    <PackageReference Include="WolverineFx.Http" Version="6.16.0" />
-    <PackageReference Include="WolverineFx.RuntimeCompilation" Version="6.16.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+    <PackageReference Include="WolverineFx" Version="6.65.1" />
+    <PackageReference Include="WolverineFx.Http" Version="6.65.1" />
+    <PackageReference Include="WolverineFx.RuntimeCompilation" Version="6.65.1" />
 <!--#if (IsMarten) -->
-    <PackageReference Include="Marten" Version="9.12.0" />
-    <PackageReference Include="Marten.AspNetCore" Version="9.12.0" />
-    <PackageReference Include="WolverineFx.Marten" Version="6.16.0" />
+    <PackageReference Include="Marten" Version="9.63.0" />
+    <PackageReference Include="Marten.AspNetCore" Version="9.63.0" />
+    <PackageReference Include="WolverineFx.Marten" Version="6.65.1" />
 <!--#endif -->
 <!--#if (IsEfCore) -->
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
-    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="6.16.0" />
-    <PackageReference Include="WolverineFx.Postgresql" Version="6.16.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="11.0.0" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="6.65.1" />
+    <PackageReference Include="WolverineFx.Postgresql" Version="6.65.1" />
+    <!-- EF Core Design 11 needs Roslyn 5.9, but WolverineFx.RuntimeCompilation pulls the Roslyn 5.0
+         metapackages (which pin their VB/Scripting parts to exactly 5.0). Lift them to 5.9 to avoid NU1608.
+         Remove once dynamic codegen is dropped or Wolverine ships against Roslyn 5.9+. -->
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="5.9.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="5.9.0" />
 <!--#endif -->
 <!--#if (Identity && IsMarten) -->
-    <PackageReference Include="Marten.AspNetIdentity" Version="9.0.26" />
+    <PackageReference Include="Marten.AspNetIdentity" Version="11.0.1" />
 <!--#endif -->
 <!--#if (Identity) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
 <!--#endif -->
 <!--#if (Identity && IsEfCore) -->
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="11.0.0" />
 <!--#endif -->
   </ItemGroup>
 
