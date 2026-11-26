@@ -93,14 +93,18 @@
             "src/Client/src/features/auth/**",
             "src/Client/.env.development",
             "src/Client/src/App.WithIdentity.tsx",
+            "src/ApiHost/ApiHost.WithIdentity.http",
             "tests/ApiHost.Tests/AuthEndpointsTests.cs",
             "tests/ApiHost.Tests/TodoAuthorizationTests.cs"
           ]
         },
         {
           "condition": "(Identity)",
-          "exclude": [ "src/Client/src/App.tsx" ],
-          "rename": { "src/Client/src/App.WithIdentity.tsx": "src/Client/src/App.tsx" }
+          "exclude": [ "src/Client/src/App.tsx", "src/ApiHost/ApiHost.http" ],
+          "rename": {
+            "src/Client/src/App.WithIdentity.tsx": "src/Client/src/App.tsx",
+            "src/ApiHost/ApiHost.WithIdentity.http": "src/ApiHost/ApiHost.http"
+          }
         },
         {
           "condition": "(!IncludeTests)",

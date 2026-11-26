@@ -1,0 +1,55 @@
+# Try the API from your IDE: Visual Studio, VS Code (REST Client extension) or Rider.
+# Start Postgres and the API first (`docker compose up -d`, then `dotnet run`).
+# Run "Log in" first: later requests reuse its token via {{login.response.body.$.accessToken}}.
+
+@baseUrl = http://localhost:5133
+
+### Log in as the demo user (created in Development only; see appsettings.Development.json)
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "demo@example.com", "password": "Demo123!" }
+
+### Who am I?
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### List my todos
+GET {{baseUrl}}/api/todos
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Create a todo (also pushes "todo-changed" to your open browser tabs over SignalR)
+# @name createTodo
+POST {{baseUrl}}/api/todos
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "title": "Try Wolverine" }
+
+### Complete the todo created above (cascades TodoCompleted to a background handler; see the API log)
+POST {{baseUrl}}/api/todos/{{createTodo.response.body.$.id}}/complete
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Validation: an empty title is rejected with 400 and ProblemDetails
+POST {{baseUrl}}/api/todos
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "title": "" }
+
+### Without a token, the Todo endpoints answer 401
+GET {{baseUrl}}/api/todos
+
+### Get a new access token (the refresh token rotates: the old one stops working)
+# @name refresh
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{login.response.body.$.refreshToken}}" }
+
+### Log out (revokes the refresh token from the latest refresh)
+POST {{baseUrl}}/api/auth/logout
+Content-Type: application/json
+
+{ "refreshToken": "{{refresh.response.body.$.refreshToken}}" }

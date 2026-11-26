@@ -1,1 +1,24 @@
-@Api_HostAddress = http://localhost:5133
+# Try the API from your IDE: Visual Studio, VS Code (REST Client extension) or Rider.
+# Start Postgres and the API first (`docker compose up -d`, then `dotnet run`).
+# Requests can reuse earlier responses, e.g. {{createTodo.response.body.$.id}}.
+
+@baseUrl = http://localhost:5133
+
+### List todos
+GET {{baseUrl}}/api/todos
+
+### Create a todo (also pushes "todo-changed" to open browser tabs over SignalR)
+# @name createTodo
+POST {{baseUrl}}/api/todos
+Content-Type: application/json
+
+{ "title": "Try Wolverine" }
+
+### Complete the todo created above (cascades TodoCompleted to a background handler; see the API log)
+POST {{baseUrl}}/api/todos/{{createTodo.response.body.$.id}}/complete
+
+### Validation: an empty title is rejected with 400 and ProblemDetails
+POST {{baseUrl}}/api/todos
+Content-Type: application/json
+
+{ "title": "" }

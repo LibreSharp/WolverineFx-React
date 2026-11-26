@@ -31,10 +31,12 @@ issues.
   API client generated from the OpenAPI document. Single deployable: Kestrel serves the built client in production.
 - **Tests** (`--IncludeTests true`): xUnit, Alba and Testcontainers against a real Postgres,
   covering the endpoints, auth, messaging, the event stream and SignalR.
+- **Requests to try in your IDE:** a `.http` file with the app's requests (login first when
+  Identity is on), each reusing earlier responses such as the new Todo's id.
 - **CI:** all 8 option combinations on every push: build, tests, and a Production publish
   that is started and called.
 
-## Next: v0.1.0 on nuget.org
+## v0.1.0 on nuget.org (released 26 November 2026)
 
 - [x] **Pre-generated Wolverine code for production:** `dotnet publish` runs `codegen write`
       and Production loads the result (`TypeLoadMode.Static`), so no code is compiled at
@@ -46,9 +48,10 @@ issues.
 - [x] **Publish from CI** when a `v*` tag is pushed (`release.yml`): runs the full CI matrix,
       then publishes with nuget.org Trusted Publishing (no stored API key) and creates a GitHub
       release.
-- [ ] **One-time nuget.org setup** (needs the account owner): a Trusted Publishing policy for
-      `release.yml`, and the `NUGET_USER` repository variable. See "Releasing" in the README.
-- [ ] **Tag `v0.1.0`.**
+- [x] **One-time nuget.org setup:** a Trusted Publishing policy for `release.yml`, and the
+      `NUGET_USER` repository variable. See "Releasing" in the README.
+- [x] **Tag `v0.1.0`:** published as
+      [LibreSharp.Templates.WolverineFxReact](https://www.nuget.org/packages/LibreSharp.Templates.WolverineFxReact).
 - [x] **Confirm every dependency's licence:** all MIT, Apache-2.0 or PostgreSQL (checked
       November 2026). `Marten.AspNetIdentity` states MIT only in its GitHub repo, not in its
       package metadata, so licence scanners report it as unlicensed; worth raising with its author.
