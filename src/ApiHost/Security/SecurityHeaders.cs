@@ -17,7 +17,11 @@ public static class SecurityHeaders
         return app.Use(async (context, next) =>
         {
             var headers = context.Response.Headers;
-            headers.ContentSecurityPolicy = ContentSecurityPolicy;
+            // The Development-only API reference (/scalar) runs its own inline setup script.
+            if (!context.Request.Path.StartsWithSegments("/scalar"))
+            {
+                headers.ContentSecurityPolicy = ContentSecurityPolicy;
+            }
             headers.XContentTypeOptions = "nosniff";
             headers.XFrameOptions = "DENY";
             headers["Referrer-Policy"] = "strict-origin-when-cross-origin";

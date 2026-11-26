@@ -97,7 +97,8 @@ billing records but no payment provider (see the
 - [x] **Hardening:** rate limiting on the auth endpoints (built-in rate limiter, 10 a minute per
       client IP) and security headers (Content-Security-Policy, nosniff, frame and referrer
       policies, HSTS in production).
-- [ ] **API reference page** in Development with [Scalar](https://scalar.com/) (MIT).
+- [x] **API reference page** in Development with [Scalar](https://scalar.com/) (MIT) at
+      `/scalar`, serving its scripts from the app rather than a CDN.
 - [ ] **Scheduled message example:** a "remind me later" Todo using Wolverine's scheduled
       messages, to show scheduled background work with no new dependency.
 - [ ] **Generated-app housekeeping:** an `AGENTS.md`/`CLAUDE.md` describing the app's patterns

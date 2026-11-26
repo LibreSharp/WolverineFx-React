@@ -1,5 +1,6 @@
 using JasperFx;
 using JasperFx.CodeGeneration;
+using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 #if (IsMarten)
 using ApiHost.Data.Marten;
@@ -86,7 +87,10 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    // The OpenAPI document (/openapi/v1.json; also used by the client's `npm run gen:api`), and
+    // an interactive API reference to browse and try the endpoints at /scalar.
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 // Development (including the tests) runs over plain HTTP with no HTTPS port to redirect

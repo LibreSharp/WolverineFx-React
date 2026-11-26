@@ -39,7 +39,9 @@ console output, where you can open it.
 <!--#endif -->
 
 To try the API without the UI, open `src/ApiHost/ApiHost.http` in Visual Studio, Rider, or VS Code
-with the REST Client extension, and run the requests in order.
+with the REST Client extension, and run the requests in order. Or browse the interactive API
+reference at http://localhost:5133/scalar (Development only), generated from the OpenAPI document
+at `/openapi/v1.json`.
 
 ## Project layout
 
