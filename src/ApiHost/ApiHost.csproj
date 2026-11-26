@@ -4,6 +4,10 @@
     <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Container image for `dotnet publish -c Release /t:PublishContainer` (see deploy/README.md).
+         The base image is Microsoft's ASP.NET Core runtime image; the app runs as a non-root user
+         and listens on port 8080. -->
+    <ContainerRepository>apihost</ContainerRepository>
   </PropertyGroup>
 
   <ItemGroup>

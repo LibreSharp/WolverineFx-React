@@ -31,6 +31,7 @@
     <Content Include="tests\**\*"
              Exclude="tests\**\bin\**;tests\**\obj\**;tests\**\*.user" />
     <Content Include="docker-compose.yml" />
+    <Content Include="deploy\**\*" />
     <Content Include="ApiHost.slnx" />
     <!-- Root dotfiles for the generated app (EnableDefaultItems is off, so list them). -->
     <Content Include=".gitignore" />

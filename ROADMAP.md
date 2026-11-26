@@ -82,9 +82,10 @@ billing records but no payment provider (see the
 - [x] **Account settings** (Identity): change email and display name, change password, delete
       account (with an `AccountDeleted` message features handle to delete their data), and
       forgot/reset password by email.
-- [ ] **Container publishing and cheap hosting:** `dotnet publish /t:PublishContainer`, a
+- [x] **Container publishing and cheap hosting:** `dotnet publish /t:PublishContainer`, a
       production `docker-compose` with Postgres and [Caddy](https://caddyserver.com/)
-      (Apache-2.0) for automatic HTTPS, and a deployment guide for a small VPS.
+      (Apache-2.0) for automatic HTTPS, and a deployment guide for a small VPS (`deploy/`). CI
+      builds the image for every combination.
 - [x] **Health checks:** `/health/live` and `/health/ready` (with a Postgres check,
       `AspNetCore.HealthChecks.NpgSql`, Apache-2.0); CI checks `/health/ready` on every published
       combination.

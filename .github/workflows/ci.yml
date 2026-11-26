@@ -85,6 +85,13 @@ jobs:
       # Publish like a real deployment (pre-generated Wolverine code, bundled React client) and
       # start it in Production. Static code loading makes the app fail at startup if any
       # generated code is missing, so a successful response proves the publish is complete.
+      # The production container image (see deploy/README.md); GitHub's runners have Docker.
+      - name: Build container image
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          dotnet publish src/MyApp -c Release /t:PublishContainer
+          docker image inspect myapp:latest --format 'Built {{.RepoTags}}, {{.Size}} bytes'
+
       - name: Publish and run
         working-directory: ${{ env.APP_DIR }}
         env:

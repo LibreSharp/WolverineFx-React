@@ -12,3 +12,6 @@ dist/
 ## IDE
 .vs/
 .idea/
+
+## Deployment secrets (see deploy/env.example)
+deploy/.env

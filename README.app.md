@@ -205,6 +205,13 @@ HTTP with [Alba](https://jasperfx.github.io/alba/). They cover:
 
 ## Deploying
 
+`deploy/` has everything to run the app on a small server: a production `docker-compose.yml`
+(PostgreSQL, the app's container, and Caddy for automatic HTTPS) and a step-by-step guide in
+`deploy/README.md`. The container image is built with
+`dotnet publish src/ApiHost -c Release /t:PublishContainer`.
+
+The rest of this section applies wherever you run it.
+
 `dotnet publish` builds the React app into `wwwroot` and pre-generates Wolverine's handler code,
 so production starts quickly and compiles nothing at runtime. (In Development, Wolverine generates
 that code at runtime instead, so you never need to regenerate it by hand.)
