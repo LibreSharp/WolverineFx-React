@@ -17,7 +17,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261127142018_AddBilling";
+    public override string LastMigrationId => "20261127144105_AddBackOffice";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -143,6 +143,38 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                 b.ToTable("BillingInvoices");
             });
 
+        modelBuilder.Entity("ApiHost.Billing.FeatureOverride", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(200)
+                    .HasColumnType("character varying(200)");
+
+                b.Property<bool>("Enabled")
+                    .HasColumnType("boolean");
+
+                b.Property<string>("Feature")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.Property<string>("Scope")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<string>("ScopeKey")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<DateTimeOffset>("UpdatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasKey("Id");
+
+                b.ToTable("FeatureOverrides");
+            });
+
         modelBuilder.Entity("ApiHost.Billing.PaymentEventRecord", b =>
             {
                 b.Property<string>("Id")
@@ -180,6 +212,52 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                 b.HasKey("OrganisationId", "LimitName", "PeriodStart");
 
                 b.ToTable("PeriodUsage");
+            });
+
+        modelBuilder.Entity("ApiHost.Features.Admin.AuditEntry", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<string>("Action")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<string>("ActorEmail")
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnType("character varying(256)");
+
+                b.Property<string>("ActorId")
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.Property<DateTimeOffset>("At")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Details")
+                    .HasColumnType("text");
+
+                b.Property<string>("TargetId")
+                    .IsRequired()
+                    .HasMaxLength(4000)
+                    .HasColumnType("character varying(4000)");
+
+                b.Property<string>("TargetType")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("At");
+
+                b.HasIndex("TargetId");
+
+                b.ToTable("AuditEntries");
             });
 
         modelBuilder.Entity("ApiHost.Features.Todos.Todo", b =>
@@ -363,6 +441,9 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                     .ValueGeneratedOnAdd()
                     .HasColumnType("uuid");
 
+                b.Property<string>("AdminNotes")
+                    .HasColumnType("text");
+
                 b.Property<DateTimeOffset>("CreatedAt")
                     .HasColumnType("timestamp with time zone");
 
@@ -370,6 +451,13 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                     .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnType("character varying(100)");
+
+                b.Property<DateTimeOffset?>("SuspendedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("SuspensionReason")
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
 
                 b.HasKey("Id");
 

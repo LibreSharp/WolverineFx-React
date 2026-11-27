@@ -31,6 +31,12 @@ public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox, TimePro
     public Task<Membership?> FindMembershipAsync(Guid organisationId, string userId, CancellationToken cancellationToken)
         => db.Memberships.FirstOrDefaultAsync(m => m.OrganisationId == organisationId && m.UserId == userId, cancellationToken);
 
+    public Task<bool> CanWorkInAsync(Guid organisationId, string userId, CancellationToken cancellationToken)
+        => db.Memberships.AnyAsync(
+            m => m.OrganisationId == organisationId && m.UserId == userId
+                 && db.Organisations.Any(o => o.Id == organisationId && o.SuspendedAt == null),
+            cancellationToken);
+
     public async Task<IReadOnlyList<Membership>> MembershipsOfOrganisationAsync(Guid organisationId, CancellationToken cancellationToken)
         => await db.Memberships.Where(m => m.OrganisationId == organisationId).ToListAsync(cancellationToken);
 

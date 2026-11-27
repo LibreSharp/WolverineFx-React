@@ -121,6 +121,29 @@ endpoint for `https://your-domain/api/billing/webhooks/stripe` with these events
 `customer.subscription.deleted`, `invoice.paid` and `invoice.payment_failed`.
 `Billing__Stripe__AutomaticTax=true` has Stripe Tax add sales tax and VAT.
 
+## The back office
+
+Admins (see [accounts](accounts.md#roles-and-the-back-office)) support customers from `/admin`:
+
+- **Dashboard:** monthly recurring revenue (per currency, from each subscription's plan
+  version), organisations (new and active in the last 30 days), trials ending in the next 7
+  days, failed payments, and failed messages.
+- **Organisations:** search by name, then see an organisation's members, plan, usage, invoices
+  (with links to Stripe's dashboard), feature flags, notes and history. From there an admin can:
+  - **give a plan until a date**, free of charge, which also extends a trial (the organisation
+    must not have a subscription: change a subscription in Stripe);
+  - **suspend** it: nobody can work in it (every request checks), and its members' sessions move
+    to their other organisations; nothing is deleted until it's unsuspended or deleted;
+  - **keep notes**, which its members never see;
+  - **delete** it with its data, as an owner can, which cancels its subscription.
+- **Feature flags:** turn a feature on or off for everyone, for a plan, or (on an
+  organisation's page) for one organisation, over what the plans say. The most specific wins:
+  the organisation's, then everyone's, then the plan's, then the catalogue. "Off for everyone" is
+  a kill switch for a feature that misbehaves. The flags are stored in the database
+  (`FeatureOverride`), and checked through the same `Entitlements.IsEnabledAsync`.
+
+Refunds stay in Stripe. Every change is in the audit log.
+
 ## Adding a feature or a limit
 
 1. Add a constant to `PlanFeatures` (with a description) or `PlanLimits.All` in `Billing/Plans.cs`,

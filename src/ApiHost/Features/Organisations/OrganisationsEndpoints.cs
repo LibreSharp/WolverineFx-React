@@ -73,7 +73,7 @@ public static class OrganisationsEndpoints
 
         var membership = await store.FindMembershipAsync(request.OrganisationId, userId, cancellationToken);
         var user = await userManager.FindByIdAsync(userId);
-        if (membership is null || user is null)
+        if (membership is null || user is null || (await store.FindAsync(request.OrganisationId, cancellationToken))?.SuspendedAt is not null)
         {
             return TypedResults.Forbid();
         }

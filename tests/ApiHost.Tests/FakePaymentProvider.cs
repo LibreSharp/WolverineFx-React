@@ -20,6 +20,9 @@ public class FakePaymentProvider : IPaymentProvider
 
     public ConcurrentQueue<string> Cancelled { get; } = new();
 
+    // Subscriptions that can't be read, as if the provider were down: the webhook's message fails.
+    public ConcurrentDictionary<string, bool> Unreachable { get; } = new(StringComparer.Ordinal);
+
     public string Name => ProviderName;
 
     public bool IsConfigured => true;
@@ -34,7 +37,9 @@ public class FakePaymentProvider : IPaymentProvider
         => Task.FromResult(new Uri($"https://payments.example.com/portal/{customerId}"));
 
     public Task<ProviderSubscription?> GetSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken)
-        => Task.FromResult(Subscriptions.GetValueOrDefault(subscriptionId));
+        => Unreachable.ContainsKey(subscriptionId)
+            ? throw new InvalidOperationException($"The fake provider can't reach subscription {subscriptionId}")
+            : Task.FromResult(Subscriptions.GetValueOrDefault(subscriptionId));
 
     public Task CancelSubscriptionAsync(string subscriptionId, CancellationToken cancellationToken)
     {

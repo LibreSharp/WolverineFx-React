@@ -684,6 +684,290 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_dashboard
+         * @description GET_api_admin_dashboard
+         */
+        get: operations["GET_api_admin_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_features
+         * @description GET_api_admin_features
+         */
+        get: operations["GET_api_admin_features"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/features/{feature}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT_api_admin_features_feature
+         * @description PUT_api_admin_features_feature
+         */
+        put: operations["PUT_api_admin_features_feature"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organisations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_organisations
+         * @description GET_api_admin_organisations
+         */
+        get: operations["GET_api_admin_organisations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organisations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_organisations_id
+         * @description GET_api_admin_organisations_id
+         */
+        get: operations["GET_api_admin_organisations_id"];
+        put?: never;
+        post?: never;
+        /**
+         * DELETE_api_admin_organisations_id
+         * @description DELETE_api_admin_organisations_id
+         */
+        delete: operations["DELETE_api_admin_organisations_id"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organisations/{id}/grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_organisations_id_grant
+         * @description POST_api_admin_organisations_id_grant
+         */
+        post: operations["POST_api_admin_organisations_id_grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organisations/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_organisations_id_suspend
+         * @description POST_api_admin_organisations_id_suspend
+         */
+        post: operations["POST_api_admin_organisations_id_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organisations/{id}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_organisations_id_unsuspend
+         * @description POST_api_admin_organisations_id_unsuspend
+         */
+        post: operations["POST_api_admin_organisations_id_unsuspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/organisations/{id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT_api_admin_organisations_id_notes
+         * @description PUT_api_admin_organisations_id_notes
+         */
+        put: operations["PUT_api_admin_organisations_id_notes"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/organisations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_users_id_organisations
+         * @description GET_api_admin_users_id_organisations
+         */
+        get: operations["GET_api_admin_users_id_organisations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/failed-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_failed_messages
+         * @description GET_api_admin_failed_messages
+         */
+        get: operations["GET_api_admin_failed_messages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/failed-messages/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_failed_messages_replay
+         * @description POST_api_admin_failed_messages_replay
+         */
+        post: operations["POST_api_admin_failed_messages_replay"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/failed-messages/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_failed_messages_discard
+         * @description POST_api_admin_failed_messages_discard
+         */
+        post: operations["POST_api_admin_failed_messages_discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_admin_audit
+         * @description GET_api_admin_audit
+         */
+        get: operations["GET_api_admin_audit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/users": {
         parameters: {
             query?: never;
@@ -778,6 +1062,46 @@ export interface paths {
          * @description POST_api_admin_invitations
          */
         post: operations["POST_api_admin_invitations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/end-sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_users_id_end_sessions
+         * @description POST_api_admin_users_id_end_sessions
+         */
+        post: operations["POST_api_admin_users_id_end_sessions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/resend-confirmation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_admin_users_id_resend_confirmation
+         * @description POST_api_admin_users_id_resend_confirmation
+         */
+        post: operations["POST_api_admin_users_id_resend_confirmation"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1026,6 +1350,113 @@ export interface components {
             state: string;
             name: null | string;
         };
+        AdminDashboard: {
+            /** Format: int32 */
+            organisations: number | string;
+            /** Format: int32 */
+            newOrganisations: number | string;
+            /** Format: int32 */
+            activeOrganisations: number | string;
+            /** Format: int32 */
+            payingOrganisations: number | string;
+            monthlyRevenue: components["schemas"]["Revenue"][];
+            /** Format: int32 */
+            trialsEnding: number | string;
+            /** Format: int32 */
+            failedPayments: number | string;
+            /** Format: int32 */
+            failedMessages: number | string;
+        };
+        AdminFeature: {
+            name: string;
+            description: string;
+            global: null | boolean;
+            plans: components["schemas"]["AdminPlanFeature"][];
+            /** Format: int32 */
+            organisationOverrides: number | string;
+        };
+        AdminInvoice: {
+            id: string;
+            number: null | string;
+            status: string;
+            /** Format: int64 */
+            total: number | string;
+            /** Format: int64 */
+            amountPaid: number | string;
+            currency: string;
+            /** Format: date-time */
+            createdAt: string;
+            hostedUrl: null | string;
+            dashboardUrl: null | string;
+        };
+        AdminOrganisationBilling: {
+            planId: string;
+            planName: string;
+            /** Format: int32 */
+            planVersion: number | string;
+            status: string;
+            /** Format: date-time */
+            trialEndsAt: null | string;
+            /** Format: date-time */
+            periodStart: string;
+            /** Format: date-time */
+            periodEnd: string;
+            cancelAtPeriodEnd: boolean;
+            currency: null | string;
+            customerUrl: null | string;
+            subscriptionUrl: null | string;
+        };
+        AdminOrganisationDetail: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            suspendedAt: null | string;
+            suspensionReason: null | string;
+            notes: null | string;
+            members: components["schemas"]["OrganisationMember"][];
+            billing: components["schemas"]["AdminOrganisationBilling"];
+            limits: components["schemas"]["LimitUsage"][];
+            invoices: components["schemas"]["AdminInvoice"][];
+            features: components["schemas"]["AdminOrganisationFeature"][];
+        };
+        AdminOrganisationFeature: {
+            name: string;
+            description: string;
+            enabled: boolean;
+            override: null | boolean;
+        };
+        AdminOrganisationList: {
+            organisations: components["schemas"]["AdminOrganisationRow"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        AdminOrganisationRow: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int32 */
+            members: number | string;
+            planName: string;
+            status: string;
+            /** Format: date-time */
+            trialEndsAt: null | string;
+            suspended: boolean;
+        };
+        AdminPlanFeature: {
+            planId: string;
+            planName: string;
+            included: boolean;
+            override: null | boolean;
+        };
         AdminUser: {
             id: string;
             email: string;
@@ -1046,6 +1477,27 @@ export interface components {
             /** Format: int32 */
             pageSize: number | string;
             allRoles: string[];
+        };
+        AuditEntry: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            at?: string;
+            actorId?: string;
+            actorEmail?: string;
+            action?: string;
+            targetType?: string;
+            targetId?: string;
+            details?: null | string;
+        };
+        AuditPage: {
+            entries: components["schemas"]["AuditEntry"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
         };
         AuthOptionsResponse: {
             allowRegistration: boolean;
@@ -1109,8 +1561,40 @@ export interface components {
             name: string;
             displayName: string;
         };
+        FailedMessage: {
+            /** Format: uuid */
+            id: string;
+            messageType: string;
+            exceptionType: null | string;
+            exceptionMessage: null | string;
+            /** Format: date-time */
+            sentAt: string;
+            /** Format: date-time */
+            failedAt: null | string;
+            source: null | string;
+            replayable: boolean;
+            /** Format: int32 */
+            replayCount: number | string;
+        };
+        FailedMessagePage: {
+            messages: components["schemas"]["FailedMessage"][];
+            /** Format: int32 */
+            total: number | string;
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+        };
+        FailedMessagesRequest: {
+            ids: string[];
+        };
         ForgotPasswordRequest: {
             email: string;
+        };
+        GrantPlanRequest: {
+            planId: string;
+            /** Format: date-time */
+            until: string;
         };
         HttpValidationProblemDetails: {
             type?: null | string;
@@ -1201,6 +1685,9 @@ export interface components {
             role: string;
             /** Format: date-time */
             joinedAt: string;
+        };
+        OrganisationNotesRequest: {
+            notes: null | string;
         };
         PasskeyLoginRequest: {
             credentialJson: string;
@@ -1298,8 +1785,21 @@ export interface components {
             token: string;
             newPassword: string;
         };
+        Revenue: {
+            currency: string;
+            /** Format: int64 */
+            monthlyAmount: number | string;
+        };
+        SetFeatureRequest: {
+            scope: string;
+            scopeKey: null | string;
+            enabled: null | boolean;
+        };
         SetRolesRequest: {
             roles: string[];
+        };
+        SuspendOrganisationRequest: {
+            reason: string;
         };
         SwitchOrganisationRequest: {
             /** Format: uuid */
@@ -2503,6 +3003,501 @@ export interface operations {
             };
         };
     };
+    GET_api_admin_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDashboard"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_admin_features: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminFeature"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PUT_api_admin_features_feature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feature: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetFeatureRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_admin_organisations: {
+        parameters: {
+            query?: {
+                search?: string;
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrganisationList"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_admin_organisations_id: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrganisationDetail"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DELETE_api_admin_organisations_id: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_admin_organisations_id_grant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantPlanRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_admin_organisations_id_suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuspendOrganisationRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_admin_organisations_id_unsuspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PUT_api_admin_organisations_id_notes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrganisationNotesRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_admin_users_id_organisations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOrganisation"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_admin_failed_messages: {
+        parameters: {
+            query?: {
+                page?: number | string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailedMessagePage"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_admin_failed_messages_replay: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FailedMessagesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IResult"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_admin_failed_messages_discard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FailedMessagesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IResult"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_admin_audit: {
+        parameters: {
+            query?: {
+                page?: number | string;
+                targetId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GET_api_admin_users: {
         parameters: {
             query?: {
@@ -2673,6 +3668,69 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
+            };
+        };
+    };
+    POST_api_admin_users_id_end_sessions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_admin_users_id_resend_confirmation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

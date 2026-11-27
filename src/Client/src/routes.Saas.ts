@@ -26,7 +26,18 @@ export default [
     route('todos', 'routes/todos.tsx'),
     route('settings', 'routes/settings.tsx'),
     route('organisation', 'routes/organisation.tsx'),
-    layout('routes/require-admin.tsx', [route('admin', 'routes/admin.tsx')]),
+    // The back office: its sections, inside its frame (tabs).
+    layout('routes/require-admin.tsx', [
+      layout('routes/admin.tsx', [
+        route('admin', 'routes/admin-dashboard.tsx'),
+        route('admin/organisations', 'routes/admin-organisations.tsx'),
+        route('admin/organisations/:id', 'routes/admin-organisation.tsx'),
+        route('admin/users', 'routes/admin-users.tsx'),
+        route('admin/features', 'routes/admin-features.tsx'),
+        route('admin/audit', 'routes/admin-audit.tsx'),
+        route('admin/failed-messages', 'routes/admin-failed-messages.tsx'),
+      ]),
+    ]),
   ]),
   route('*', 'routes/not-found.tsx'),
 ] satisfies RouteConfig

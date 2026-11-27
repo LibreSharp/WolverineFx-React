@@ -22,7 +22,14 @@ export default [
   layout('routes/require-auth.tsx', [
     route('todos', 'routes/todos.tsx'),
     route('settings', 'routes/settings.tsx'),
-    layout('routes/require-admin.tsx', [route('admin', 'routes/admin.tsx')]),
+    // The back office: its sections, inside its frame (tabs).
+    layout('routes/require-admin.tsx', [
+      layout('routes/admin.tsx', [
+        route('admin', 'routes/admin-users.tsx'),
+        route('admin/audit', 'routes/admin-audit.tsx'),
+        route('admin/failed-messages', 'routes/admin-failed-messages.tsx'),
+      ]),
+    ]),
   ]),
   route('*', 'routes/not-found.tsx'),
 ] satisfies RouteConfig

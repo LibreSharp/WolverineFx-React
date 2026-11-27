@@ -79,6 +79,25 @@ public class BillingStore(AppDbContext db, IDbContextOutbox outbox, TimeProvider
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<FeatureOverride>> FeatureOverridesAsync(CancellationToken cancellationToken)
+        => await db.FeatureOverrides.AsNoTracking().ToListAsync(cancellationToken);
+
+    public async Task SetFeatureOverrideAsync(string id, FeatureOverride? featureOverride, CancellationToken cancellationToken)
+    {
+        var existing = await db.FeatureOverrides.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        if (existing is not null)
+        {
+            db.FeatureOverrides.Remove(existing);
+        }
+
+        if (featureOverride is not null)
+        {
+            db.FeatureOverrides.Add(featureOverride);
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
     public Task<int> UsageAsync(Guid organisationId, string limit, DateTimeOffset periodStart, CancellationToken cancellationToken)
     {
         var start = periodStart.ToUniversalTime();
@@ -107,6 +126,8 @@ public class BillingStore(AppDbContext db, IDbContextOutbox outbox, TimeProvider
     {
         await db.PeriodUsage.Where(u => u.OrganisationId == organisationId).ExecuteDeleteAsync(cancellationToken);
         await db.BillingInvoices.Where(i => i.OrganisationId == organisationId).ExecuteDeleteAsync(cancellationToken);
+        var key = organisationId.ToString();
+        await db.FeatureOverrides.Where(o => o.Scope == FeatureScopes.Organisation && o.ScopeKey == key).ExecuteDeleteAsync(cancellationToken);
         await db.BillingAccounts.Where(a => a.Id == organisationId).ExecuteDeleteAsync(cancellationToken);
     }
 }

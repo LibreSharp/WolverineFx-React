@@ -23,6 +23,12 @@ export const pages: Page[] = [
   { path: '/external-login', index: false },
   { path: '/settings', index: false },
   { path: '/admin', index: false },
+  { path: '/admin/organisations', index: false },
+  { path: '/admin/organisations/:id', index: false },
+  { path: '/admin/users', index: false },
+  { path: '/admin/features', index: false },
+  { path: '/admin/audit', index: false },
+  { path: '/admin/failed-messages', index: false },
   { path: '/organisation', index: false },
   { path: '/join', index: false },
 ]

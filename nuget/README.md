@@ -1,7 +1,7 @@
 # LibreSharp WolverineFx + React Template
 
 A `dotnet new` template for a full-stack app: a [WolverineFx](https://wolverinefx.net/) backend
-and a React frontend (Vite, TypeScript, Tailwind CSS), built and deployed as one ASP.NET Core
+and a React frontend (Vite, TypeScript, Tailwind CSS, shadcn/ui with dark mode), built and deployed as one ASP.NET Core
 app on PostgreSQL.
 
 It does the jobs often given to MediatR (in-process messaging) and MassTransit (message bus and
@@ -37,7 +37,7 @@ and read the app's emails in Mailpit at http://localhost:8025.
 | Option | Values | Default | |
 |---|---|---|---|
 | `--Persistence` | `marten`, `efcore` | `marten` | Marten (documents and event sourcing) or EF Core |
-| `--Auth` | `none`, `identity`, `saas` | `none` | `identity`: accounts with ASP.NET Core Identity and JWT, email confirmation, roles and an admin page, Google/GitHub sign-in and passkeys. `saas`: accounts plus organisations, with members, roles and invitations |
+| `--Auth` | `none`, `identity`, `saas` | `none` | `identity`: accounts with ASP.NET Core Identity and JWT, email confirmation, roles and a back office, Google/GitHub sign-in and passkeys. `saas`: accounts plus organisations, with members, roles and invitations, plans, trials, limits, Stripe billing and a back office for customers |
 | `--IncludeTests` | `true`, `false` | `true` | Integration tests against a real Postgres |
 
 ## What you get
@@ -51,11 +51,17 @@ and read the app's emails in Mailpit at http://localhost:8025.
   with `saas`, their organisation).
 - **Accounts** (`--Auth identity` or `saas`): ASP.NET Core Identity with JWT access tokens and rotating
   refresh tokens; email confirmation, password reset and invitations sent through the outbox
-  (MailKit, with Mailpit in development); account settings; lockout; roles and an admin page;
-  sign-in with Google and GitHub; and passkeys.
+  (MailKit, with Mailpit in development); account settings; lockout; roles and a back office
+  (users, an audit log, and failed messages to replay); sign-in with Google and GitHub; and
+  passkeys.
 - **Organisations** (`--Auth saas`): multi-tenancy with Wolverine, so each organisation's data is
   kept apart in the data layer; every account gets its own organisation, and users create more,
   switch between them, and invite others by email; Owner, Admin and Member roles.
+- **Billing** (`--Auth saas`): a plan catalogue with versions, a reverse trial, features and limits
+  checked in one place (402 Payment Required), a pre-rendered pricing page, Stripe Checkout,
+  the customer portal and webhooks through Wolverine's durable queues, and a back office with a
+  revenue dashboard, organisations (give a plan, suspend, notes) and feature flags.
+- **UI:** shadcn/ui components on every page, with dark mode that follows the operating system.
 - **Pre-rendered public pages** (React Router's framework mode): the home page is real HTML for
   search engines and link previews, with real 404s, `robots.txt` and `sitemap.xml`.
 - **Security by default:** strict security headers, HTTPS in production, rate limiting and
@@ -71,6 +77,14 @@ and read the app's emails in Mailpit at http://localhost:8025.
   including passkeys; and end-to-end tests with Playwright.
 
 Every option combination is built, tested and published in CI on each change.
+
+## Changes in 0.4.1
+
+- **Billing and a back office** with `--Auth saas`: plans, a reverse trial, limits, Stripe
+  subscriptions, and admin pages for organisations, feature flags, an audit log and failed
+  messages.
+- **shadcn/ui and dark mode** on every page. With accounts, the admin page is now a back office
+  with sections, and the user menu is a dropdown.
 
 ## Changes in 0.4.0
 

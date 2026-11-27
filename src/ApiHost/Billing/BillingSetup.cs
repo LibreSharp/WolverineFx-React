@@ -24,6 +24,7 @@ public static class BillingSetup
         services.Configure<StripeOptions>(configuration.GetSection(StripeOptions.SectionName));
         services.AddSingleton<IPaymentProvider, StripePaymentProvider>();
         services.AddScoped<Entitlements>();
+        services.AddScoped<ApiHost.Features.Admin.IBackOfficeQueries, ApiHost.Features.Admin.BackOfficeQueries>();
 
         // What counts towards each Count limit (PlanLimits).
         services.AddScoped<ILimitUsage, OpenTodosUsage>();
@@ -39,6 +40,7 @@ public static class BillingSetup
         {
             opts.CodeGeneration.AlwaysUseServiceLocationFor<Entitlements>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<IBillingStore>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<ApiHost.Features.Admin.IBackOfficeQueries>();
 
             // Webhook events are handled from a durable local queue (as every local queue is; see
             // Program.cs), after the webhook has been answered. If Stripe can't be reached, the

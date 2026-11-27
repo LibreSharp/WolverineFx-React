@@ -10,6 +10,14 @@ public class Organisation
     public string Name { get; set; } = string.Empty;
 
     public DateTimeOffset CreatedAt { get; set; }
+
+    // Suspended by an admin (the back office): nobody can work in it until it's unsuspended.
+    public DateTimeOffset? SuspendedAt { get; set; }
+
+    public string? SuspensionReason { get; set; }
+
+    // The back office's notes about the organisation, for admins only.
+    public string? AdminNotes { get; set; }
 }
 
 // A user's place in an organisation.

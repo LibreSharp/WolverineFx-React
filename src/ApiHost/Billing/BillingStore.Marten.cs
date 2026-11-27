@@ -58,6 +58,23 @@ public class BillingStore(IDocumentSession session, IMartenOutbox outbox, TimePr
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<FeatureOverride>> FeatureOverridesAsync(CancellationToken cancellationToken)
+        => await session.Query<FeatureOverride>().ToListAsync(cancellationToken);
+
+    public Task SetFeatureOverrideAsync(string id, FeatureOverride? featureOverride, CancellationToken cancellationToken)
+    {
+        if (featureOverride is null)
+        {
+            session.Delete<FeatureOverride>(id);
+        }
+        else
+        {
+            session.Store(featureOverride);
+        }
+
+        return session.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<int> UsageAsync(Guid organisationId, string limit, DateTimeOffset periodStart, CancellationToken cancellationToken)
     {
         var rows = await session.AdvancedSql.QueryAsync<int>(
@@ -88,6 +105,8 @@ public class BillingStore(IDocumentSession session, IMartenOutbox outbox, TimePr
     {
         session.Delete<BillingAccount>(organisationId);
         session.DeleteWhere<BillingInvoice>(i => i.OrganisationId == organisationId);
+        var key = organisationId.ToString();
+        session.DeleteWhere<FeatureOverride>(o => o.Scope == FeatureScopes.Organisation && o.ScopeKey == key);
         session.QueueSqlCommand($"delete from {session.DocumentStore.Options.DatabaseSchemaName}.{UsageTable} where organisation_id = ?", organisationId);
         return session.SaveChangesAsync(cancellationToken);
     }

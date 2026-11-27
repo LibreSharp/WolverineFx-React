@@ -10,7 +10,16 @@ public class OrganisationAccess(IOrganisationStore store, TimeProvider clock)
     // gets their own.
     public async Task<Guid> ChooseAsync(ApplicationUser user, Guid? preferred, CancellationToken cancellationToken)
     {
-        var memberships = await store.MembershipsOfUserAsync(user.Id, cancellationToken);
+        // Not a suspended one: the user can't work in it.
+        var memberships = new List<Membership>();
+        foreach (var membership in await store.MembershipsOfUserAsync(user.Id, cancellationToken))
+        {
+            if ((await store.FindAsync(membership.OrganisationId, cancellationToken))?.SuspendedAt is null)
+            {
+                memberships.Add(membership);
+            }
+        }
+
         var chosen = memberships.FirstOrDefault(m => m.OrganisationId == preferred)
             ?? memberships.MaxBy(m => m.LastUsedAt);
         if (chosen is not null)

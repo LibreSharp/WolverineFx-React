@@ -63,15 +63,28 @@ configured in `ConfigureIdentity` in `Identity/IdentityJwtSetup.cs`). While lock
 refused without checking the password, refresh tokens stop working, and resetting the password
 lifts the lock. An admin can also lock an account until they unlock it.
 
-## Roles and the admin page
+## Roles and the back office
 
 Roles are constants in `Identity/AppRoles.cs`, created in the database at startup
 (`RoleSeeder`). Protect endpoints with `[Authorize(Roles = AppRoles.Admin)]`. A changed role
 reaches the user's access token at their next token refresh.
 
-The admin page (`/admin`, Admin role only) lists and searches users, changes their roles, locks
-and unlocks accounts (an admin lock ends the user's sessions), and invites people: an invitation
-creates the account and emails a link to choose a password, valid for a week.
+The back office (`/admin`, Admin role only) has these sections:
+
+- **Users:** search users, change their roles, lock and unlock accounts (an admin lock ends the
+  user's sessions), end a user's sessions (sign them out everywhere: their refresh tokens are
+  revoked, and each session ends when its access token expires), resend the confirmation email,
+  and invite people. An invitation creates the account and emails a link to choose a password,
+  valid for a week.
+<!--#if (Saas) -->
+  Each user's organisations are listed too.
+- **Dashboard, Organisations and Feature flags:** see [Plans, trials and limits](billing.md#the-back-office).
+<!--#endif -->
+- **Audit log:** every change an admin makes, with who made it and when
+  (`Features/Admin/IAuditLog.cs`). Record new admin actions with `IAuditLog.RecordAsync`.
+- **Failed messages:** background work that failed every attempt and waits in Wolverine's
+  dead-letter queue, such as an email the SMTP server refused. Fix the cause, then replay the
+  message (it runs again) or discard it.
 
 - The first admins come from configuration: see [Make someone an admin](how-to/make-an-admin.md).
 - `Accounts:AllowRegistration=false` makes accounts invitation-only.

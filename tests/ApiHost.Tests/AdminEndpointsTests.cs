@@ -411,4 +411,85 @@ public class AdminEndpointsTests
         Assert.Empty(beyond.Users);
         Assert.Equal(first.Total, beyond.Total);
     }
+
+    [Fact]
+    public async Task admin_actions_are_recorded_in_the_audit_log()
+    {
+        var admin = await LoginAsAdminAsync();
+        var email = NewEmail();
+        await _fixture.RegisterConfirmedUserAsync(email, Password);
+        var user = await FindAsync(admin.AccessToken, email);
+
+        await AdminPostAsync(admin.AccessToken, $"/api/admin/users/{user.Id}/lock", HttpStatusCode.NoContent);
+        await AdminPostAsync(admin.AccessToken, $"/api/admin/users/{user.Id}/unlock", HttpStatusCode.NoContent);
+
+        var audit = (await _fixture.Host.Scenario(s =>
+        {
+            s.Get.Url($"/api/admin/audit?targetId={user.Id}");
+            s.WithBearerToken(admin.AccessToken);
+            s.StatusCodeShouldBeOk();
+        })).ReadAsJson<AuditPage>()!;
+        Assert.Equal([AuditActions.UnlockUser, AuditActions.LockUser], audit.Entries.Select(e => e.Action), StringComparer.Ordinal);
+        var configuration = _fixture.Host.Services.GetRequiredService<IConfiguration>();
+        Assert.All(audit.Entries, e => Assert.Equal(configuration["DevelopmentUser:Email"], e.ActorEmail, ignoreCase: true));
+    }
+
+    [Fact]
+    public async Task ending_a_users_sessions_stops_their_refresh_tokens()
+    {
+        var admin = await LoginAsAdminAsync();
+        var email = NewEmail();
+        await _fixture.RegisterConfirmedUserAsync(email, Password);
+        var session = await LoginAsync(email, Password);
+        var user = await FindAsync(admin.AccessToken, email);
+
+        await AdminPostAsync(admin.AccessToken, $"/api/admin/users/{user.Id}/end-sessions", HttpStatusCode.NoContent);
+
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new RefreshRequest(session.RefreshToken)).ToUrl("/api/auth/refresh");
+            s.StatusCodeShouldBe(HttpStatusCode.Unauthorized);
+        });
+    }
+
+    [Fact]
+    public async Task an_admin_can_resend_a_confirmation_email_to_someone_unconfirmed()
+    {
+        var admin = await LoginAsAdminAsync();
+        var email = NewEmail();
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new RegisterRequest(email, Password)).ToUrl("/api/auth/register");
+            s.StatusCodeShouldBe(HttpStatusCode.Created);
+        }));
+        var user = await FindAsync(admin.AccessToken, email);
+
+        await _fixture.Host.ExecuteAndWaitAsync(() => AdminPostAsync(admin.AccessToken, $"/api/admin/users/{user.Id}/resend-confirmation", HttpStatusCode.Accepted));
+        Assert.Equal(2, _fixture.Emails.SentTo(email).Count);
+
+        var confirmed = NewEmail();
+        await _fixture.RegisterConfirmedUserAsync(confirmed, Password);
+        await AdminPostAsync(admin.AccessToken, $"/api/admin/users/{(await FindAsync(admin.AccessToken, confirmed)).Id}/resend-confirmation", HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task admins_can_list_failed_messages()
+    {
+        var admin = await LoginAsAdminAsync();
+
+        var page = (await _fixture.Host.Scenario(s =>
+        {
+            s.Get.Url("/api/admin/failed-messages");
+            s.WithBearerToken(admin.AccessToken);
+            s.StatusCodeShouldBeOk();
+        })).ReadAsJson<FailedMessagePage>()!;
+
+        Assert.Equal(1, page.Page);
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new FailedMessagesRequest([])).ToUrl("/api/admin/failed-messages/replay");
+            s.WithBearerToken(admin.AccessToken);
+            s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+        });
+    }
 }

@@ -35,8 +35,40 @@ public class PlanFeatureDefinitions(IConfiguration configuration) : IFeatureDefi
         => new() { Name = name, EnabledFor = [new FeatureFilterConfiguration { Name = PlanFeatureFilter.Alias }] };
 }
 
-// The organisation a feature is checked for, and the plan it's on now.
-public record OrganisationFeatureContext(Guid OrganisationId, Plan Plan);
+// The organisation a feature is checked for, the plan it's on now, and the back office's
+// overrides.
+public record OrganisationFeatureContext(Guid OrganisationId, Plan Plan, IReadOnlyList<FeatureOverride> Overrides);
+
+// A feature turned on or off by an admin (the back office's feature flags), over what the plans
+// say. The most specific wins: an organisation's, then everyone's, then a plan's, then the plan
+// catalogue. Id: "{Scope}:{ScopeKey}:{Feature}".
+public class FeatureOverride
+{
+    public string Id { get; set; } = string.Empty;
+
+    public string Feature { get; set; } = string.Empty;
+
+    // One of FeatureScopes.
+    public string Scope { get; set; } = string.Empty;
+
+    // The plan's id or the organisation's id; empty for Global.
+    public string ScopeKey { get; set; } = string.Empty;
+
+    public bool Enabled { get; set; }
+
+    public DateTimeOffset UpdatedAt { get; set; }
+
+    public static string IdFor(string scope, string scopeKey, string feature) => $"{scope}:{scopeKey}:{feature}";
+}
+
+public static class FeatureScopes
+{
+    public const string Global = "Global";
+    public const string Plan = "Plan";
+    public const string Organisation = "Organisation";
+
+    public static readonly IReadOnlyList<string> All = [Global, Plan, Organisation];
+}
 
 [FilterAlias(Alias)]
 public class PlanFeatureFilter : IContextualFeatureFilter<OrganisationFeatureContext>
@@ -44,5 +76,16 @@ public class PlanFeatureFilter : IContextualFeatureFilter<OrganisationFeatureCon
     public const string Alias = "Plan";
 
     public Task<bool> EvaluateAsync(FeatureFilterEvaluationContext featureFilterContext, OrganisationFeatureContext appContext)
-        => Task.FromResult(appContext.Plan.Includes(featureFilterContext.FeatureName));
+        => Task.FromResult(IsEnabled(featureFilterContext.FeatureName, appContext));
+
+    public static bool IsEnabled(string feature, OrganisationFeatureContext context)
+    {
+        FeatureOverride? Find(string scope, string key)
+            => context.Overrides.FirstOrDefault(o => o.Id == FeatureOverride.IdFor(scope, key, feature));
+
+        var chosen = Find(FeatureScopes.Organisation, context.OrganisationId.ToString())
+            ?? Find(FeatureScopes.Global, string.Empty)
+            ?? Find(FeatureScopes.Plan, context.Plan.Id);
+        return chosen?.Enabled ?? context.Plan.Includes(feature);
+    }
 }

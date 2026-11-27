@@ -30,7 +30,13 @@ public interface IBillingStore
     // database statement, so requests at the same moment can't take the total past max.
     Task<bool> TryUseAsync(Guid organisationId, string limit, DateTimeOffset periodStart, int amount, int max, CancellationToken cancellationToken);
 
-    // A deleted organisation's account, usage and invoices.
+    // The back office's feature flags (FeatureOverride): all of them, as there are few.
+    Task<IReadOnlyList<FeatureOverride>> FeatureOverridesAsync(CancellationToken cancellationToken);
+
+    // Adds or replaces the override, or removes the one with that id when it's null.
+    Task SetFeatureOverrideAsync(string id, FeatureOverride? featureOverride, CancellationToken cancellationToken);
+
+    // A deleted organisation's account, usage, invoices and feature overrides.
     Task DeleteOrganisationAsync(Guid organisationId, CancellationToken cancellationToken);
 }
 

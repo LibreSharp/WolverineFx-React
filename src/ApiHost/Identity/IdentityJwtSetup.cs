@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ApiHost.Identity.Email;
 using ApiHost.Identity.External;
@@ -41,6 +42,8 @@ public static class IdentityJwtSetup
         // Google and GitHub sign-in, each only when configured.
         services.AddAuthentication().AddExternalProviders(configuration);
         services.AddScoped<ExternalLoginService>();
+        services.AddScoped<ApiHost.Features.Admin.IAuditLog, ApiHost.Features.Admin.AuditLog>();
+        services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<ExternalLinkTickets>();
 
         // Passkeys (Identity's WebAuthn support); see Passkeys/.
@@ -68,6 +71,7 @@ public static class IdentityJwtSetup
             opts.CodeGeneration.AlwaysUseServiceLocationFor<SignInManager<ApplicationUser>>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<TokenIssuer>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<ExternalLoginService>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<ApiHost.Features.Admin.IAuditLog>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<IPasskeyHandler<ApplicationUser>>();
         });
 

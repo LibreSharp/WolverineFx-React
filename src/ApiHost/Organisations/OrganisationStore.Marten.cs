@@ -29,6 +29,16 @@ public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox, T
     public Task<Membership?> FindMembershipAsync(Guid organisationId, string userId, CancellationToken cancellationToken)
         => session.Query<Membership>().FirstOrDefaultAsync(m => m.OrganisationId == organisationId && m.UserId == userId, cancellationToken);
 
+    public async Task<bool> CanWorkInAsync(Guid organisationId, string userId, CancellationToken cancellationToken)
+    {
+        // A batch: both queries in one round trip.
+        var batch = session.CreateBatchQuery();
+        var membership = batch.Query<Membership>().Where(m => m.OrganisationId == organisationId && m.UserId == userId).Any();
+        var organisation = batch.Load<Organisation>(organisationId);
+        await batch.Execute(cancellationToken);
+        return await membership && (await organisation)?.SuspendedAt is null;
+    }
+
     public Task<IReadOnlyList<Membership>> MembershipsOfOrganisationAsync(Guid organisationId, CancellationToken cancellationToken)
         => session.Query<Membership>().Where(m => m.OrganisationId == organisationId).ToListAsync(cancellationToken);
 

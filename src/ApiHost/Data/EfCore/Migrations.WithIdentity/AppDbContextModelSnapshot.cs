@@ -17,7 +17,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261127034335_AddPasskeys";
+    public override string LastMigrationId => "20261127144039_AddAuditLog";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -28,6 +28,52 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
             .HasAnnotation("WolverineEnabled", "true");
 
         NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+        modelBuilder.Entity("ApiHost.Features.Admin.AuditEntry", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<string>("Action")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<string>("ActorEmail")
+                    .IsRequired()
+                    .HasMaxLength(256)
+                    .HasColumnType("character varying(256)");
+
+                b.Property<string>("ActorId")
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.Property<DateTimeOffset>("At")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Details")
+                    .HasColumnType("text");
+
+                b.Property<string>("TargetId")
+                    .IsRequired()
+                    .HasMaxLength(4000)
+                    .HasColumnType("character varying(4000)");
+
+                b.Property<string>("TargetType")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("At");
+
+                b.HasIndex("TargetId");
+
+                b.ToTable("AuditEntries");
+            });
 
         modelBuilder.Entity("ApiHost.Features.Todos.Todo", b =>
             {

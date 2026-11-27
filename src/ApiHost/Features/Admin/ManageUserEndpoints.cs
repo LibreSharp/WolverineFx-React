@@ -46,6 +46,7 @@ public static class ManageUserEndpoints
         ClaimsPrincipal principal,
         UserManager<ApplicationUser> userManager,
         IRefreshTokenStore refreshTokenStore,
+        IAuditLog auditLog,
         CancellationToken cancellationToken)
     {
         if (id == principal.GetUserId())
@@ -68,6 +69,7 @@ public static class ManageUserEndpoints
         }
 
         await refreshTokenStore.RevokeAllForUserAsync(user.Id, cancellationToken);
+        await auditLog.RecordAsync(principal, AuditActions.LockUser, "User", user.Id, user.Email, cancellationToken);
         return TypedResults.NoContent();
     }
 
@@ -75,7 +77,7 @@ public static class ManageUserEndpoints
     [Authorize(Roles = AppRoles.Admin)]
     [WolverinePost("/api/admin/users/{id}/unlock")]
     public static async Task<Results<NoContent, NotFound, ValidationProblem>> Unlock(
-        string id, UserManager<ApplicationUser> userManager)
+        string id, ClaimsPrincipal principal, UserManager<ApplicationUser> userManager, IAuditLog auditLog, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(id);
         if (user is null)
@@ -89,7 +91,13 @@ public static class ManageUserEndpoints
             result = await userManager.ResetAccessFailedCountAsync(user);
         }
 
-        return result.Succeeded ? TypedResults.NoContent() : result.ToValidationProblem();
+        if (!result.Succeeded)
+        {
+            return result.ToValidationProblem();
+        }
+
+        await auditLog.RecordAsync(principal, AuditActions.UnlockUser, "User", user.Id, user.Email, cancellationToken);
+        return TypedResults.NoContent();
     }
 
     // Replaces the user's roles. The new roles are in their access token from their next login or
@@ -97,7 +105,7 @@ public static class ManageUserEndpoints
     [Authorize(Roles = AppRoles.Admin)]
     [WolverinePut("/api/admin/users/{id}/roles")]
     public static async Task<Results<NoContent, NotFound, ValidationProblem>> SetRoles(
-        string id, SetRolesRequest request, ClaimsPrincipal principal, UserManager<ApplicationUser> userManager)
+        string id, SetRolesRequest request, ClaimsPrincipal principal, UserManager<ApplicationUser> userManager, IAuditLog auditLog, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(id);
         if (user is null)
@@ -117,7 +125,14 @@ public static class ManageUserEndpoints
             result = await userManager.AddToRolesAsync(user, request.Roles.Distinct(StringComparer.Ordinal).Except(current, StringComparer.Ordinal));
         }
 
-        return result.Succeeded ? TypedResults.NoContent() : result.ToValidationProblem();
+        if (!result.Succeeded)
+        {
+            return result.ToValidationProblem();
+        }
+
+        var roles = request.Roles.Distinct(StringComparer.Ordinal).ToList();
+        await auditLog.RecordAsync(principal, AuditActions.SetRoles, "User", user.Id, $"{user.Email}: {(roles.Count == 0 ? "no roles" : string.Join(", ", roles))}", cancellationToken);
+        return TypedResults.NoContent();
     }
 
     // Creates an account with no password and emails the person a link to choose one (see
@@ -130,7 +145,9 @@ public static class ManageUserEndpoints
         ClaimsPrincipal principal,
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
-        HttpContext httpContext)
+        HttpContext httpContext,
+        IAuditLog auditLog,
+        CancellationToken cancellationToken)
     {
         var admin = await userManager.FindByIdAsync(principal.GetUserId());
         var invitedBy = admin?.DisplayName ?? admin?.Email ?? "An administrator";
@@ -156,6 +173,59 @@ public static class ManageUserEndpoints
             }
         }
 
+        await auditLog.RecordAsync(principal, AuditActions.InviteUser, "User", user.Id, request.Email, cancellationToken);
         return (TypedResults.Accepted((string?)null), [new SendInvitation(user.Id, invitedBy, ClientUrl.For(configuration, httpContext))]);
+    }
+
+    // Signs the user out everywhere: their refresh tokens are revoked, so each session ends when
+    // its access token expires (within Jwt:AccessTokenLifetimeMinutes). For a lost device, or a
+    // suspected stolen password (with a password reset).
+    [Authorize(Roles = AppRoles.Admin)]
+    [WolverinePost("/api/admin/users/{id}/end-sessions")]
+    public static async Task<Results<NoContent, NotFound>> EndSessions(
+        string id,
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager,
+        IRefreshTokenStore refreshTokenStore,
+        IAuditLog auditLog,
+        CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(id);
+        if (user is null)
+        {
+            return TypedResults.NotFound();
+        }
+
+        await refreshTokenStore.RevokeAllForUserAsync(user.Id, cancellationToken);
+        await auditLog.RecordAsync(principal, AuditActions.EndSessions, "User", user.Id, user.Email, cancellationToken);
+        return TypedResults.NoContent();
+    }
+
+    // Emails a new confirmation link to someone who hasn't confirmed their email yet.
+    [Authorize(Roles = AppRoles.Admin)]
+    [WolverinePost("/api/admin/users/{id}/resend-confirmation")]
+    public static async Task<(Results<Accepted, NotFound, ValidationProblem>, OutgoingMessages)> ResendConfirmation(
+        string id,
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration,
+        HttpContext httpContext,
+        IAuditLog auditLog,
+        CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(id);
+        if (user is null)
+        {
+            return (TypedResults.NotFound(), []);
+        }
+
+        if (user.EmailConfirmed || !await userManager.HasPasswordAsync(user))
+        {
+            // An invited user (no password yet) is sent their invitation again by inviting them again.
+            return (IdentityResultExtensions.ValidationProblem("Id", user.EmailConfirmed ? "Their email is already confirmed." : "They haven't accepted their invitation: invite them again."), []);
+        }
+
+        await auditLog.RecordAsync(principal, AuditActions.ResendConfirmation, "User", user.Id, user.Email, cancellationToken);
+        return (TypedResults.Accepted((string?)null), [new SendEmailConfirmation(user.Id, ClientUrl.For(configuration, httpContext))]);
     }
 }

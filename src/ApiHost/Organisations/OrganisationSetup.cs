@@ -35,8 +35,8 @@ public static class OrganisationSetup
         });
 
         // An access token is only accepted while its user is still a member of its organisation,
-        // so removing someone, or deleting the organisation, takes effect at once rather than when
-        // the token expires. (One indexed query per request.) The browser then refreshes its
+        // and the organisation isn't suspended, so removing someone, or deleting or suspending the
+        // organisation, takes effect at once rather than when the token expires. (One indexed query per request.) The browser then refreshes its
         // tokens, which picks another of the user's organisations.
         services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
         {
@@ -53,9 +53,9 @@ public static class OrganisationSetup
                 var organisationId = principal.FindFirst(OrganisationClaims.OrganisationId)?.Value;
                 var store = context.HttpContext.RequestServices.GetRequiredService<IOrganisationStore>();
                 if (!Guid.TryParse(organisationId, out var id)
-                    || await store.FindMembershipAsync(id, principal.GetUserId(), context.HttpContext.RequestAborted) is null)
+                    || !await store.CanWorkInAsync(id, principal.GetUserId(), context.HttpContext.RequestAborted))
                 {
-                    context.Fail("No longer a member of the token's organisation");
+                    context.Fail("No longer a member of the token's organisation, or it's suspended");
                 }
             };
         });

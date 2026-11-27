@@ -1,8 +1,8 @@
 # LibreSharp WolverineFx + React Template
 
 A `dotnet new` template pairing a [WolverineFx](https://wolverinefx.net/) backend (HTTP
-endpoints + message bus) with a React ([Vite](https://vite.dev/) + TypeScript + Tailwind CSS)
-frontend, built as a single deployable ASP.NET Core host.
+endpoints + message bus) with a React ([Vite](https://vite.dev/) + TypeScript + Tailwind CSS +
+[shadcn/ui](https://ui.shadcn.com/)) frontend, built as a single deployable ASP.NET Core host.
 
 Part of [LibreSharp](https://libresharp.github.io), which collects free alternatives to .NET
 packages that went commercial. This template does the jobs often given to MediatR (in-process
@@ -35,7 +35,7 @@ dotnet new install LibreSharp.Templates.WolverineFxReact
 | To | Run |
 |---|---|
 | Update to the latest version | `dotnet new update` |
-| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.4.0` |
+| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.4.1` |
 | See the template's options | `dotnet new wolverine-react --help` |
 | Uninstall | `dotnet new uninstall LibreSharp.Templates.WolverineFxReact` |
 
@@ -43,6 +43,16 @@ Updating the template only affects projects you create afterwards.
 
 To try unreleased changes, install from a clone of this repository instead:
 `dotnet new install ./` (run `dotnet new uninstall ./` to remove it).
+
+### Changes in 0.4.1
+
+- **Billing and a back office** with `--Auth saas`: plans, a reverse trial, limits and Stripe
+  subscriptions, and admin pages for organisations, feature flags, an audit log and failed
+  messages. The pricing page is public and pre-rendered.
+- **shadcn/ui and dark mode:** every page is built from shadcn/ui components and the theme's
+  colours, and follows the operating system's light or dark setting.
+- **With accounts, the admin page is now a back office** with sections (`/admin/...`), and the
+  user menu is a dropdown.
 
 ### Changes in 0.4.0
 
@@ -84,7 +94,7 @@ invitations) land in Mailpit at http://localhost:8025.
 | Parameter | Values | Default | Effect |
 |---|---|---|---|
 | `--Persistence` | `marten` \| `efcore` | `marten` | Document DB/event sourcing over PostgreSQL (Marten) vs. relational EF Core over PostgreSQL |
-| `--Auth` | `none` \| `identity` \| `saas` | `none` | `identity` adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles and an admin page, invitations, Google/GitHub sign-in and passkeys. `saas` adds organisations on top: data belongs to an organisation, with members, roles (Owner, Admin, Member), email invitations and a switcher |
+| `--Auth` | `none` \| `identity` \| `saas` | `none` | `identity` adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles, a back office (users, audit log, failed messages), invitations, Google/GitHub sign-in and passkeys. `saas` adds organisations on top: data belongs to an organisation, with members, roles (Owner, Admin, Member), email invitations and a switcher; plans, trials, limits and Stripe billing; and a back office for organisations and feature flags |
 | `--IncludeTests` | `true` \| `false` | `true` | Includes the `tests/` project(s) |
 
 Example:
@@ -126,8 +136,10 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
 
 ### Frontend
 
-- **React, Vite, TypeScript and Tailwind CSS**, with an app shell (header, user menu, home page,
-  footer, not-found page).
+- **React, Vite, TypeScript, Tailwind CSS and [shadcn/ui](https://ui.shadcn.com/)** (MIT), with
+  an app shell (header, user menu, home page, footer, not-found page). Every page is built from
+  shadcn/ui components (they're the app's own files, in `components/ui`) and the theme's
+  colours, with **dark mode** that follows the operating system and needs no script.
 - **React Router** (framework mode, as a single-page app) with real URLs; with accounts,
   signed-out users are sent to `/login` and back to the page they wanted.
 - **Pre-rendered public pages:** the home page is real HTML at build time, so search engines and
@@ -153,9 +165,11 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
 - **Account settings:** display name, email (after confirming the new one), password, passkeys,
   linked Google/GitHub accounts, and account deletion (which deletes the user's data through an
   `AccountDeleted` message each feature handles).
-- **Roles and an admin page** (`/admin`): search users, change roles, lock and unlock accounts,
-  and invite people by email. The first admins come from configuration, and registration can be
-  made invitation-only.
+- **Roles and a back office** (`/admin`): search users, change roles, lock and unlock accounts,
+  end a user's sessions, resend confirmation emails, and invite people by email; an **audit log**
+  of every admin action; and **failed messages** (Wolverine's dead-letter queue) to replay or
+  discard. The first admins come from configuration, and registration can be made
+  invitation-only.
 - **Sign-in with Google and GitHub**, each turned on by setting its client ID and secret.
 - **Passkeys** with ASP.NET Core Identity's own WebAuthn support: add them in Settings, then log
   in without a password.
@@ -175,6 +189,28 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
   organisation, so the app can't be used to send spam.
 - **Deleting an organisation** deletes its data through an `OrganisationDeleted` message that
   each feature handles for that tenant, published in the same transaction as the deletion.
+
+### Billing (`--Auth saas`)
+
+- **A plan catalogue** in one place (`Billing/Plans.cs`): prices per currency, features and
+  limits, with versions so existing customers keep their price ("grandfathering"). The public
+  **pricing page** is pre-rendered from it.
+- **A reverse trial:** new organisations get the top plan for 14 days, then the free plan.
+- **Entitlements:** one check for "can this organisation use feature X?" and "how much of limit
+  Y is left?", in Wolverine `Before` methods (402 Payment Required) and in the client to show or
+  hide features and upgrade prompts. Features are feature flags
+  ([Microsoft.FeatureManagement](https://github.com/microsoft/FeatureManagement-Dotnet), MIT).
+  Limits count what exists (open Todos, members) or use per billing period (reminders a month),
+  with a warning at 80%. A downgrade never deletes data.
+- **Stripe subscriptions** ([Stripe.net](https://github.com/stripe/stripe-dotnet), Apache-2.0):
+  Checkout and the customer portal; signed webhooks stored once and handled from a durable
+  Wolverine queue, keeping a local copy of billing state so the app never asks Stripe which plan
+  an organisation is on; and `dotnet run -- stripe-prices` to create the prices from the
+  catalogue. Payments sit behind `IPaymentProvider`, so another provider can replace Stripe.
+- **A back office for customers:** a dashboard (monthly recurring revenue, organisations,
+  trials ending, failed payments), organisations (members, plan, usage, invoices with Stripe
+  links; give a plan until a date or extend a trial, suspend, notes, delete) and feature flags
+  for everyone, a plan or one organisation.
 
 ### Security
 
@@ -205,7 +241,8 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
 - **Client unit tests** (always included): Vitest and React Testing Library with the API faked
   by [MSW](https://mswjs.io/), next to the code they test, covering the Todo page and, with
   accounts, the token refresh, every sign-in page, route guards, Settings and the admin
-  page, and with `saas` the organisation switcher, the organisation page and the join page.
+  page, and with `saas` the organisation switcher, the organisation page, the join page, the
+  pricing page, plans and limits, and the back office.
 
 With `--IncludeTests true` (the default):
 
@@ -213,7 +250,8 @@ With `--IncludeTests true` (the default):
   Chrome, against the running app: Todos with live updates, the pre-rendered pages and search
   engine files and, with accounts, sign-up with the real confirmation email (read from Mailpit),
   settings, password reset, lockout, the admin page and invitations, passkeys with Chrome's
-  virtual authenticator, and (with `saas`) a teammate joining from an invitation email. CI runs
+  virtual authenticator, and (with `saas`) a teammate joining from an invitation email and an
+  admin giving an organisation a plan in the back office. CI runs
   them against each published combination.
 
 - A `tests/` project (xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers) that
@@ -223,11 +261,15 @@ With `--IncludeTests true` (the default):
   checks, security headers, and the Marten event stream.
 - With accounts: registration and email confirmation (following the links in captured
   emails), login, token rotation and reuse detection, account settings, password reset, lockout,
-  rate limiting, roles and the admin endpoints, invitations, Google/GitHub sign-in rules, and
-  passkeys (with a software authenticator, so Identity's real WebAuthn checks run).
+  rate limiting, roles and the admin endpoints (with the audit log and failed messages),
+  invitations, Google/GitHub sign-in rules, and passkeys (with a software authenticator, so
+  Identity's real WebAuthn checks run).
 - With `saas`: organisations kept apart, switching, roles and the always-an-owner rule (including
   changes at the same moment), removal taking effect at once, invitations and their limits,
-  deleting an organisation's data, and organisation-wide realtime updates.
+  deleting an organisation's data, and organisation-wide realtime updates; trials, features and
+  limits (including requests at the same moment), downgrades, checkout and webhooks with a fake
+  payment provider, Stripe's signature checks, and the back office (suspension, feature flags,
+  replaying a failed message).
 
 ### Developer experience
 

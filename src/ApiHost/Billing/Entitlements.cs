@@ -31,6 +31,7 @@ public class Entitlements(
     TimeProvider clock)
 {
     private readonly Dictionary<Guid, BillingState> _states = [];
+    private IReadOnlyList<FeatureOverride>? _overrides;
 
     public async Task<BillingState> StateAsync(Guid organisationId, CancellationToken cancellationToken)
     {
@@ -49,12 +50,17 @@ public class Entitlements(
     }
 
     // Forgets the cached state, after the organisation's billing account changes.
-    public void Refresh(Guid organisationId) => _states.Remove(organisationId);
+    public void Refresh(Guid organisationId)
+    {
+        _states.Remove(organisationId);
+        _overrides = null;
+    }
 
     public async Task<bool> IsEnabledAsync(Guid organisationId, string feature, CancellationToken cancellationToken)
     {
         var state = await StateAsync(organisationId, cancellationToken);
-        return await featureManager.IsEnabledAsync(feature, new OrganisationFeatureContext(organisationId, state.Plan));
+        _overrides ??= await store.FeatureOverridesAsync(cancellationToken);
+        return await featureManager.IsEnabledAsync(feature, new OrganisationFeatureContext(organisationId, state.Plan, _overrides));
     }
 
     public async Task<LimitUsage> UsageAsync(Guid organisationId, string limit, CancellationToken cancellationToken)

@@ -54,7 +54,7 @@ export async function logIn(page: Page, email: string, pass = password) {
 // Opens a signed-in page through the header's navigation. (page.goto would reload the app, and a
 // reload signs out: tokens are kept in memory only.)
 export async function openFromNav(page: Page, name: 'Todos' | 'Settings' | 'Admin') {
-  await page.getByRole('navigation').getByRole('link', { name, exact: true }).click()
+  await page.getByRole('banner').getByRole('navigation').getByRole('link', { name, exact: true }).click()
 }
 
 export async function logOut(page: Page) {
@@ -71,4 +71,24 @@ export async function signUp(page: Page, email = newEmail()): Promise<string> {
   await logIn(page, email)
   await expect(page.getByRole('heading', { name: 'Todos' })).toBeVisible()
   return email
+}
+
+// The admin: the app must list E2E_ADMIN_EMAIL in Accounts:AdminEmails. Against the Development
+// app, use the demo user: E2E_ADMIN_EMAIL=demo@example.com E2E_ADMIN_PASSWORD=Demo123!
+export const adminEmail = process.env.E2E_ADMIN_EMAIL ?? 'admin-e2e@example.com'
+export const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? password
+
+// Logs in as the admin, signing up first if the account doesn't exist yet (the first test to run).
+export async function logInAsAdmin(page: Page) {
+  await page.goto('/login')
+  await page.getByPlaceholder('Email').fill(adminEmail)
+  await page.getByPlaceholder('Password').fill(adminPassword)
+  await page.getByRole('button', { name: 'Log in', exact: true }).click()
+  const loggedIn = await page
+    .getByRole('heading', { name: 'Todos' })
+    .waitFor({ timeout: 5_000 })
+    .then(() => true, () => false)
+  if (!loggedIn) {
+    await signUp(page, adminEmail)
+  }
 }

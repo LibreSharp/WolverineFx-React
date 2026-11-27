@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { linkFromEmail, newEmail, openFromNav, password, signUp } from './helpers'
+import { linkFromEmail, logInAsAdmin, newEmail, openFromNav, password, signUp } from './helpers'
 
 // --Auth saas only (excluded otherwise by template.json): an owner creates an organisation and
 // invites a teammate by email; the teammate creates their account from the link, and they share
@@ -39,4 +39,23 @@ test('a teammate joins from the invitation email and shares the organisation’s
   await personal.selectOption(ownOrganisation!)
   await expect(owner.getByText('Loading…')).toBeHidden()
   await expect(owner.getByText(title)).toHaveCount(0)
+})
+
+test('an admin finds an organisation in the back office and gives it a plan', async ({ browser }) => {
+  const owner = await (await browser.newContext()).newPage()
+  const email = await signUp(owner)
+
+  const admin = await (await browser.newContext()).newPage()
+  await logInAsAdmin(admin)
+  await openFromNav(admin, 'Admin')
+  await expect(admin.getByText('Monthly recurring revenue')).toBeVisible()
+  await admin.getByRole('navigation', { name: 'Admin' }).getByRole('link', { name: 'Organisations' }).click()
+  // A new account's organisation is named after its email.
+  await admin.getByPlaceholder('Search by name').fill(email)
+  await admin.getByRole('link', { name: email }).click()
+  await expect(admin.getByRole('heading', { name: email })).toBeVisible()
+
+  await admin.getByRole('button', { name: 'Change the trial' }).click()
+  await expect(admin.getByText(/Done: Pro until/)).toBeVisible()
+  await expect(admin.getByRole('cell', { name: 'organisation.grant-plan' })).toBeVisible()
 })

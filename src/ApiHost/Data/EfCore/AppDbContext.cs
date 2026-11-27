@@ -1,5 +1,6 @@
 using ApiHost.Features.Todos;
 #if (Identity)
+using ApiHost.Features.Admin;
 using ApiHost.Identity;
 #endif
 #if (Saas)
@@ -32,6 +33,9 @@ public class AppDbContext : DbContext
     // ASP.NET Core Data Protection keys (they protect password reset tokens), shared by every
     // instance of the app and kept across restarts. See EfCoreIdentityExtensions.
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
+
+    // The back office's audit log (Features/Admin/AuditLog.cs).
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 #endif
 #if (Saas)
 
@@ -48,6 +52,8 @@ public class AppDbContext : DbContext
     public DbSet<BillingInvoice> BillingInvoices => Set<BillingInvoice>();
 
     public DbSet<PaymentEventRecord> PaymentEvents => Set<PaymentEventRecord>();
+
+    public DbSet<FeatureOverride> FeatureOverrides => Set<FeatureOverride>();
 #endif
 
 #if (Identity)
@@ -64,8 +70,27 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Todo>()
             .HasIndex(t => t.OwnerId);
+
+        modelBuilder.Entity<AuditEntry>(entry =>
+        {
+            entry.HasIndex(e => e.At);
+            entry.HasIndex(e => e.TargetId);
+            entry.Property(e => e.ActorId).HasMaxLength(450);
+            entry.Property(e => e.ActorEmail).HasMaxLength(256);
+            entry.Property(e => e.Action).HasMaxLength(50);
+            entry.Property(e => e.TargetType).HasMaxLength(50);
+            entry.Property(e => e.TargetId).HasMaxLength(4000);
+        });
 #if (Saas)
 
+        ConfigureOrganisationsAndBilling(modelBuilder);
+#endif
+    }
+#if (Saas)
+
+    // Organisations (not tenanted: they are the tenants) and billing.
+    private static void ConfigureOrganisationsAndBilling(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<Organisation>().Property(o => o.Name).HasMaxLength(OrganisationNames.MaxLength);
         modelBuilder.Entity<Membership>().HasIndex(m => m.UserId);
         modelBuilder.Entity<Membership>().HasIndex(m => new { m.OrganisationId, m.UserId }).IsUnique();
@@ -103,13 +128,21 @@ public class AppDbContext : DbContext
             invoice.Property(i => i.Currency).HasMaxLength(3);
             invoice.HasIndex(i => i.OrganisationId);
         });
+        modelBuilder.Entity<FeatureOverride>(featureOverride =>
+        {
+            featureOverride.Property(o => o.Id).HasMaxLength(200);
+            featureOverride.Property(o => o.Feature).HasMaxLength(100);
+            featureOverride.Property(o => o.Scope).HasMaxLength(20);
+            featureOverride.Property(o => o.ScopeKey).HasMaxLength(50);
+        });
+        modelBuilder.Entity<Organisation>().Property(o => o.SuspensionReason).HasMaxLength(500);
         modelBuilder.Entity<PaymentEventRecord>(paymentEvent =>
         {
             paymentEvent.ToTable("PaymentEvents");
             paymentEvent.Property(e => e.Id).HasMaxLength(300);
             paymentEvent.Property(e => e.Type).HasMaxLength(100);
         });
-#endif
     }
+#endif
 #endif
 }

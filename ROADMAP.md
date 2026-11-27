@@ -237,7 +237,7 @@ Then the option:
 - [x] **Team invitations** by email, to existing users and to new ones (who create an account
       from the invitation).
 
-### v0.4.1: billing and a full back office
+### v0.4.1: billing and a full back office (done, not yet released)
 
 Billing, inside `--Auth saas` (no new options):
 
@@ -269,18 +269,18 @@ Admin back office. The admin page manages users only today; the bar for a full b
 the one in the [template comparison](https://libresharp.github.io/templates/) (PlatformPlatform:
 revenue, accounts, users, invoices and feature flags):
 
-- [ ] **Dashboard:** sign-ups, active organisations, monthly recurring revenue, trials ending and
+- [x] **Dashboard:** sign-ups (as new organisations: every new account gets one), active organisations, monthly recurring revenue, trials ending and
       failed payments.
-- [ ] **Organisations:** search; members; plan; usage against limits; invoices; extend a trial or
+- [x] **Organisations:** search; members; plan; usage against limits; invoices; extend a trial or
       give a plan for free; suspend and delete; internal notes.
-- [ ] **Users:** as today, plus each user's organisations, ending their sessions, and resending
+- [x] **Users:** as today, plus each user's organisations, ending their sessions, and resending
       the confirmation email.
-- [ ] **Subscriptions and invoices:** read-only, with links to the Stripe dashboard. Refunds stay
+- [x] **Subscriptions and invoices:** read-only, with links to the Stripe dashboard. Refunds stay
       in Stripe.
-- [ ] **Feature flags:** turn features on globally, per plan or per organisation.
-- [ ] **Audit log:** every admin action (who changed what, and when). Needed before "sign in as a
+- [x] **Feature flags:** turn features on globally, per plan or per organisation.
+- [x] **Audit log:** every admin action (who changed what, and when). Needed before "sign in as a
       user" is ever added.
-- [ ] **Failed messages:** view and replay Wolverine's dead-letter queue, such as an email that
+- [x] **Failed messages:** view and replay Wolverine's dead-letter queue, such as an email that
       failed or a Stripe webhook that errored. JasperFx sells monitoring tooling for this; a small
       free page fits this template's purpose.
 

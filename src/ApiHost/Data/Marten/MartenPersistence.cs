@@ -1,5 +1,6 @@
 using ApiHost.Features.Todos;
 #if (Identity)
+using ApiHost.Features.Admin;
 using ApiHost.Identity;
 #endif
 #if (Saas)
@@ -41,6 +42,11 @@ public static class MartenPersistence
 
             opts.Schema.For<Todo>()
                 .Index(t => t.OwnerId);
+
+            // The back office's audit log (Features/Admin/AuditLog.cs).
+            opts.Schema.For<AuditEntry>()
+                .Index(e => e.At)
+                .Index(e => e.TargetId);
 #endif
 #if (Saas)
 
@@ -63,6 +69,7 @@ public static class MartenPersistence
             opts.Schema.For<BillingAccount>().Index(a => a.CustomerId!);
             opts.Schema.For<BillingInvoice>().Index(i => i.OrganisationId);
             opts.Schema.For<PaymentEventRecord>();
+            opts.Schema.For<FeatureOverride>();
             var usage = new Table(new PostgresqlObjectName(opts.DatabaseSchemaName, BillingStore.UsageTable, SchemaUtils.IdentifierUsage.General));
             usage.AddColumn<Guid>("organisation_id").AsPrimaryKey();
             usage.AddColumn<string>("limit_name").AsPrimaryKey();

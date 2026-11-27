@@ -13,6 +13,10 @@ public interface IOrganisationStore
 
     Task<Membership?> FindMembershipAsync(Guid organisationId, string userId, CancellationToken cancellationToken);
 
+    // Whether the user is a member of the organisation and it isn't suspended: checked on every
+    // request (OrganisationSetup), in one query.
+    Task<bool> CanWorkInAsync(Guid organisationId, string userId, CancellationToken cancellationToken);
+
     // Every membership of the organisation, including any whose account was just deleted.
     Task<IReadOnlyList<Membership>> MembershipsOfOrganisationAsync(Guid organisationId, CancellationToken cancellationToken);
 
