@@ -1,8 +1,17 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useAuthOptions } from '../auth/authQueries'
 import { useNavigate } from 'react-router'
 import { setTokens } from '../../lib/api/authTokens'
 import type { HomeLocationState } from '../../components/HomePage'
-import { useChangePassword, useDeleteAccount, useMe, useUpdateProfile } from './accountQueries'
+import {
+  startLinkingExternalLogin,
+  useChangePassword,
+  useDeleteAccount,
+  useExternalLogins,
+  useMe,
+  useRemoveExternalLogin,
+  useUpdateProfile,
+} from './accountQueries'
 
 const inputClass = 'w-full rounded border border-gray-300 px-3 py-2'
 const buttonClass = 'rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50'
@@ -120,6 +129,70 @@ function PasswordSection() {
   )
 }
 
+// The API sends the browser back here after linking a provider, with the result in the URL
+// fragment (#linked=Google or #error=...).
+function readLinkResult(): { linked?: string; error?: string } {
+  const fragment = new URLSearchParams(window.location.hash.slice(1))
+  return { linked: fragment.get('linked') ?? undefined, error: fragment.get('error') ?? undefined }
+}
+
+function SignInMethodsSection() {
+  const options = useAuthOptions()
+  const logins = useExternalLogins()
+  const remove = useRemoveExternalLogin()
+  const [linkResult] = useState(readLinkResult)
+  // Then remove it from the address bar, so a reload doesn't show it again.
+  useEffect(() => {
+    if (window.location.hash) window.history.replaceState(null, '', window.location.pathname)
+  }, [])
+  const [linkError, setLinkError] = useState<string | null>(null)
+  const providers = options.data?.externalProviders ?? []
+
+  if (providers.length === 0 && (logins.data?.length ?? 0) === 0) return null
+
+  const linked = logins.data ?? []
+  const unlinked = providers.filter((p) => !linked.some((l) => l.provider === p.name))
+
+  return (
+    <Section title="Sign-in methods">
+      <ul className="mb-4 space-y-2">
+        {linked.map((login) => (
+          <li key={login.provider} className="flex items-center justify-between text-sm">
+            <span>{login.displayName}</span>
+            <button
+              type="button"
+              disabled={remove.isPending}
+              onClick={() => remove.mutate(login.provider)}
+              className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+            >
+              Remove
+            </button>
+          </li>
+        ))}
+        {linked.length === 0 && <li className="text-sm text-gray-500">No providers linked.</li>}
+      </ul>
+      <div className="flex flex-wrap gap-2">
+        {unlinked.map((provider) => (
+          <button
+            key={provider.name}
+            type="button"
+            onClick={() => startLinkingExternalLogin(provider.name).catch((e: Error) => setLinkError(e.message))}
+            className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100"
+          >
+            Link {provider.displayName}
+          </button>
+        ))}
+      </div>
+      <div className="mt-3">
+        <Result
+          error={remove.error ?? (linkError || linkResult.error ? new Error(linkError ?? linkResult.error) : null)}
+          success={linkResult.linked && `${linkResult.linked} is now linked: you can use it to log in.`}
+        />
+      </div>
+    </Section>
+  )
+}
+
 function DeleteAccountSection() {
   const deleteAccount = useDeleteAccount()
   const navigate = useNavigate()
@@ -164,6 +237,7 @@ export function SettingsPage() {
       <h1 className="text-2xl font-semibold">Settings</h1>
       <ProfileSection />
       <PasswordSection />
+      <SignInMethodsSection />
       <DeleteAccountSection />
     </div>
   )

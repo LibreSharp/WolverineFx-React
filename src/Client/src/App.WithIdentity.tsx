@@ -7,6 +7,7 @@ import { useMe } from './features/account/accountQueries'
 import { SettingsPage } from './features/account/SettingsPage'
 import { UserMenu } from './features/account/UserMenu'
 import { AcceptInvitationPage } from './features/auth/AcceptInvitationPage'
+import { ExternalLoginPage } from './features/auth/ExternalLoginPage'
 import { useAuthOptions } from './features/auth/authQueries'
 import { AuthProvider } from './features/auth/AuthContext'
 import { ConfirmEmailChangePage, ConfirmEmailPage } from './features/auth/ConfirmEmailPage'
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
       { path: 'confirm-email', element: <ConfirmEmailPage /> },
       { path: 'confirm-email-change', element: <ConfirmEmailChangePage /> },
       { path: 'accept-invitation', element: <AcceptInvitationPage /> },
+      { path: 'external-login', element: <ExternalLoginPage /> },
       {
         // Signed-out pages; a signed-in user is sent on to the Todos.
         element: <GuestOnly />,

@@ -65,6 +65,7 @@ src/ApiHost/
   Identity/               Users, JWT tokens, refresh tokens, auth and account endpoints
   Identity/Email/         Account emails: messages, their handler, and the SMTP sender (MailKit)
   Identity/Admin/         Admin endpoints: users, roles, locks and invitations
+  Identity/External/      Sign-in with Google and GitHub
 <!--#endif -->
 src/Client/src/
   App.tsx                 Routes (React Router)
@@ -140,6 +141,20 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   people: an invitation creates the account and emails a link to choose a password. Accounts
   whose email is in `Accounts:AdminEmails` become admins once their email is confirmed. Set
   `Accounts:AllowRegistration` to `false` to make accounts invitation-only.
+- **Sign-in with Google and GitHub** (`Identity/External/`), each switched on by setting its
+  client ID and secret. The provider must vouch for the email address: a verified email signs
+  into (and links to) the account with that email, or creates one. GitHub's primary email is
+  used only if GitHub has verified it. If an account with that email was registered but never
+  confirmed, its password is removed first, so whoever registered it can't get in. After the
+  provider, the API redirects to `/external-login` with a refresh token in the URL fragment
+  (never sent to servers), which the client swaps for new tokens at once. Settings lists, links
+  and removes providers; the last way to sign in can't be removed.
+
+  To set one up, create an OAuth app with the provider and register its callback URL:
+  `https://your-domain/api/auth/external/signin-google` (or `signin-github`); in Development,
+  `http://localhost:5133/api/auth/external/signin-google`. Then set the settings below; in
+  Development keep them out of source control with user secrets: in `src/ApiHost`, run
+  `dotnet user-secrets init` once, then `dotnet user-secrets set Authentication:Google:ClientId ...`.
 <!--#endif -->
 
 ## Adding a feature
@@ -263,6 +278,8 @@ Configure it with environment variables (or any ASP.NET Core configuration sourc
 | `Email__Smtp__Host`, `Email__Smtp__Port`, `Email__Smtp__UserName`, `Email__Smtp__Password`, `Email__Smtp__From` | Your email service's SMTP settings, for account emails |
 | `Accounts__AdminEmails__0` | Your email: that account becomes an admin once its email is confirmed (more: `__1`, `__2`, ...) |
 | `Accounts__AllowRegistration` | `false` to allow only invited people to create accounts (default `true`) |
+| `Authentication__Google__ClientId`, `Authentication__Google__ClientSecret` | Optional: turns on "Continue with Google" |
+| `Authentication__GitHub__ClientId`, `Authentication__GitHub__ClientSecret` | Optional: turns on "Continue with GitHub" |
 | `Email__Smtp__Security` | `Auto` (default: TLS when the server offers it), `StartTls`, `SslOnConnect` (port 465) or `None` |
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still

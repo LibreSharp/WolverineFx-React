@@ -13,6 +13,8 @@ updates:
         patterns: ["Microsoft.*", "System.*", "Npgsql*"]
       opentelemetry:
         patterns: ["OpenTelemetry*"]
+      oauth:
+        patterns: ["AspNet.Security.OAuth.*"]
       tests:
         patterns: ["xunit*", "Alba", "Testcontainers*", "coverlet*", "Microsoft.NET.Test.Sdk"]
 

@@ -46,6 +46,8 @@
 <!--#if (Identity) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="MailKit" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" />
+    <PackageReference Include="AspNet.Security.OAuth.GitHub" />
 <!--#endif -->
 <!--#if (Identity && IsEfCore) -->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />

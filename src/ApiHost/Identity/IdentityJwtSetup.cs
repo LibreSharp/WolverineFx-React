@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ApiHost.Identity.Email;
+using ApiHost.Identity.External;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -44,6 +45,11 @@ public static class IdentityJwtSetup
 
         services.AddJwtBearerAuthentication(jwtOptions);
 
+        // Google and GitHub sign-in, each only when configured.
+        services.AddAuthentication().AddExternalProviders(configuration);
+        services.AddScoped<ExternalLoginService>();
+        services.AddSingleton<ExternalLinkTickets>();
+
         services.AddAuthorization();
 
         // Limits login, registration and password attempts per client IP (see AuthRateLimiting).
@@ -57,6 +63,7 @@ public static class IdentityJwtSetup
             opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<SignInManager<ApplicationUser>>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<TokenIssuer>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<ExternalLoginService>();
         });
 
         // A ready-made login for local development only.

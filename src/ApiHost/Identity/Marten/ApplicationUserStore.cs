@@ -14,6 +14,7 @@ namespace ApiHost.Identity.Marten;
 // - IUserLockoutStore: account lockout after repeated failed logins, and locking by an admin.
 // - IUserRoleStore: UserManager's role methods (AddToRoleAsync, GetRolesAsync, ...), keeping the
 //   role names in the user document's RoleClaims, where Marten.AspNetIdentity puts them.
+// - IUserLoginStore: external sign-in (Google, GitHub), kept in the user document's Logins.
 //
 // Marten.AspNetIdentity has no nullable annotations, so its FindBy...Async methods don't match
 // Identity's (which may return null); the warning is about annotations only.
@@ -22,7 +23,8 @@ public class ApplicationUserStore
     : MartenUserStore<ApplicationUser>,
       IUserSecurityStampStore<ApplicationUser>,
       IUserLockoutStore<ApplicationUser>,
-      IUserRoleStore<ApplicationUser>
+      IUserRoleStore<ApplicationUser>,
+      IUserLoginStore<ApplicationUser>
 {
     // The base class keeps its own reference privately.
     private readonly IDocumentStore _documentStore;
@@ -109,6 +111,33 @@ public class ApplicationUserStore
 
         await using var session = _documentStore.QuerySession();
         return (await session.Query<ApplicationUser>().Where(u => u.RoleClaims.Contains(roleName)).ToListAsync(cancellationToken)).ToList();
+    }
+
+    public Task AddLoginAsync(ApplicationUser user, UserLoginInfo login, CancellationToken cancellationToken)
+    {
+        user.Logins.Add(new StoredLogin(login.LoginProvider, login.ProviderKey, login.ProviderDisplayName));
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveLoginAsync(ApplicationUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
+    {
+        foreach (var login in user.Logins.Where(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey).ToList())
+        {
+            user.Logins.Remove(login);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<IList<UserLoginInfo>> GetLoginsAsync(ApplicationUser user, CancellationToken cancellationToken)
+        => Task.FromResult<IList<UserLoginInfo>>(
+            [.. user.Logins.Select(l => new UserLoginInfo(l.LoginProvider, l.ProviderKey, l.ProviderDisplayName))]);
+
+    public async Task<ApplicationUser?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+    {
+        await using var session = _documentStore.QuerySession();
+        return await session.Query<ApplicationUser>()
+            .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey), cancellationToken);
     }
 
     private async Task<string?> FindRoleNameAsync(string normalizedRoleName, CancellationToken cancellationToken)

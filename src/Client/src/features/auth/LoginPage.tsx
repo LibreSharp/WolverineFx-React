@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router'
 import { useAuthOptions } from './authQueries'
+import { ExternalProviderButtons } from './ExternalProviderButtons'
 import { LoginForm } from './LoginForm'
 import type { AuthLocationState } from './routeGuards'
 
@@ -16,6 +17,7 @@ export function LoginPage() {
         </p>
       )}
       <LoginForm />
+      <ExternalProviderButtons />
       <p className="text-center text-sm text-gray-500">
         <Link to="/forgot-password" className="text-indigo-600 hover:underline">
           Forgot your password?

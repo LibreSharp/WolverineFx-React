@@ -4,6 +4,106 @@
  */
 
 export interface paths {
+    "/api/auth/external/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_auth_external_provider
+         * @description GET_api_auth_external_provider
+         */
+        get: operations["GET_api_auth_external_provider"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/external/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_auth_external_callback
+         * @description GET_api_auth_external_callback
+         */
+        get: operations["GET_api_auth_external_callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/external-logins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_account_external_logins
+         * @description GET_api_account_external_logins
+         */
+        get: operations["GET_api_account_external_logins"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/external-logins/link-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_account_external_logins_link_ticket
+         * @description POST_api_account_external_logins_link_ticket
+         */
+        post: operations["POST_api_account_external_logins_link_ticket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/external-logins/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * DELETE_api_account_external_logins_provider
+         * @description DELETE_api_account_external_logins_provider
+         */
+        delete: operations["DELETE_api_account_external_logins_provider"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/accept-invitation": {
         parameters: {
             query?: never;
@@ -500,6 +600,7 @@ export interface components {
         };
         AuthOptionsResponse: {
             allowRegistration: boolean;
+            externalProviders: components["schemas"]["ExternalProvider"][];
         };
         ChangePasswordRequest: {
             currentPassword: string;
@@ -520,6 +621,10 @@ export interface components {
         DeleteAccountRequest: {
             password: string;
         };
+        ExternalProvider: {
+            name: string;
+            displayName: string;
+        };
         ForgotPasswordRequest: {
             email: string;
         };
@@ -539,6 +644,13 @@ export interface components {
             roles: null | string[];
         };
         IResult: Record<string, never>;
+        LinkedLogin: {
+            provider: string;
+            displayName: string;
+        };
+        LinkTicketResponse: {
+            ticket: string;
+        };
         LoginRequest: {
             email: string;
             password: string;
@@ -557,6 +669,12 @@ export interface components {
             email: string;
             displayName: null | string;
             roles: string[];
+        };
+        RedirectHttpResult: {
+            permanent?: boolean;
+            preserveMethod?: boolean;
+            url?: string;
+            acceptLocalUrlOnly?: boolean;
         };
         RefreshRequest: {
             refreshToken: string;
@@ -619,6 +737,152 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    GET_api_auth_external_provider: {
+        parameters: {
+            query?: {
+                link?: string;
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_auth_external_callback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RedirectHttpResult"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_account_external_logins: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkedLogin"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_account_external_logins_link_ticket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkTicketResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DELETE_api_account_external_logins_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     POST_api_auth_accept_invitation: {
         parameters: {
             query?: never;

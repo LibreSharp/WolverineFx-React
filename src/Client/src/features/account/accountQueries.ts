@@ -5,6 +5,7 @@ import { problemMessage } from '../../lib/api/problemDetails'
 
 export const accountKeys = {
   me: ['me'] as const,
+  externalLogins: ['external-logins'] as const,
 }
 
 // The signed-in user's profile (id, email, display name).
@@ -52,4 +53,38 @@ export function useDeleteAccount() {
       if (!response.ok) throw new Error(problemMessage(error, 'Could not delete your account.'))
     },
   })
+}
+
+// The Google/GitHub logins linked to this account.
+export function useExternalLogins() {
+  return useQuery({
+    queryKey: accountKeys.externalLogins,
+    queryFn: async () => {
+      const { data, response } = await api.GET('/api/account/external-logins')
+      if (!response.ok || !data) throw new Error('Could not load your sign-in methods.')
+      return data
+    },
+  })
+}
+
+export function useRemoveExternalLogin() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (provider: string) => {
+      const { error, response } = await api.DELETE('/api/account/external-logins/{provider}', {
+        params: { path: { provider } },
+      })
+      if (!response.ok) throw new Error(problemMessage(error, 'Could not remove it.'))
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: accountKeys.externalLogins }),
+  })
+}
+
+// Leaves the app to link a provider: a full-page navigation can't send the access token, so ask
+// for a short-lived ticket first (see ExternalLinkTickets in the API). The provider sends the
+// browser back to /settings#linked=... or /settings#error=...
+export async function startLinkingExternalLogin(provider: string) {
+  const { data } = await api.POST('/api/account/external-logins/link-ticket')
+  if (!data) throw new Error('Could not start linking.')
+  window.location.assign(`/api/auth/external/${encodeURIComponent(provider)}?link=${encodeURIComponent(data.ticket)}`)
 }

@@ -119,7 +119,12 @@ billing records but no payment provider (see the
       The first admins come from `Accounts:AdminEmails`; `Accounts:AllowRegistration=false`
       makes accounts invitation-only. Marten's user store gained `IUserRoleStore`, so both
       persistence options use `UserManager`'s role methods.
-- [ ] **External sign-in** with Google and GitHub.
+- [x] **External sign-in** with Google and GitHub (Microsoft's Google handler, MIT, and
+      AspNet.Security.OAuth.GitHub, Apache-2.0), each on only when configured. Only verified
+      emails sign in or link (GitHub's primary email is checked against its email list); an
+      unconfirmed account with that email loses its password first (pre-hijacking). The SPA
+      gets a refresh token in the URL fragment and rotates it at once. Marten's user store
+      gained `IUserLoginStore`.
 - [ ] **Passkeys** with ASP.NET Core Identity (added in .NET 10; confirm the API first).
 - [x] **Account lockout** after repeated failed logins: Identity's own lockout (5 attempts,
       15 minutes) through `SignInManager.CheckPasswordSignInAsync`; refresh tokens stop working

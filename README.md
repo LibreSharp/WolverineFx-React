@@ -120,6 +120,9 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 - **Roles and an admin page** (`--Identity true`): an Admin role, a `/admin` page to search
   users, change roles, lock and unlock accounts, and invite people by email; admins come from
   `Accounts:AdminEmails`, and registration can be made invitation-only.
+- **Sign-in with Google and GitHub** (`--Identity true`), each on when its client ID and secret
+  are set: verified emails only, linking and unlinking in Settings, and protection against
+  account pre-hijacking.
 - **Account lockout** (`--Identity true`): Identity's lockout after five failed logins (15
   minutes), which also stops refresh tokens; a password reset lifts it.
 - **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With

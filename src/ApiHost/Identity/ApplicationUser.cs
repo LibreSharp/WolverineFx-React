@@ -12,7 +12,12 @@ public class ApplicationUser : IdentityUser, IClaimsUser
 
     // Optional name shown in the app instead of the email address.
     public string? DisplayName { get; set; }
+
+    // External sign-ins (Google, GitHub) linked to this account; see ApplicationUserStore.
+    public IList<StoredLogin> Logins { get; set; } = new List<StoredLogin>();
 }
+
+public record StoredLogin(string LoginProvider, string ProviderKey, string? ProviderDisplayName);
 #else
 public class ApplicationUser : IdentityUser
 {
