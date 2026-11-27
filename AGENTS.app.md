@@ -27,6 +27,9 @@ Guidance for AI coding assistants working on ApiHost. See README.md for the full
 | Run the API | `docker compose up -d` then `dotnet run --project src/ApiHost` |
 | Run the client | `npm run dev` in `src/Client` |
 | Test the client | `npm test` in `src/Client` (`npm run test:watch` while working) |
+<!--#if (IncludeTests) -->
+| End-to-end tests (the app running) | `npm test` in `tests/e2e` (see README.md) |
+<!--#endif -->
 | Lint and type-check the client | `npm run lint` and `npm run build` in `src/Client` |
 | Regenerate the client's API types | `npm run gen:api` in `src/Client`, with the API running |
 <!--#if (IsEfCore) -->
@@ -106,6 +109,10 @@ scheduled messages can be played immediately with `PlayScheduledMessagesAsync`.
 Account emails are captured (`_fixture.Emails`); follow their links with `LinkQuery`. New
 endpoints must keep `EndpointSecurityTests` passing (login, roles, rate limiting).
 <!--#endif -->
+
+End-to-end tests in `tests/e2e/specs` use Playwright against the running app. Navigate with the
+app's own links after logging in: `page.goto` reloads the page, which signs out (tokens are in
+memory only).
 <!--#endif -->
 
 ## Don't

@@ -128,6 +128,9 @@
             "tests/ApiHost.Tests/AdminEndpointsTests.cs",
             "tests/ApiHost.Tests/ExternalLoginTests.cs",
             "tests/ApiHost.Tests/EndpointSecurityTests.cs",
+            "tests/e2e/specs/accounts.spec.ts",
+            "tests/e2e/specs/admin.spec.ts",
+            "tests/e2e/specs/passkeys.spec.ts",
             "tests/ApiHost.Tests/PasskeyTests.cs",
             "tests/ApiHost.Tests/SoftwarePasskey.cs",
             "tests/ApiHost.Tests/AuthRateLimitingTests.cs",
@@ -136,7 +139,7 @@
         },
         {
           "condition": "(Identity)",
-          "exclude": [ "src/Client/src/App.tsx", "src/ApiHost/ApiHost.http" ],
+          "exclude": [ "src/Client/src/App.tsx", "src/ApiHost/ApiHost.http", "tests/e2e/specs/todos.spec.ts" ],
           "rename": {
             "src/Client/src/App.WithIdentity.tsx": "src/Client/src/App.tsx",
             "src/ApiHost/ApiHost.WithIdentity.http": "src/ApiHost/ApiHost.http"

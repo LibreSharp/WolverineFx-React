@@ -81,6 +81,7 @@ src/Client/src/
   test/                   Unit test setup: the fake API (MSW) and render helpers
 <!--#if (IncludeTests) -->
 tests/ApiHost.Tests/        Integration tests against a real PostgreSQL
+tests/e2e/                  End-to-end tests in a real browser (Playwright)
 <!--#endif -->
 ```
 
@@ -220,6 +221,9 @@ any OpenTelemetry backend, such as Grafana, Honeycomb or a self-hosted Jaeger.
 | Run the tests (Docker must be running) | `dotnet test` |
 <!--#endif -->
 | Run the client's unit tests | `npm test` in `src/Client` (or `npm run test:watch`) |
+<!--#if (IncludeTests) -->
+| Run the end-to-end tests (the app running; see below) | `npm install` once, then `npm test` in `tests/e2e` |
+<!--#endif -->
 | Update the client's API types | `npm run gen:api` in `src/Client`, with the API running |
 | Lint the client | `npm run lint` in `src/Client` |
 <!--#if (IsEfCore) -->
@@ -266,6 +270,27 @@ invitation and external sign-in pages, route guards, Settings and the admin page
 <!--#else -->
 cover the Todo page and the API client.
 <!--#endif -->
+<!--#if (IncludeTests) -->
+
+The end-to-end tests (`tests/e2e`) drive the running app in Chrome with
+[Playwright](https://playwright.dev/), using the Chrome installed on your machine.
+<!--#if (Identity) -->
+They sign up and confirm accounts with the real emails in Mailpit, use Todos with live updates
+across tabs, change settings, reset a password, trip the lockout, use the admin page and
+invitations, and log in with a passkey (Chrome's virtual authenticator). To run them against
+the Development setup, start the API with a higher sign-in rate limit (every test comes from
+your machine) and the Vite dev server, then in `tests/e2e`:
+
+```bash
+Accounts__AuthAttemptsPerMinute=1000 dotnet run --project src/ApiHost   # in one terminal
+npm run dev                                                              # in src/Client
+E2E_BASE_URL=http://localhost:5173 E2E_ADMIN_EMAIL=demo@example.com E2E_ADMIN_PASSWORD='Demo123!' npm test
+```
+<!--#else -->
+They check the home page and that Todos are added, completed and shown live in other tabs. Run
+the API and the Vite dev server, then in `tests/e2e`: `E2E_BASE_URL=http://localhost:5173 npm test`.
+<!--#endif -->
+<!--#endif -->
 
 ## Deploying
 
@@ -307,6 +332,7 @@ Configure it with environment variables (or any ASP.NET Core configuration sourc
 | `Accounts__AllowRegistration` | `false` to allow only invited people to create accounts (default `true`) |
 | `Authentication__Google__ClientId`, `Authentication__Google__ClientSecret` | Optional: turns on "Continue with Google" |
 | `Authentication__GitHub__ClientId`, `Authentication__GitHub__ClientSecret` | Optional: turns on "Continue with GitHub" |
+| `Accounts__AuthAttemptsPerMinute` | Sign-in and account attempts allowed per client address per minute (see Security) |
 | `Email__Smtp__Security` | `Auto` (default: TLS when the server offers it), `StartTls`, `SslOnConnect` (port 465) or `None` |
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still

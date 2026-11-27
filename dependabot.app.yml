@@ -31,6 +31,16 @@ updates:
       - dependency-name: typescript
         update-types: ["version-update:semver-major"]
 
+#if (IncludeTests)
+  - package-ecosystem: npm
+    directory: /tests/e2e                # Playwright
+    schedule:
+      interval: weekly
+    groups:
+      playwright:
+        patterns: ["*"]
+
+#endif
   - package-ecosystem: docker-compose
     directories: [/, /deploy]
     schedule:

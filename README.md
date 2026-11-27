@@ -173,6 +173,12 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 
 With `--IncludeTests true` (the default):
 
+- **End-to-end tests** with [Playwright](https://playwright.dev/) (Apache-2.0) in the installed
+  Chrome, against the running app: Todos with live updates and, with `--Identity true`, sign-up
+  with the real confirmation email (read from Mailpit), settings, password reset, lockout, the
+  admin page and invitations, and passkeys with Chrome's virtual authenticator. CI runs them
+  against each published combination.
+
 - A `tests/` project (xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers) that
   boots the real app against a throwaway Postgres and drives it over HTTP, so one project covers
   both `--Persistence` choices. It covers the Todo endpoints and validation, background and
@@ -232,5 +238,5 @@ The nuget.org page shows `nuget/README.md`; this README is for working on the te
 
 CI generates all 8 parameter combinations on every push: it builds them, runs the integration
 tests against a real Postgres (Testcontainers) and the client's unit tests, builds the container
-image, and publishes and
+image, runs the end-to-end tests against the published app, and publishes and
 starts each one in Production. See [ROADMAP.md](ROADMAP.md) for what's next.

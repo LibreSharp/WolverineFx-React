@@ -41,6 +41,12 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # Catches the published app's emails, which the end-to-end tests read (confirmation links).
+      mailpit:
+        image: axllent/mailpit:v1.34.0
+        ports:
+          - 1025:1025
+          - 8025:8025
 
     steps:
       - uses: actions/checkout@v5
@@ -108,6 +114,14 @@ jobs:
           ConnectionStrings__Marten: Host=localhost;Database=myapp;Username=postgres;Password=postgres
           ConnectionStrings__Postgres: Host=localhost;Database=myapp;Username=postgres;Password=postgres
           Jwt__SigningKey: ci-only-signing-key-that-is-long-enough-0123456789
+          # For the end-to-end tests (ignored without --Identity): email through Mailpit, an admin
+          # account, and a higher sign-in rate limit, since every test comes from one address.
+          Email__Smtp__Host: localhost
+          Email__Smtp__Port: "1025"
+          Email__Smtp__Security: None
+          Email__Smtp__From: no-reply@example.com
+          Accounts__AdminEmails__0: admin-e2e@example.com
+          Accounts__AuthAttemptsPerMinute: "1000"
         run: |
           dotnet publish src/MyApp -c Release -o "$RUNNER_TEMP/publish"
           test -d src/MyApp/Internal/Generated || { echo "codegen did not run"; exit 1; }
@@ -131,3 +145,24 @@ jobs:
           ready=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/health/ready)
           [ "$ready" = "200" ] || fail "GET /health/ready returned $ready, expected 200."
           echo "Published app works: renders in Chrome, GET /api/todos $status, GET /health/ready 200."
+
+      # Playwright in Chrome against the published app still running from the step above, with
+      # real emails through Mailpit: sign-up and confirmation, Todos with live updates, settings,
+      # lockout, the admin page and invitations, and passkeys (Chrome's virtual authenticator).
+      - name: End-to-end tests
+        if: ${{ matrix.tests }}
+        working-directory: ${{ env.APP_DIR }}/tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:5000
+          MAILPIT_URL: http://localhost:8025
+        run: |
+          npm ci
+          npx playwright test
+
+      - name: Upload end-to-end traces
+        if: ${{ failure() && matrix.tests }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-traces-${{ matrix.persistence }}-identity-${{ matrix.identity }}
+          path: ${{ env.APP_DIR }}/tests/e2e/test-results/
+          if-no-files-found: ignore
