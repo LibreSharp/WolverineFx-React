@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { api } from '../../lib/api/client'
 import { useAuth, type LoginRefusal } from './useAuth'
 
@@ -63,6 +64,11 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       />
 
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {refusal === 'LockedOut' && (
+        <Link to="/forgot-password" className="text-sm text-indigo-600 hover:underline">
+          Reset your password
+        </Link>
+      )}
       {refusal === 'EmailNotConfirmed' &&
         (resent ? (
           <p role="status" className="text-sm text-green-700">We've sent a new confirmation link to {email}.</p>

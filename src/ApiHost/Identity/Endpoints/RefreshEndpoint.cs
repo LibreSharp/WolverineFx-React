@@ -41,8 +41,10 @@ public static class RefreshEndpoint
             return TypedResults.Unauthorized();
         }
 
+        // A locked-out account (failed logins, or locked by an admin) gets no new access tokens,
+        // so its sessions end within one access token lifetime.
         var user = await userManager.FindByIdAsync(existing.UserId);
-        if (user is null)
+        if (user is null || await userManager.IsLockedOutAsync(user))
         {
             return TypedResults.Unauthorized();
         }

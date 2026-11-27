@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
@@ -28,18 +29,36 @@ public static class LoginEndpoint
         }
 
         // Identity's sign-in checks, without its cookie: the email must be confirmed
-        // (SignIn.RequireConfirmedEmail) and the account not locked out, then the password.
-        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
+        // (SignIn.RequireConfirmedEmail), the account must not be locked out, and then the
+        // password must match. A wrong password counts towards a lockout (lockoutOnFailure).
+        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
         if (result.Succeeded)
         {
             return TypedResults.Ok(await TokenIssuing.IssueAsync(user, userManager, tokenService, refreshTokenStore, cancellationToken));
         }
 
-        // An unconfirmed email is refused before the password is checked. Say so only to someone
-        // who knows the password, so it doesn't reveal which emails have accounts.
-        if (result.IsNotAllowed && await userManager.CheckPasswordAsync(user, request.Password))
+        // While locked out, no password is checked and anyone is told so (Identity's behaviour;
+        // registration reveals which emails have accounts anyway).
+        if (result.IsLockedOut)
         {
-            return LoginProblems.EmailNotConfirmed();
+            return LoginProblems.LockedOut(user);
+        }
+
+        // An unconfirmed email is refused before the password is checked. Say so only to someone
+        // who knows the password, and count a wrong one towards a lockout like any other.
+        if (result.IsNotAllowed)
+        {
+            if (await userManager.IsLockedOutAsync(user))
+            {
+                return LoginProblems.LockedOut(user);
+            }
+
+            if (await userManager.CheckPasswordAsync(user, request.Password))
+            {
+                return LoginProblems.EmailNotConfirmed();
+            }
+
+            await userManager.AccessFailedAsync(user);
         }
 
         return TypedResults.Unauthorized();
@@ -51,8 +70,23 @@ public static class LoginProblems
 {
     public const string ReasonKey = "reason";
 
-    public static ProblemHttpResult EmailNotConfirmed() => TypedResults.Problem(
+    public static ProblemHttpResult EmailNotConfirmed() => Refused(
+        "EmailNotConfirmed", "Confirm your email address first: open the link in the email we sent you.");
+
+    public static ProblemHttpResult LockedOut(ApplicationUser user)
+    {
+        if (user.IsLockedByAdmin())
+        {
+            return Refused("LockedOut", "This account has been locked. Contact us if you think this is a mistake.");
+        }
+
+        var minutes = Math.Max(1, (int)Math.Ceiling(((user.LockoutEnd ?? DateTimeOffset.UtcNow) - DateTimeOffset.UtcNow).TotalMinutes));
+        return Refused("LockedOut", string.Create(CultureInfo.InvariantCulture,
+            $"Too many failed attempts: this account is locked. Try again in {minutes} minute{(minutes == 1 ? "" : "s")}, or reset your password."));
+    }
+
+    private static ProblemHttpResult Refused(string reason, string title) => TypedResults.Problem(
         statusCode: StatusCodes.Status403Forbidden,
-        title: "Confirm your email address first: open the link in the email we sent you.",
-        extensions: new Dictionary<string, object?>(StringComparer.Ordinal) { [ReasonKey] = "EmailNotConfirmed" });
+        title: title,
+        extensions: new Dictionary<string, object?>(StringComparer.Ordinal) { [ReasonKey] = reason });
 }

@@ -117,7 +117,9 @@ billing records but no payment provider (see the
 - [ ] **Roles and a small admin page:** list users, lock and unlock accounts, change roles.
 - [ ] **External sign-in** with Google and GitHub.
 - [ ] **Passkeys** with ASP.NET Core Identity (added in .NET 10; confirm the API first).
-- [ ] **Account lockout** after repeated failed logins.
+- [x] **Account lockout** after repeated failed logins: Identity's own lockout (5 attempts,
+      15 minutes) through `SignInManager.CheckPasswordSignInAsync`; refresh tokens stop working
+      while locked, and a password reset lifts it.
 
 ### v0.4: SaaS option
 

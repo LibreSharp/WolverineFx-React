@@ -117,6 +117,8 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   email changes and password reset, sent with [MailKit](https://github.com/jstedfast/MailKit)
   from a Wolverine handler, so they go through the durable outbox and are retried. In
   Development, [Mailpit](https://github.com/axllent/mailpit) in `docker-compose` catches them.
+- **Account lockout** (`--Identity true`): Identity's lockout after five failed logins (15
+  minutes), which also stops refresh tokens; a password reset lifts it.
 - **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With
   `--Identity true`, `/login` and `/register` are real routes, signed-out users are redirected
   to `/login` and returned to the page they wanted afterwards. In production, unknown paths serve

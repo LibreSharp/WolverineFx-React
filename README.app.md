@@ -127,6 +127,10 @@ The Todo feature is a working example of each pattern. Copy it when you add your
 - **Forgot password.** `/forgot-password` emails a link to `/reset-password` with a one-time
   token valid for an hour. The API answers the same whether or not the email has an account, so
   it can't be used to find out who is registered. Resetting also confirms the email.
+- **Account lockout.** Five wrong passwords in a row lock the account for 15 minutes (ASP.NET
+  Core Identity's lockout, set in `Identity/IdentityJwtSetup.cs`). While locked, login answers
+  403 without checking the password, refresh tokens stop working, and resetting the password
+  lifts the lock.
 <!--#endif -->
 
 ## Adding a feature
@@ -269,7 +273,8 @@ unencrypted, like the rest of your data: protect database access and backups acc
   service, add its origin there. Production also sends HSTS.
 <!--#if (Identity) -->
 - Login, registration, email confirmation, password reset and change, and account deletion allow 10 attempts a minute
-  per client IP, then answer 429 (`src/ApiHost/Identity/AuthRateLimiting.cs`). Behind a reverse
+  per client IP, then answer 429 (`src/ApiHost/Identity/AuthRateLimiting.cs`). Separately, five
+  wrong passwords lock that account for 15 minutes, whichever addresses they come from. Behind a reverse
   proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so the app sees each client's real
   address, and only expose the app through the proxy.
 <!--#endif -->

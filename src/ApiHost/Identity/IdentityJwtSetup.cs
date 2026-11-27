@@ -32,6 +32,12 @@ public static class IdentityJwtSetup
             // Login is refused until the user opens the link in the confirmation email sent when
             // they register (see LoginEndpoint and RegisterEndpoint).
             options.SignIn.RequireConfirmedEmail = true;
+
+            // Five wrong passwords in a row lock the account for 15 minutes (see LoginEndpoint).
+            // An admin can also lock an account indefinitely (see Lockout.cs).
+            options.Lockout.AllowedForNewUsers = true;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
         });
 
         services.AddJwtBearerAuthentication(jwtOptions);

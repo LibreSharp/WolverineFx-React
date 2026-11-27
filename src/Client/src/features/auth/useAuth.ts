@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
 // Why the API refused a login with 403 (see LoginProblems in the API).
-export type LoginRefusal = 'EmailNotConfirmed'
+export type LoginRefusal = 'EmailNotConfirmed' | 'LockedOut'
 
 export type LoginResult = { ok: true } | { ok: false; error: string; reason?: LoginRefusal }
 

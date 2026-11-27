@@ -22,7 +22,8 @@ public static class ResetPasswordEndpoint
 {
     // Sets a new password using the token from the reset email, and signs out every session.
     // Opening the emailed link proves the user owns the address, so it also confirms the email
-    // (someone who lost the confirmation email can get in this way).
+    // (someone who lost the confirmation email can get in this way) and lifts a lockout from
+    // failed logins.
     [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/reset-password")]
     public static async Task<Results<NoContent, ValidationProblem>> Post(
@@ -51,6 +52,8 @@ public static class ResetPasswordEndpoint
             user.EmailConfirmed = true;
             await userManager.UpdateAsync(user);
         }
+
+        await userManager.ClearFailedLoginLockoutAsync(user);
 
         await refreshTokenStore.RevokeAllForUserAsync(user.Id, cancellationToken);
         return TypedResults.NoContent();
