@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Notice } from '../../components/Messages'
 import { useQueryClient } from '@tanstack/react-query'
 import { getOrganisationId, subscribeTokens } from '../../lib/api/authTokens'
 import { onOrganisationLost } from '../../lib/api/client'
@@ -42,30 +45,32 @@ function SignedInSwitcher() {
       <label className="sr-only" htmlFor="organisation">
         Organisation
       </label>
-      <select
+      <NativeSelect
         id="organisation"
+        size="sm"
         value={current?.id ?? ''}
         disabled={switchTo.isPending}
         onChange={(e) => switchTo.mutate(e.target.value)}
-        className="rounded border border-gray-300 px-2 py-1"
       >
         {organisations.data.map((o) => (
-          <option key={o.id} value={o.id}>
+          <NativeSelectOption key={o.id} value={o.id}>
             {o.name}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
-      <Link to="/organisation" className="text-gray-600 hover:text-gray-900">
-        Manage
-      </Link>
+      </NativeSelect>
+      <Button asChild variant="ghost" size="sm">
+        <Link to="/organisation">Manage</Link>
+      </Button>
       {lost && (
-        <p role="alert" className="flex items-center gap-2 text-amber-800">
-          You no longer have access to the organisation you were working in, and your last change
-          there wasn&apos;t saved. You&apos;re now in {current?.name ?? 'another organisation'}.
-          <button type="button" onClick={() => setLost(false)} className="underline">
+        <Notice tone="warning" className="absolute top-14 right-6 z-10 max-w-sm">
+          <span role="alert">
+            You no longer have access to the organisation you were working in, and your last change
+            there wasn&apos;t saved. You&apos;re now in {current?.name ?? 'another organisation'}.
+          </span>{' '}
+          <Button variant="link" size="sm" className="h-auto px-0" onClick={() => setLost(false)}>
             Dismiss
-          </button>
-        </p>
+          </Button>
+        </Notice>
       )}
     </div>
   )

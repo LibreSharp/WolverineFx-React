@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router'
+import { AuthCard } from './AuthCard'
 import { useAuthOptions } from './authQueries'
 import { ExternalProviderButtons } from './ExternalProviderButtons'
 import { RegisterForm } from './RegisterForm'
@@ -10,18 +11,31 @@ export function RegisterPage() {
 
   if (options.data?.allowRegistration === false) {
     return (
-      <div className="mx-auto flex max-w-sm flex-col gap-3 p-8">
-        <h1 className="text-2xl font-semibold">Create an account</h1>
-        <p className="text-sm text-gray-600">Accounts are by invitation only. Ask an administrator to invite you.</p>
-        <Link to="/login" className="text-sm text-indigo-600 hover:underline">
-          Log in
-        </Link>
-      </div>
+      <AuthCard
+        title="Create an account"
+        footer={
+          <Link to="/login" className="text-primary hover:underline">
+            Log in
+          </Link>
+        }
+      >
+        <p className="text-sm text-muted-foreground">Accounts are by invitation only. Ask an administrator to invite you.</p>
+      </AuthCard>
     )
   }
 
   return (
-    <div>
+    <AuthCard
+      title="Create an account"
+      footer={
+        <p>
+          Already have an account?{' '}
+          <Link to="/login" className="text-primary hover:underline">
+            Log in
+          </Link>
+        </p>
+      }
+    >
       <RegisterForm
         onSuccess={(email) =>
           navigate('/login', {
@@ -32,12 +46,6 @@ export function RegisterPage() {
         }
       />
       <ExternalProviderButtons />
-      <p className="text-center text-sm text-gray-500">
-        Already have an account?{' '}
-        <Link to="/login" className="text-indigo-600 hover:underline">
-          Log in
-        </Link>
-      </p>
-    </div>
+    </AuthCard>
   )
 }

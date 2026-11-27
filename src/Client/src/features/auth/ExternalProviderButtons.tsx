@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { useAuthOptions } from './authQueries'
 
 // "Continue with Google/GitHub" for each provider the API has configured. These are plain links:
@@ -8,16 +10,16 @@ export function ExternalProviderButtons() {
   if (providers.length === 0) return null
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-2 px-8">
-      <p className="text-center text-sm text-gray-500">or</p>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Separator className="flex-1" />
+        or
+        <Separator className="flex-1" />
+      </div>
       {providers.map((provider) => (
-        <a
-          key={provider.name}
-          href={`/api/auth/external/${encodeURIComponent(provider.name)}`}
-          className="rounded border border-gray-300 bg-white px-4 py-2 text-center text-sm hover:bg-gray-50"
-        >
-          Continue with {provider.displayName}
-        </a>
+        <Button key={provider.name} asChild variant="outline">
+          <a href={`/api/auth/external/${encodeURIComponent(provider.name)}`}>Continue with {provider.displayName}</a>
+        </Button>
       ))}
     </div>
   )

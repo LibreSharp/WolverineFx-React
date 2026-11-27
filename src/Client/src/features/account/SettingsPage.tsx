@@ -17,33 +17,22 @@ import {
   useRenamePasskey,
   useUpdateProfile,
 } from './accountQueries'
-
-const inputClass = 'w-full rounded border border-gray-300 px-3 py-2'
-const buttonClass = 'rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50'
-
-function Section({ title, children, tone }: { title: string; children: ReactNode; tone?: 'danger' }) {
-  return (
-    <section
-      className={`rounded border bg-white p-6 ${tone === 'danger' ? 'border-red-200' : 'border-gray-200'}`}
-    >
-      <h2 className="mb-4 text-lg font-semibold">{title}</h2>
-      {children}
-    </section>
-  )
-}
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Section } from '../../components/Section'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block text-gray-700">{label}</span>
+      <span className="mb-1 block text-muted-foreground">{label}</span>
       {children}
     </label>
   )
 }
 
 function Result({ error, success }: { error: Error | null; success?: string | false }) {
-  if (error) return <p role="alert" className="text-sm text-red-600">{error.message}</p>
-  if (success) return <p role="status" className="text-sm text-green-700">{success}</p>
+  if (error) return <p role="alert" className="text-sm text-destructive">{error.message}</p>
+  if (success) return <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">{success}</p>
   return null
 }
 
@@ -53,7 +42,7 @@ function ProfileSection() {
   const [email, setEmail] = useState<string | null>(null)
   const [displayName, setDisplayName] = useState<string | null>(null)
 
-  if (me.isPending) return <Section title="Profile"><p className="text-gray-500">Loading…</p></Section>
+  if (me.isPending) return <Section title="Profile"><p className="text-muted-foreground">Loading…</p></Section>
   if (me.isError) return <Section title="Profile"><Result error={me.error} /></Section>
 
   // Show what the user typed, or the saved values until they type.
@@ -71,20 +60,19 @@ function ProfileSection() {
     ? `Profile saved. To change your email, open the link we've sent to ${sentTo}.`
     : 'Profile saved.'
 
-
   return (
     <Section title="Profile">
       <form onSubmit={save} className="space-y-4">
         <Field label="Email (you log in with this)">
-          <input type="email" required value={emailValue} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+          <Input type="email" required value={emailValue} onChange={(e) => setEmail(e.target.value)} />
         </Field>
         <Field label="Display name (optional)">
-          <input value={displayNameValue} maxLength={100} onChange={(e) => setDisplayName(e.target.value)} className={inputClass} />
+          <Input value={displayNameValue} maxLength={100} onChange={(e) => setDisplayName(e.target.value)} />
         </Field>
         <Result error={update.error} success={update.isSuccess && saved} />
-        <button type="submit" disabled={update.isPending} className={buttonClass}>
+        <Button type="submit" disabled={update.isPending}>
           Save profile
-        </button>
+        </Button>
       </form>
     </Section>
   )
@@ -116,19 +104,19 @@ function PasswordSection() {
     <Section title="Change password">
       <form onSubmit={submit} className="space-y-4">
         <Field label="Current password">
-          <input type="password" required autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className={inputClass} />
+          <Input type="password" required autoComplete="current-password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
         </Field>
         <Field label="New password">
-          <input type="password" required autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={inputClass} />
+          <Input type="password" required autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
         </Field>
         <Field label="Confirm new password">
-          <input type="password" required autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={inputClass} />
+          <Input type="password" required autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
         </Field>
-        {mismatch && <p role="alert" className="text-sm text-red-600">The new passwords don't match.</p>}
+        {mismatch && <p role="alert" className="text-sm text-destructive">The new passwords don't match.</p>}
         <Result error={change.error} success={change.isSuccess && 'Password changed. Your other sessions have been signed out.'} />
-        <button type="submit" disabled={change.isPending || mismatch} className={buttonClass}>
+        <Button type="submit" disabled={change.isPending || mismatch}>
           Change password
-        </button>
+        </Button>
       </form>
     </Section>
   )
@@ -146,35 +134,33 @@ function PasskeyRow({ passkey }: { passkey: { id: string; name: string; createdA
         {name === null ? (
           <span className="flex-1">
             {passkey.name}{' '}
-            <span className="text-gray-500">· added {new Date(passkey.createdAt).toLocaleDateString()}</span>
+            <span className="text-muted-foreground">· added {new Date(passkey.createdAt).toLocaleDateString()}</span>
           </span>
         ) : (
-          <input value={name} maxLength={100} onChange={(e) => setName(e.target.value)} className={`${inputClass} flex-1`} />
+          <Input value={name} maxLength={100} onChange={(e) => setName(e.target.value)} className="flex-1" />
         )}
         {name === null ? (
-          <button type="button" onClick={() => setName(passkey.name)} className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100">
+          <Button variant="outline" type="button" onClick={() => setName(passkey.name)}>
             Rename
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button variant="outline"
             type="button"
             disabled={!name.trim() || rename.isPending}
             onClick={() => rename.mutate({ id: passkey.id, name }, { onSuccess: () => setName(null) })}
-            className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
           >
             Save
-          </button>
+          </Button>
         )}
-        <button
+        <Button variant="outline"
           type="button"
           disabled={remove.isPending}
           onClick={() => remove.mutate(passkey.id)}
-          className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
         >
           Remove
-        </button>
+        </Button>
       </div>
-      {error && <p role="alert" className="mt-1 text-red-600">{error.message}</p>}
+      {error && <p role="alert" className="mt-1 text-destructive">{error.message}</p>}
     </li>
   )
 }
@@ -193,25 +179,25 @@ function PasskeysSection() {
 
   return (
     <Section title="Passkeys">
-      <p className="mb-4 text-sm text-gray-600">
+      <p className="mb-4 text-sm text-muted-foreground">
         Log in with your fingerprint, face or device PIN instead of a password. A passkey stays on your device (or in
         your password manager) and works only on this site.
       </p>
       <ul className="mb-4 space-y-2">
         {passkeys.data?.map((passkey) => <PasskeyRow key={passkey.id} passkey={passkey} />)}
-        {passkeys.data?.length === 0 && <li className="text-sm text-gray-500">No passkeys yet.</li>}
+        {passkeys.data?.length === 0 && <li className="text-sm text-muted-foreground">No passkeys yet.</li>}
       </ul>
       <form onSubmit={submit} className="flex gap-2">
-        <input
+        <Input
           placeholder="Name, e.g. Laptop"
           value={name}
           maxLength={100}
           onChange={(e) => setName(e.target.value)}
-          className={`${inputClass} flex-1`}
+          className="flex-1"
         />
-        <button type="submit" disabled={add.isPending} className={buttonClass}>
+        <Button type="submit" disabled={add.isPending}>
           Add a passkey
-        </button>
+        </Button>
       </form>
       <div className="mt-3">
         <Result error={add.error && !isCancelled(add.error) ? add.error : null} success={add.isSuccess && 'Passkey added.'} />
@@ -250,28 +236,26 @@ function SignInMethodsSection() {
         {linked.map((login) => (
           <li key={login.provider} className="flex items-center justify-between text-sm">
             <span>{login.displayName}</span>
-            <button
+            <Button variant="outline"
               type="button"
               disabled={remove.isPending}
               onClick={() => remove.mutate(login.provider)}
-              className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
             >
               Remove
-            </button>
+            </Button>
           </li>
         ))}
-        {linked.length === 0 && <li className="text-sm text-gray-500">No providers linked.</li>}
+        {linked.length === 0 && <li className="text-sm text-muted-foreground">No providers linked.</li>}
       </ul>
       <div className="flex flex-wrap gap-2">
         {unlinked.map((provider) => (
-          <button
+          <Button variant="outline" size="sm"
             key={provider.name}
             type="button"
             onClick={() => startLinkingExternalLogin(provider.name).catch((e: Error) => setLinkError(e.message))}
-            className="rounded border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100"
           >
             Link {provider.displayName}
-          </button>
+          </Button>
         ))}
       </div>
       <div className="mt-3">
@@ -302,21 +286,20 @@ function DeleteAccountSection() {
 
   return (
     <Section title="Delete account" tone="danger">
-      <p className="mb-4 text-sm text-gray-600">
+      <p className="mb-4 text-sm text-muted-foreground">
         This permanently deletes your account and all your todos. It can't be undone.
       </p>
       <form onSubmit={submit} className="space-y-4">
         <Field label="Enter your password to confirm">
-          <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
+          <Input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
         <Result error={deleteAccount.error} />
-        <button
+        <Button variant="destructive"
           type="submit"
           disabled={deleteAccount.isPending}
-          className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
         >
           Delete my account
-        </button>
+        </Button>
       </form>
     </Section>
   )

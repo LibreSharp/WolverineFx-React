@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet } from 'react-router'
+import { cn } from '@/lib/utils'
 import { appName, PageMeta } from './PageMeta'
 
 // A link in the header's navigation; highlighted on its current page.
@@ -8,7 +9,7 @@ export function NavItem({ to, children }: { to: string; children: ReactNode }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `rounded px-2 py-1 text-sm ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:text-gray-900'}`
+        cn('rounded-md px-2 py-1 text-sm', isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground')
       }
     >
       {children}
@@ -20,10 +21,10 @@ export function NavItem({ to, children }: { to: string; children: ReactNode }) {
 // actions, the current route's page in <Outlet />, and a footer.
 export function Layout({ nav, actions }: { nav?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col bg-muted/40">
       <PageMeta />
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-3">
+      <header className="border-b bg-background">
+        <div className="relative mx-auto flex max-w-3xl items-center gap-4 px-6 py-3">
           <Link to="/" className="font-semibold">
             {appName}
           </Link>
@@ -34,8 +35,8 @@ export function Layout({ nav, actions }: { nav?: ReactNode; actions?: ReactNode 
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="border-t border-gray-200 bg-white">
-        <div className="mx-auto max-w-3xl px-6 py-4 text-sm text-gray-500">
+      <footer className="border-t bg-background">
+        <div className="mx-auto max-w-3xl px-6 py-4 text-sm text-muted-foreground">
           {appName} · Built with Wolverine and React
         </div>
       </footer>

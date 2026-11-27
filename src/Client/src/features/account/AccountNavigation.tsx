@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { Button } from '@/components/ui/button'
 import { NavItem } from '../../components/Layout'
 import { useAuthOptions } from '../auth/authQueries'
 import { useAuth } from '../auth/useAuth'
@@ -31,13 +32,13 @@ export function AccountActions() {
 
   return (
     <div className="flex items-center gap-3 text-sm">
-      <Link to="/login" className="text-gray-600 hover:text-gray-900">
-        Log in
-      </Link>
+      <Button asChild variant="ghost" size="sm">
+        <Link to="/login">Log in</Link>
+      </Button>
       {options.data?.allowRegistration !== false && (
-        <Link to="/register" className="rounded bg-indigo-600 px-3 py-1.5 text-white hover:bg-indigo-700">
-          Register
-        </Link>
+        <Button asChild size="sm">
+          <Link to="/register">Register</Link>
+        </Button>
       )}
     </div>
   )

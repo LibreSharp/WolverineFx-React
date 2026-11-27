@@ -345,9 +345,9 @@ websites. These changes let a library plug in without forking the template:
 
 - [x] **UI components:** [shadcn/ui](https://ui.shadcn.com/) (MIT), installed in v0.4.1 so the
       billing and back-office screens are built with it.
-- [ ] **Move the existing pages to shadcn/ui** (forms, Todos, settings, admin, organisation),
-      then turn on **dark mode**: the theme has it, but pages with fixed colours would look
-      wrong in it.
+- [x] **Every page on shadcn/ui**, with **dark mode** that follows the operating system's
+      setting (no script, so pre-rendered pages show the right colours at once). A switch to
+      choose light or dark could come later.
 - [ ] **Translations** with react-i18next (MIT): the interface's text in resource files, a
       language switcher, and dates and numbers formatted for the user's language. Apps for
       markets outside English-speaking countries need this from the start, so it comes before

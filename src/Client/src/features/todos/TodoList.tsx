@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { useCompleteTodo, useCreateTodo, useRemindTodo, useTodos } from './todoQueries'
 import { useTodoRealtime } from './useTodoRealtime'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
 // "Remind me" choices, in minutes.
 const reminderChoices = [
@@ -43,55 +46,51 @@ export function TodoList({ remindersEnabled = true, reminderUpsell, notice, onRe
       {notice}
 
       <form onSubmit={addTodo} className="mb-4 flex gap-2">
-        <input
-          className="flex-1 rounded border border-gray-300 px-3 py-2"
+        <Input
+          className="flex-1"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="What needs doing?"
         />
-        <button
-          type="submit"
-          disabled={createTodo.isPending}
-          className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={createTodo.isPending}>
           Add
-        </button>
+        </Button>
       </form>
 
       {reminders.map((reminder) => (
         <div
           key={reminder.todoId}
           role="alert"
-          className="mb-4 flex items-center justify-between rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+          className="mb-4 flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-200"
         >
           <span>Reminder: {reminder.title}</span>
-          <button type="button" onClick={() => dismiss(reminder.todoId)} className="hover:underline">
+          <Button variant="link" type="button" onClick={() => dismiss(reminder.todoId)} className="h-auto px-0">
             Dismiss
-          </button>
+          </Button>
         </div>
       ))}
 
       {remindTodo.isSuccess && (
-        <p role="status" className="mb-4 text-sm text-gray-600">
+        <p role="status" className="mb-4 text-sm text-muted-foreground">
           Reminder set for {new Date(remindTodo.data.remindAt).toLocaleString()}.
         </p>
       )}
       {remindTodo.error && (
-        <p role="alert" className="mb-4 text-sm text-red-600">
+        <p role="alert" className="mb-4 text-sm text-destructive">
           {remindTodo.error.message}
         </p>
       )}
 
       {createTodo.error && (
-        <p role="alert" className="mb-4 text-sm text-red-600">
+        <p role="alert" className="mb-4 text-sm text-destructive">
           {createTodo.error.message}
         </p>
       )}
 
       {todos.isPending ? (
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-muted-foreground">Loading…</p>
       ) : todos.isError ? (
-        <p role="alert" className="text-red-600">
+        <p role="alert" className="text-destructive">
           {todos.error.message}
         </p>
       ) : (
@@ -99,42 +98,41 @@ export function TodoList({ remindersEnabled = true, reminderUpsell, notice, onRe
           {todos.data.map((todo) => (
             <li
               key={todo.id}
-              className="flex items-center justify-between rounded border border-gray-200 px-3 py-2"
+              className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
             >
-              <span className={todo.isComplete ? 'text-gray-400 line-through' : ''}>
+              <span className={todo.isComplete ? 'text-muted-foreground line-through' : ''}>
                 {todo.title}
               </span>
               {!todo.isComplete && (
                 <div className="flex items-center gap-3">
                   {remindersEnabled ? (
-                    <select
+                    <NativeSelect
                       aria-label={`Remind me about ${todo.title}`}
                       value=""
                       onChange={(event) =>
                         remindTodo.mutate({ id: todo.id!, minutes: Number(event.target.value) }, { onSettled: onReminderSet })
                       }
-                      className="rounded border border-gray-200 bg-white px-1 py-0.5 text-sm text-gray-600"
                     >
-                      <option value="" disabled>
+                      <NativeSelectOption value="" disabled>
                         Remind me…
-                      </option>
+                      </NativeSelectOption>
                       {reminderChoices.map((choice) => (
-                        <option key={choice.minutes} value={choice.minutes}>
+                        <NativeSelectOption key={choice.minutes} value={choice.minutes}>
                           {choice.label}
-                        </option>
+                        </NativeSelectOption>
                       ))}
-                    </select>
+                    </NativeSelect>
                   ) : (
                     reminderUpsell
                   )}
-                  <button
+                  <Button variant="link"
                     type="button"
                     onClick={() => completeTodo.mutate(todo.id!)}
                     disabled={completeTodo.isPending}
-                    className="text-sm text-indigo-600 hover:underline disabled:opacity-50"
+                    className="h-auto px-0"
                   >
                     Complete
-                  </button>
+                  </Button>
                 </div>
               )}
             </li>

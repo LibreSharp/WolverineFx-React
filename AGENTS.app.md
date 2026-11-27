@@ -116,8 +116,10 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   and in the handle makes a page public: indexed by search engines and pre-rendered to HTML.
   Pre-rendered pages run in Node at build time, so they must not touch `window` while rendering.
 - UI: build with the shadcn/ui components in `src/Client/src/components/ui/` (Button, Card,
-  Input, Table, Dialog...) and the theme's colours (`bg-card`, `text-muted-foreground`,
-  `text-destructive`), not fixed ones (`bg-white`, `text-gray-600`). Add a component with
+  Input, NativeSelect, Table, Dialog...), the app's `components/Section.tsx` and
+  `components/Messages.tsx`, and the theme's colours (`bg-card`, `text-muted-foreground`,
+  `text-destructive`), not fixed ones (`bg-white`, `text-gray-600`), so pages work in dark mode
+  (which follows the operating system). Add a component with
   `npx shadcn@latest add <name>` in `src/Client`; the files are the app's own, to edit. Import
   with `@/` (`@/components/ui/button`). Pre-rendered pages mustn't set `style` attributes: the
   Content-Security-Policy blocks inline styles in HTML.

@@ -5,6 +5,7 @@ import { api } from '../../lib/api/client'
 import { problemMessage } from '../../lib/api/problemDetails'
 import { accountKeys } from '../account/accountQueries'
 import { useAuth } from './useAuth'
+import { AuthCard } from './AuthCard'
 
 type Status = { state: 'working' } | { state: 'done' } | { state: 'failed'; error: string }
 
@@ -25,16 +26,15 @@ function useConfirmOnce(confirm: () => Promise<{ ok: boolean; error?: unknown }>
 
 function ConfirmationResult({ title, status, success }: { title: string; status: Status; success: ReactNode }) {
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-3 p-8">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      {status.state === 'working' && <p className="text-gray-500">Confirming…</p>}
+    <AuthCard title={title}>
+      {status.state === 'working' && <p className="text-muted-foreground">Confirming…</p>}
       {status.state === 'done' && success}
       {status.state === 'failed' && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-destructive">
           {status.error}
         </p>
       )}
-    </div>
+    </AuthCard>
   )
 }
 
@@ -55,8 +55,8 @@ export function ConfirmEmailPage() {
       status={status}
       success={
         <>
-          <p role="status" className="text-sm text-green-700">Your email address is confirmed.</p>
-          <Link to="/login" className="text-sm text-indigo-600 hover:underline">
+          <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">Your email address is confirmed.</p>
+          <Link to="/login" className="text-sm text-primary hover:underline">
             Log in
           </Link>
         </>
@@ -88,10 +88,10 @@ export function ConfirmEmailChangePage() {
       status={status}
       success={
         <>
-          <p role="status" className="text-sm text-green-700">
+          <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
             Your email address is now {email}. Use it to log in.
           </p>
-          <Link to={isAuthenticated ? '/settings' : '/login'} className="text-sm text-indigo-600 hover:underline">
+          <Link to={isAuthenticated ? '/settings' : '/login'} className="text-sm text-primary hover:underline">
             {isAuthenticated ? 'Back to settings' : 'Log in'}
           </Link>
         </>

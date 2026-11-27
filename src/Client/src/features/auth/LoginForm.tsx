@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { api } from '../../lib/api/client'
 import { setTokens } from '../../lib/api/authTokens'
 import { isCancelled, loginWithPasskey, passkeysSupported } from '../../lib/passkeys'
@@ -50,70 +52,63 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto flex max-w-sm flex-col gap-3 p-8">
-      <h1 className="text-2xl font-semibold">Log in</h1>
-
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       {devEmail && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Development: pre-filled with the demo user <strong>{devEmail}</strong>.
         </p>
       )}
 
-      <input
+      <Input
         type="email"
         required
+        aria-label="Email"
         placeholder="Email"
+        autoComplete="email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        className="rounded border border-gray-300 px-3 py-2"
       />
-      <input
+      <Input
         type="password"
         required
+        aria-label="Password"
         placeholder="Password"
+        autoComplete="current-password"
         value={password}
         onChange={(event) => setPassword(event.target.value)}
-        className="rounded border border-gray-300 px-3 py-2"
       />
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       {refusal === 'LockedOut' && (
-        <Link to="/forgot-password" className="text-sm text-indigo-600 hover:underline">
+        <Link to="/forgot-password" className="text-sm text-primary hover:underline">
           Reset your password
         </Link>
       )}
       {refusal === 'EmailNotConfirmed' &&
         (resent ? (
-          <p role="status" className="text-sm text-green-700">We've sent a new confirmation link to {email}.</p>
+          <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">We've sent a new confirmation link to {email}.</p>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="link"
+            className="h-auto justify-start px-0"
             onClick={async () => {
               await api.POST('/api/auth/resend-confirmation', { body: { email } })
               setResent(true)
             }}
-            className="text-left text-sm text-indigo-600 hover:underline"
           >
             Send the confirmation email again
-          </button>
+          </Button>
         ))}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={submitting}>
         {submitting ? 'Logging in…' : 'Log in'}
-      </button>
+      </Button>
 
       {passkeysSupported() && (
-        <button
-          type="button"
-          onClick={handlePasskey}
-          className="rounded border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
-        >
+        <Button type="button" variant="outline" onClick={handlePasskey}>
           Log in with a passkey
-        </button>
+        </Button>
       )}
     </form>
   )

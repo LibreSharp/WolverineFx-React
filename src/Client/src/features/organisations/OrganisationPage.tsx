@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { useMe } from '../account/accountQueries'
 import { BillingSection } from '../billing/BillingSection'
@@ -17,22 +17,13 @@ import {
   useRevokeInvitation,
   type OrganisationRole,
 } from './organisationQueries'
-
-const inputClass = 'w-full rounded border border-gray-300 px-3 py-2'
-const buttonClass = 'rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50'
-const linkButtonClass = 'text-sm text-indigo-600 hover:underline disabled:opacity-50'
-
-function Section({ title, children, tone }: { title: string; children: ReactNode; tone?: 'danger' }) {
-  return (
-    <section className={`rounded border bg-white p-6 ${tone === 'danger' ? 'border-red-200' : 'border-gray-200'}`}>
-      <h2 className="mb-4 text-lg font-semibold">{title}</h2>
-      {children}
-    </section>
-  )
-}
+import { Button } from '@/components/ui/button'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Input } from '@/components/ui/input'
+import { Section } from '../../components/Section'
 
 function Problem({ error }: { error: Error | null }) {
-  return error ? <p role="alert" className="text-sm text-red-600">{error.message}</p> : null
+  return error ? <p role="alert" className="text-sm text-destructive">{error.message}</p> : null
 }
 
 // /organisation: the current organisation's name, members, roles and invitations, plus creating
@@ -40,7 +31,7 @@ function Problem({ error }: { error: Error | null }) {
 // the user can't do.
 export function OrganisationPage() {
   const organisation = useCurrentOrganisation()
-  if (organisation.isPending) return <p className="mx-auto max-w-3xl px-6 py-10 text-gray-500">Loading…</p>
+  if (organisation.isPending) return <p className="mx-auto max-w-3xl px-6 py-10 text-muted-foreground">Loading…</p>
   if (organisation.isError) return <div className="mx-auto max-w-3xl px-6 py-10"><Problem error={organisation.error} /></div>
 
   const role = organisation.data.role
@@ -71,8 +62,8 @@ function RenameSection({ name }: { name: string }) {
         className="flex gap-2"
       >
         <label className="sr-only" htmlFor="organisation-name">Organisation name</label>
-        <input id="organisation-name" required maxLength={100} value={value} onChange={(e) => setValue(e.target.value)} className={inputClass} />
-        <button type="submit" disabled={rename.isPending} className={buttonClass}>Rename</button>
+        <Input id="organisation-name" required maxLength={100} value={value} onChange={(e) => setValue(e.target.value)} />
+        <Button type="submit" disabled={rename.isPending}>Rename</Button>
       </form>
       <Problem error={rename.error} />
     </Section>
@@ -91,33 +82,32 @@ function MembersSection({ myRole }: { myRole: string }) {
 
   return (
     <Section title="Members">
-      {members.isPending && <p className="text-gray-500">Loading…</p>}
+      {members.isPending && <p className="text-muted-foreground">Loading…</p>}
       <Problem error={members.error ?? changeRole.error ?? (remove.variables?.leaving ? null : remove.error)} />
-      <ul className="divide-y divide-gray-100">
+      <ul className="divide-y divide-border">
         {members.data?.map((member) => (
           <li key={member.userId} className="flex items-center justify-between gap-4 py-2 text-sm">
             <span>
               {member.displayName || member.email}
-              {member.userId === me.data?.userId && <span className="text-gray-500"> (you)</span>}
+              {member.userId === me.data?.userId && <span className="text-muted-foreground"> (you)</span>}
             </span>
             <span className="flex items-center gap-3">
               {canManage(member.role) && member.userId !== me.data?.userId ? (
                 <>
                   <label className="sr-only" htmlFor={`role-${member.userId}`}>Role of {member.email}</label>
-                  <select
+                  <NativeSelect
                     id={`role-${member.userId}`}
                     value={member.role}
                     onChange={(e) => changeRole.mutate({ userId: member.userId, role: e.target.value as OrganisationRole })}
-                    className="rounded border border-gray-300 px-2 py-1"
                   >
-                    {assignable.map((r) => <option key={r}>{r}</option>)}
-                  </select>
-                  <button type="button" className={linkButtonClass} onClick={() => remove.mutate({ userId: member.userId, leaving: false })}>
+                    {assignable.map((r) => <NativeSelectOption key={r}>{r}</NativeSelectOption>)}
+                  </NativeSelect>
+                  <Button variant="link" size="sm" type="button" className="h-auto px-0" onClick={() => remove.mutate({ userId: member.userId, leaving: false })}>
                     Remove
-                  </button>
+                  </Button>
                 </>
               ) : (
-                <span className="text-gray-600">{member.role}</span>
+                <span className="text-muted-foreground">{member.role}</span>
               )}
             </span>
           </li>
@@ -143,27 +133,27 @@ function InvitationsSection({ myRole }: { myRole: string }) {
     <Section title="Invite people">
       <form onSubmit={send} className="flex flex-wrap gap-2">
         <label className="sr-only" htmlFor="invite-email">Email to invite</label>
-        <input id="invite-email" type="email" required placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputClass} flex-1`} />
+        <Input id="invite-email" type="email" required placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="flex-1" />
         <label className="sr-only" htmlFor="invite-role">Role</label>
-        <select id="invite-role" value={role} onChange={(e) => setRole(e.target.value as OrganisationRole)} className="rounded border border-gray-300 px-2 py-2">
-          {roles.filter((r) => r !== 'Owner' || myRole === 'Owner').map((r) => <option key={r}>{r}</option>)}
-        </select>
-        <button type="submit" disabled={invite.isPending} className={buttonClass}>Invite</button>
+        <NativeSelect id="invite-role" value={role} onChange={(e) => setRole(e.target.value as OrganisationRole)}>
+          {roles.filter((r) => r !== 'Owner' || myRole === 'Owner').map((r) => <NativeSelectOption key={r}>{r}</NativeSelectOption>)}
+        </NativeSelect>
+        <Button type="submit" disabled={invite.isPending}>Invite</Button>
       </form>
-      {invite.isSuccess && <p role="status" className="mt-2 text-sm text-green-700">Invitation sent.</p>}
+      {invite.isSuccess && <p role="status" className="mt-2 text-sm text-emerald-700 dark:text-emerald-300">Invitation sent.</p>}
       <Problem error={invite.error ?? revoke.error} />
       {invitations.data && invitations.data.length > 0 && (
         <>
-          <h3 className="mt-6 mb-2 text-sm font-semibold text-gray-700">Waiting to join</h3>
-          <ul className="divide-y divide-gray-100">
+          <h3 className="mt-6 mb-2 text-sm font-semibold text-muted-foreground">Waiting to join</h3>
+          <ul className="divide-y divide-border">
             {invitations.data.map((invitation) => (
               <li key={invitation.id} className="flex items-center justify-between py-2 text-sm">
                 <span>
-                  {invitation.email} <span className="text-gray-500">({invitation.role})</span>
+                  {invitation.email} <span className="text-muted-foreground">({invitation.role})</span>
                 </span>
-                <button type="button" className={linkButtonClass} onClick={() => revoke.mutate(invitation.id)}>
+                <Button variant="link" size="sm" type="button" className="h-auto px-0" onClick={() => revoke.mutate(invitation.id)}>
                   Revoke
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -187,8 +177,8 @@ function CreateSection() {
         className="flex gap-2"
       >
         <label className="sr-only" htmlFor="new-organisation">New organisation name</label>
-        <input id="new-organisation" required maxLength={100} placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
-        <button type="submit" disabled={create.isPending} className={buttonClass}>Create</button>
+        <Input id="new-organisation" required maxLength={100} placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+        <Button type="submit" disabled={create.isPending}>Create</Button>
       </form>
       <Problem error={create.error} />
     </Section>
@@ -206,14 +196,14 @@ function LeaveOrDeleteSection({ isOwner, name }: { isOwner: boolean; name: strin
   return (
     <Section title="Leave or delete" tone="danger">
       <div className="space-y-4">
-        <button
+        <Button variant="outline"
           type="button"
           disabled={!me.data || leave.isPending}
           onClick={() => me.data && leave.mutate({ userId: me.data.userId, leaving: true }, done)}
-          className="rounded border border-red-300 px-4 py-2 text-red-700 hover:bg-red-50 disabled:opacity-50"
+          className="text-destructive text-destructive"
         >
           Leave {name}
-        </button>
+        </Button>
         <Problem error={leave.error} />
         {isOwner && (
           <form
@@ -223,13 +213,13 @@ function LeaveOrDeleteSection({ isOwner, name }: { isOwner: boolean; name: strin
             }}
             className="space-y-2"
           >
-            <label className="block text-sm text-gray-700" htmlFor="confirm-delete">
+            <label className="block text-sm text-muted-foreground" htmlFor="confirm-delete">
               To delete {name} and all its data for everyone, type its name:
             </label>
-            <input id="confirm-delete" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={inputClass} />
-            <button type="submit" disabled={confirm !== name || remove.isPending} className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50">
+            <Input id="confirm-delete" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+            <Button variant="destructive" type="submit" disabled={confirm !== name || remove.isPending}>
               Delete organisation
-            </button>
+            </Button>
             <Problem error={remove.error} />
           </form>
         )}

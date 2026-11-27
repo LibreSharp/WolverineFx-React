@@ -45,7 +45,7 @@ export function BillingSection() {
               <li key={limit.name} className="text-sm">
                 <div className="flex justify-between">
                   <span>{limit.description}</span>
-                  <span className={cn(limit.reached ? 'text-destructive' : limit.nearLimit ? 'text-amber-700' : 'text-muted-foreground')}>
+                  <span className={cn(limit.reached ? 'text-destructive' : limit.nearLimit ? 'text-amber-700 dark:text-amber-300' : 'text-muted-foreground')}>
                     {used.toLocaleString()} of {formatLimit(limit.limit)}
                   </span>
                 </div>

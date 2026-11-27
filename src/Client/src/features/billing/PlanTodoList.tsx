@@ -23,8 +23,8 @@ export function PlanTodoList() {
   const open = plan?.limits.find((limit) => limit.name === 'OpenTodos')
   const notice =
     plan && open && (open.reached || open.nearLimit) ? (
-      <Alert role="status" className="mb-4 border-amber-200 bg-amber-50 text-amber-900">
-        <AlertDescription className="text-amber-900">
+      <Alert role="status" variant="warning" className="mb-4">
+        <AlertDescription>
         {open.reached
           ? `You've reached the ${plan.planName} plan's ${open.limit} open Todos: complete some, or `
           : `${open.used} of the ${plan.planName} plan's ${open.limit} open Todos used. Need more? `}

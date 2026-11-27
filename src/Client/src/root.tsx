@@ -3,6 +3,7 @@ import { isRouteErrorResponse, Links, Meta, Scripts, ScrollRestoration } from 'r
 import { QueryClientProvider } from '@tanstack/react-query'
 import { App } from './App'
 import { appName } from './components/PageMeta'
+import { Button } from './components/ui/button'
 import { queryClient } from './lib/queryClient'
 import './index.css'
 
@@ -65,9 +66,9 @@ export function ErrorBoundary({ error }: { error: unknown }) {
       <title>{`${message} · ${appName}`}</title>
       <meta name="robots" content="noindex" />
       <h1 className="mb-2 text-2xl font-semibold">{message}</h1>
-      <button type="button" onClick={() => window.location.reload()} className="text-indigo-600 hover:underline">
+      <Button variant="link" className="px-0" onClick={() => window.location.reload()}>
         Reload the page
-      </button>
+      </Button>
     </div>
   )
 }

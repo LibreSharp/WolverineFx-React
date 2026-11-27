@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '../auth/useAuth'
 import { formatLimit, formatPrice, planCatalogue, planName } from './plans'
@@ -27,11 +28,11 @@ export function PricingPage() {
       {currencies.length > 1 && (
         <label className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
           Currency
-          <select value={currency} onChange={(event) => setCurrency(event.target.value)} className="rounded-md border border-input bg-background px-2 py-1">
+          <NativeSelect size="sm" value={currency} onChange={(event) => setCurrency(event.target.value)}>
             {currencies.map((code) => (
-              <option key={code}>{code}</option>
+              <NativeSelectOption key={code}>{code}</NativeSelectOption>
             ))}
-          </select>
+          </NativeSelect>
         </label>
       )}
       <div className="grid gap-6 sm:grid-cols-2">

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useAuth } from './useAuth'
 
 export function RegisterForm({ onSuccess }: { onSuccess?: (email: string) => void }) {
@@ -25,35 +27,31 @@ export function RegisterForm({ onSuccess }: { onSuccess?: (email: string) => voi
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto flex max-w-sm flex-col gap-3 p-8">
-      <h1 className="text-2xl font-semibold">Create an account</h1>
-
-      <input
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <Input
         type="email"
         required
+        aria-label="Email"
         placeholder="Email"
+        autoComplete="email"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        className="rounded border border-gray-300 px-3 py-2"
       />
-      <input
+      <Input
         type="password"
         required
+        aria-label="Password"
         placeholder="Password"
+        autoComplete="new-password"
         value={password}
         onChange={(event) => setPassword(event.target.value)}
-        className="rounded border border-gray-300 px-3 py-2"
       />
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={submitting}>
         {submitting ? 'Creating account…' : 'Create account'}
-      </button>
+      </Button>
     </form>
   )
 }

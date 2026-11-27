@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { api } from '../../lib/api/client'
 import { setTokens } from '../../lib/api/authTokens'
+import { AuthCard } from './AuthCard'
 
 // Where the API sends the browser back after signing in with Google or GitHub:
 // /external-login#refreshToken=... or /external-login#error=...
@@ -36,16 +37,15 @@ export function ExternalLoginPage() {
   }, [navigate, refreshToken])
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-3 p-8">
-      <h1 className="text-2xl font-semibold">Signing in</h1>
+    <AuthCard title="Signing in">
       {error ? (
         <>
-          <p role="alert" className="text-sm text-red-600">{error}</p>
-          <Link to="/login" className="text-sm text-indigo-600 hover:underline">Back to log in</Link>
+          <p role="alert" className="text-sm text-destructive">{error}</p>
+          <Link to="/login" className="text-sm text-primary hover:underline">Back to log in</Link>
         </>
       ) : (
-        <p className="text-gray-500">One moment…</p>
+        <p className="text-muted-foreground">One moment…</p>
       )}
-    </div>
+    </AuthCard>
   )
 }

@@ -58,8 +58,9 @@ export async function openFromNav(page: Page, name: 'Todos' | 'Settings' | 'Admi
 }
 
 export async function logOut(page: Page) {
-  await page.getByRole('banner').locator('summary').click()
-  await page.getByRole('button', { name: 'Log out' }).click()
+  // The user menu: the button with the user's name in the header.
+  await page.getByRole('banner').locator('[data-slot="dropdown-menu-trigger"]').click()
+  await page.getByRole('menuitem', { name: 'Log out' }).click()
   await expect(page).toHaveURL(/\/login$/)
 }
 
