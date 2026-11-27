@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api/client'
 import { setTokens } from '../../lib/api/authTokens'
 import { problemMessage } from '../../lib/api/problemDetails'
-import { addPasskey } from '../../lib/passkeys'
+import { addPasskey, passkeysSupported } from '../../lib/passkeys'
 
 export const accountKeys = {
   me: ['me'] as const,
@@ -100,6 +100,8 @@ export function usePasskeys() {
       if (!response.ok || !data) throw new Error('Could not load your passkeys.')
       return data
     },
+    // Settings hides passkeys where the browser can't use them.
+    enabled: passkeysSupported(),
   })
 }
 

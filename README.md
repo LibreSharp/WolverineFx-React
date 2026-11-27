@@ -164,7 +164,14 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 - **Data Protection keys in PostgreSQL**, so email links and other protected tokens work across
   restarts and instances.
 
-### Tests (`--IncludeTests true`, the default)
+### Tests
+
+- **Client unit tests** (always included): Vitest and React Testing Library with the API faked
+  by [MSW](https://mswjs.io/), next to the code they test, covering the Todo page and, with
+  `--Identity true`, the token refresh, every sign-in page, route guards, Settings and the admin
+  page.
+
+With `--IncludeTests true` (the default):
 
 - A `tests/` project (xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers) that
   boots the real app against a throwaway Postgres and drives it over HTTP, so one project covers
@@ -224,5 +231,6 @@ The nuget.org page shows `nuget/README.md`; this README is for working on the te
 
 
 CI generates all 8 parameter combinations on every push: it builds them, runs the integration
-tests against a real Postgres (Testcontainers), builds the container image, and publishes and
+tests against a real Postgres (Testcontainers) and the client's unit tests, builds the container
+image, and publishes and
 starts each one in Production. See [ROADMAP.md](ROADMAP.md) for what's next.

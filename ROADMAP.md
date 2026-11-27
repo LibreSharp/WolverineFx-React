@@ -148,7 +148,7 @@ billing records but no payment provider (see the
       every endpoint's metadata, so a new one that forgets `[Authorize]`, the Admin role or rate
       limiting fails. Not covered: the SMTP sender against a real server (checked by hand with
       Mailpit) and the provider round trip for Google/GitHub (needs real accounts).
-- [ ] **Frontend unit tests:** Vitest and React Testing Library for the auth, account, admin and
+- [x] **Frontend unit tests:** Vitest and React Testing Library for the auth, account, admin and
       Todo components and hooks (forms, error and notice messages, route guards, passkey and
       external sign-in pages), run in CI for every combination.
 - [ ] **End-to-end tests:** Playwright in CI against the published app and Mailpit: register,

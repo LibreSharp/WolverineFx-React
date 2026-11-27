@@ -1,18 +1,25 @@
-import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api/client'
 import { getTokens, setTokens, subscribeTokens } from '../../lib/api/authTokens'
 import { problemMessage } from '../../lib/api/problemDetails'
+import { authOptionsKey } from './authQueries'
 import { AuthContext, type LoginRefusal, type LoginResult } from './useAuth'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const tokens = useSyncExternalStore(subscribeTokens, getTokens)
   const queryClient = useQueryClient()
 
-  // Signed out (logout, or a refresh token that was rejected): drop all cached data, so the
-  // next person to log in on this browser never sees the previous user's Todos.
+  // Just signed out (logout, or a refresh token that was rejected): drop the user's cached data,
+  // so the next person to log in on this browser never sees the previous user's Todos. Only on
+  // a change from signed in, and keeping the public sign-in options, which pages that are still
+  // showing (the header, the login page) depend on.
+  const wasSignedIn = useRef(tokens !== null)
   useEffect(() => {
-    if (!tokens) queryClient.clear()
+    if (wasSignedIn.current && !tokens) {
+      queryClient.removeQueries({ predicate: (query) => query.queryKey[0] !== authOptionsKey[0] })
+    }
+    wasSignedIn.current = tokens !== null
   }, [tokens, queryClient])
 
   const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {

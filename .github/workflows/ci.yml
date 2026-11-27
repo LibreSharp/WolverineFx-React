@@ -76,6 +76,14 @@ jobs:
           npm ci
           npm run build
 
+      # Vitest and React Testing Library, with the API faked by MSW; and oxlint. The client's
+      # tests live in src/Client, so they run whatever --IncludeTests says.
+      - name: Client unit tests and lint
+        working-directory: ${{ env.APP_DIR }}/src/Client
+        run: |
+          npm test
+          npm run lint
+
       # Testcontainers starts a throwaway Postgres; GitHub's Ubuntu runners have Docker preinstalled.
       - name: Test
         if: ${{ matrix.tests }}

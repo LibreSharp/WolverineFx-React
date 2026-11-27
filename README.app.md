@@ -78,6 +78,7 @@ src/Client/src/
   features/admin/         Admin page (/admin): users, roles, locks and invitations
 <!--#endif -->
   lib/api/                Typed API client generated from the OpenAPI document
+  test/                   Unit test setup: the fake API (MSW) and render helpers
 <!--#if (IncludeTests) -->
 tests/ApiHost.Tests/        Integration tests against a real PostgreSQL
 <!--#endif -->
@@ -218,6 +219,7 @@ any OpenTelemetry backend, such as Grafana, Honeycomb or a self-hosted Jaeger.
 <!--#if (IncludeTests) -->
 | Run the tests (Docker must be running) | `dotnet test` |
 <!--#endif -->
+| Run the client's unit tests | `npm test` in `src/Client` (or `npm run test:watch`) |
 | Update the client's API types | `npm run gen:api` in `src/Client`, with the API running |
 | Lint the client | `npm run lint` in `src/Client` |
 <!--#if (IsEfCore) -->
@@ -235,18 +237,34 @@ Marten creates and updates its tables automatically when the app starts.
 <!--#endif -->
 <!--#if (IncludeTests) -->
 
-The tests start their own throwaway PostgreSQL in Docker (Testcontainers) and call the API over
-HTTP with [Alba](https://jasperfx.github.io/alba/). They cover:
+The API tests start their own throwaway PostgreSQL in Docker (Testcontainers) and call the API
+over HTTP with [Alba](https://jasperfx.github.io/alba/). They cover:
 
-- the Todo endpoints and validation,
-- the background `TodoCompleted` handler (with Wolverine's message tracking),
+- the Todo endpoints and validation, health checks, security headers and the API reference,
+- the background `TodoCompleted` handler and scheduled reminders (with Wolverine's message
+  tracking),
 - SignalR notifications, received by real SignalR clients,
 <!--#if (IsMarten) -->
 - the Todo event stream,
 <!--#endif -->
 <!--#if (Identity) -->
-- registration, login, token refresh and reuse detection, logout, and per-user access.
+- registration and email confirmation (following the links in captured emails), login, token
+  refresh and reuse detection, logout and per-user access,
+- account settings, email changes, password reset, account deletion, lockout and rate limiting,
+- roles, the admin endpoints and invitations, Google/GitHub sign-in rules, and passkeys (with a
+  software authenticator, so ASP.NET Core Identity's real WebAuthn checks run),
+- every endpoint's security attributes (`EndpointSecurityTests`): a new account or admin
+  endpoint that forgets `[Authorize]`, the Admin role or rate limiting fails it.
 <!--#endif -->
+<!--#endif -->
+
+The client's unit tests (`npm test` in `src/Client`) use Vitest and React Testing Library, with
+the API faked by [MSW](https://mswjs.io/). They sit next to the code they test (`*.test.tsx`) and
+<!--#if (Identity) -->
+cover the Todo page, the API client's token refresh, the login, registration, email-link,
+invitation and external sign-in pages, route guards, Settings and the admin page.
+<!--#else -->
+cover the Todo page and the API client.
 <!--#endif -->
 
 ## Deploying

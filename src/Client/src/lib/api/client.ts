@@ -2,7 +2,13 @@ import createClient from 'openapi-fetch'
 import type { paths } from './schema'
 import { getTokens, setTokens } from './authTokens'
 
-export const api = createClient<paths>({ baseUrl: '/' })
+// The page's own origin: the same as a relative URL in the browser, and resolvable in tests.
+// fetch is looked up on each call (openapi-fetch would otherwise keep the one that existed when
+// this module loaded), so the unit tests' fake API (MSW) sees the requests.
+export const api = createClient<paths>({
+  baseUrl: window.location.origin,
+  fetch: (request) => globalThis.fetch(request),
+})
 
 let refreshPromise: Promise<boolean> | null = null
 
@@ -42,7 +48,9 @@ api.use({
     return request
   },
   async onResponse({ request, response }) {
-    if (response.status === 401 && !request.headers.has('X-Retried-After-Refresh')) {
+    // A refused refresh token must not trigger another refresh: that would wait on itself.
+    const isRefresh = new URL(request.url).pathname === '/api/auth/refresh'
+    if (response.status === 401 && !isRefresh && !request.headers.has('X-Retried-After-Refresh')) {
       const refreshed = await refreshTokens()
       if (refreshed) {
         const retryRequest = new Request(request)

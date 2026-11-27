@@ -26,6 +26,7 @@ Guidance for AI coding assistants working on ApiHost. See README.md for the full
 <!--#endif -->
 | Run the API | `docker compose up -d` then `dotnet run --project src/ApiHost` |
 | Run the client | `npm run dev` in `src/Client` |
+| Test the client | `npm test` in `src/Client` (`npm run test:watch` while working) |
 | Lint and type-check the client | `npm run lint` and `npm run build` in `src/Client` |
 | Regenerate the client's API types | `npm run gen:api` in `src/Client`, with the API running |
 <!--#if (IsEfCore) -->
@@ -86,15 +87,27 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
 - Access tokens stay in memory (`lib/api/authTokens.ts`); don't move them to browser storage.
 <!--#endif -->
 
-<!--#if (IncludeTests) -->
 ## Tests
+
+Client unit tests (Vitest and React Testing Library) sit next to the code they test
+(`*.test.tsx`) and fake the API with MSW: add a handler with `server.use(http.get('*/api/...'))`,
+and render pages with `renderPage`/`renderRoutes` from `src/test/render.tsx`. Unhandled requests
+fail the test. Find elements the way users do (roles, labels, text), not by class names.
+<!--#if (Identity) -->
+`features/auth/testing.tsx` signs in, fakes `/api/auth/me`, and fakes the browser's passkey API.
+<!--#endif -->
+<!--#if (IncludeTests) -->
 
 Integration tests in `tests/ApiHost.Tests` start a real PostgreSQL with Testcontainers and call
 the API over HTTP with Alba. Add tests next to the existing ones for new endpoints. For messages,
 wrap the call in `_fixture.Host.ExecuteAndWaitAsync(...)` and assert on the tracked session;
 scheduled messages can be played immediately with `PlayScheduledMessagesAsync`.
-
+<!--#if (Identity) -->
+Account emails are captured (`_fixture.Emails`); follow their links with `LinkQuery`. New
+endpoints must keep `EndpointSecurityTests` passing (login, roles, rate limiting).
 <!--#endif -->
+<!--#endif -->
+
 ## Don't
 
 - Commit `src/ApiHost/Internal/Generated/` (`dotnet publish` generates it) or `deploy/.env`.
