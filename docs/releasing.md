@@ -26,6 +26,6 @@ So the workflow can publish without a stored API key (nuget.org Trusted Publishi
 ## After releasing
 
 - Check the package page on nuget.org, then try it:
-  `dotnet new install LibreSharp.Templates.WolverineFxReact::<version>` and generate a project.
+  `dotnet new install LibreSharp.Templates.WolverineFxReact@<version>` and generate a project.
 - Update the template's entry on the [LibreSharp site](https://libresharp.github.io/templates/)
   if what it offers changed.

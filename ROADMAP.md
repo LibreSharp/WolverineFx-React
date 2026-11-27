@@ -106,7 +106,7 @@ billing records but no payment provider (see the
       for AI coding assistants, Dependabot config (grouped updates), central package management
       (`Directory.Packages.props`), and the free Meziantou.Analyzer (0 warnings).
 
-### v0.3: better accounts (inside `--Identity true`; still 8 combinations)
+### v0.3: better accounts (inside `--Identity true`; still 8 combinations), released 27 November 2026
 
 - [x] **Email:** confirmation (required to log in), confirmed email changes and password reset,
       sent through the Wolverine outbox so no email is lost on a restart, with the one-time
@@ -135,7 +135,7 @@ billing records but no payment provider (see the
       15 minutes) through `SignInManager.CheckPasswordSignInAsync`; refresh tokens stop working
       while locked, and a password reset lifts it.
 
-### v0.3 wrap-up: documentation and test coverage (before tagging v0.3.0)
+### v0.3 wrap-up: documentation and test coverage (shipped in v0.3.0)
 
 - [x] **Security section in the generated README:** every security measure described (sign-in,
       tokens, emails, lockout, rate limits, headers, roles, data protection, deployment) without
