@@ -99,6 +99,7 @@
             "README.app.md": "README.md",
             "CLAUDE.app.md": "CLAUDE.md",
             "AGENTS.app.md": "AGENTS.md",
+            "docs.app": "docs",
             "dependabot.app.yml": ".github/dependabot.yml"
           }
         },
@@ -108,7 +109,7 @@
         },
         {
           "condition": "(!IsEfCore)",
-          "exclude": [ "src/ApiHost/Data/EfCore/**", "src/ApiHost/Identity/EfCore/**" ]
+          "exclude": [ "src/ApiHost/Data/EfCore/**", "src/ApiHost/Identity/EfCore/**", "docs.app/how-to/add-a-migration.md" ]
         },
         {
           "condition": "(!Identity)",
@@ -128,6 +129,12 @@
             "tests/ApiHost.Tests/AdminEndpointsTests.cs",
             "tests/ApiHost.Tests/ExternalLoginTests.cs",
             "tests/ApiHost.Tests/EndpointSecurityTests.cs",
+            "docs.app/accounts.md",
+            "docs.app/how-to/configure-email.md",
+            "docs.app/how-to/set-up-external-sign-in.md",
+            "docs.app/how-to/add-a-role.md",
+            "docs.app/how-to/make-an-admin.md",
+            "docs.app/how-to/rotate-the-signing-key.md",
             "tests/e2e/specs/accounts.spec.ts",
             "tests/e2e/specs/admin.spec.ts",
             "tests/e2e/specs/passkeys.spec.ts",

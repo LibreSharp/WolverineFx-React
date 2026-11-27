@@ -191,9 +191,12 @@ With `--IncludeTests true` (the default):
 
 ### Developer experience
 
-- **A README for the generated app** (`README.app.md`, renamed to `README.md`): running it, the
-  project layout, how the example works, adding a feature, common tasks, deployment and
-  security, matching the chosen options.
+- **Documentation for the generated app:** a short README (running it, the project layout,
+  common tasks) and a `docs/` folder (from `docs.app/` here) with architecture, accounts,
+  security, testing, observability and deployment pages, plus how-to guides: add a feature,
+  change the database schema, send email through your provider, set up Google/GitHub sign-in,
+  add a role, make someone an admin, and change the JWT signing key. Each app gets only the
+  pages that match its options.
 - **Help for AI coding assistants:** `AGENTS.md` (with `CLAUDE.md` importing it) describes the
   app's conventions and the rules that are easy to miss.
 - **Housekeeping:** central package management (`Directory.Packages.props`), the free Meziantou

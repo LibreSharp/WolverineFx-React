@@ -1,6 +1,8 @@
 # AGENTS.md
 
-Guidance for AI coding assistants working on ApiHost. See README.md for the full picture.
+Guidance for AI coding assistants working on ApiHost. See README.md for the overview and `docs/`
+for how each part works (architecture, accounts, security, testing, deployment) and how-to guides
+for common changes.
 
 ## Stack
 
@@ -114,6 +116,11 @@ End-to-end tests in `tests/e2e/specs` use Playwright against the running app. Na
 app's own links after logging in: `page.goto` reloads the page, which signs out (tokens are in
 memory only).
 <!--#endif -->
+
+## Documentation
+
+When a change alters behaviour, configuration or a security measure, update the matching page in
+`docs/` (and the settings table in `docs/deployment.md` for a new setting) in the same change.
 
 ## Don't
 

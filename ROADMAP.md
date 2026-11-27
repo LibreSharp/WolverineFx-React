@@ -155,6 +155,10 @@ billing records but no payment provider (see the
       confirm by email, log in, Todos with realtime updates, settings, admin page, lockout.
       Passkeys with Chrome's virtual authenticator.
 
+- [x] **A `docs/` folder in generated apps:** the README slimmed to an overview, with
+      architecture, accounts, security, testing, observability and deployment pages and how-to
+      guides, each included only when it matches the app's options.
+
 ### v0.4: SaaS option
 
 - [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
