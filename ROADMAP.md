@@ -114,7 +114,11 @@ billing records but no payment provider (see the
       [MailKit](https://github.com/jstedfast/MailKit) (MIT) to send, and
       [Mailpit](https://github.com/axllent/mailpit) (MIT) in `docker-compose` to catch emails in
       development. Invitations come with the admin page.
-- [ ] **Roles and a small admin page:** list users, lock and unlock accounts, change roles.
+- [x] **Roles and a small admin page:** list and search users, lock and unlock accounts, change
+      roles (a fixed list in `AppRoles`, seeded to the role table), and invite people by email.
+      The first admins come from `Accounts:AdminEmails`; `Accounts:AllowRegistration=false`
+      makes accounts invitation-only. Marten's user store gained `IUserRoleStore`, so both
+      persistence options use `UserManager`'s role methods.
 - [ ] **External sign-in** with Google and GitHub.
 - [ ] **Passkeys** with ASP.NET Core Identity (added in .NET 10; confirm the API first).
 - [x] **Account lockout** after repeated failed logins: Identity's own lockout (5 attempts,

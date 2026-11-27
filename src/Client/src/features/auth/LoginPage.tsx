@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router'
+import { useAuthOptions } from './authQueries'
 import { LoginForm } from './LoginForm'
 import type { AuthLocationState } from './routeGuards'
 
 export function LoginPage() {
   const state = useLocation().state as AuthLocationState | null
+  const options = useAuthOptions()
 
   // After a successful login, GuestOnly redirects to the page the user was going to.
   return (
@@ -19,12 +21,14 @@ export function LoginPage() {
           Forgot your password?
         </Link>
       </p>
-      <p className="mt-2 text-center text-sm text-gray-500">
-        No account?{' '}
-        <Link to="/register" className="text-indigo-600 hover:underline">
-          Register
-        </Link>
-      </p>
+      {options.data?.allowRegistration !== false && (
+        <p className="mt-2 text-center text-sm text-gray-500">
+          No account?{' '}
+          <Link to="/register" className="text-indigo-600 hover:underline">
+            Register
+          </Link>
+        </p>
+      )}
     </div>
   )
 }

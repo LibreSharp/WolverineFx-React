@@ -59,6 +59,10 @@ Content-Type: application/json
 
 { "email": "demo@example.com" }
 
+### Admin: list users (the demo user is an admin in Development; others get 403)
+GET {{baseUrl}}/api/admin/users?search=example
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
 ### Without a token, the Todo endpoints answer 401
 GET {{baseUrl}}/api/todos
 

@@ -18,8 +18,7 @@ public static class LoginEndpoint
         LoginRequest request,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        JwtTokenService tokenService,
-        IRefreshTokenStore refreshTokenStore,
+        TokenIssuer tokenIssuer,
         CancellationToken cancellationToken)
     {
         var user = await userManager.FindByEmailAsync(request.Email);
@@ -34,7 +33,7 @@ public static class LoginEndpoint
         var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
         if (result.Succeeded)
         {
-            return TypedResults.Ok(await TokenIssuing.IssueAsync(user, userManager, tokenService, refreshTokenStore, cancellationToken));
+            return TypedResults.Ok(await tokenIssuer.IssueAsync(user, cancellationToken));
         }
 
         // While locked out, no password is checked and anyone is told so (Identity's behaviour;

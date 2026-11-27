@@ -1,4 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
+import { NotFound } from '../../components/NotFound'
+import { useMe } from '../account/accountQueries'
 import { useAuth } from './useAuth'
 
 // What the login page remembers: where to go after logging in, and a message to show (for
@@ -27,5 +29,14 @@ export function GuestOnly() {
   if (isAuthenticated) {
     return <Navigate to={state?.from?.pathname ?? '/todos'} replace />
   }
+  return <Outlet />
+}
+
+// Layout route for admin pages (inside RequireAuth): anyone without the Admin role sees the
+// not-found page. This only hides the page; the API checks the role on every admin request.
+export function RequireAdmin() {
+  const me = useMe()
+  if (me.isPending) return null
+  if (!me.data?.roles.includes('Admin')) return <NotFound />
   return <Outlet />
 }

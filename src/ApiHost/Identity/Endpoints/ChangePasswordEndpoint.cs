@@ -30,8 +30,8 @@ public static class ChangePasswordEndpoint
         ChangePasswordRequest request,
         ClaimsPrincipal principal,
         UserManager<ApplicationUser> userManager,
-        JwtTokenService tokenService,
         IRefreshTokenStore refreshTokenStore,
+        TokenIssuer tokenIssuer,
         CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(principal.GetUserId());
@@ -48,6 +48,6 @@ public static class ChangePasswordEndpoint
         }
 
         await refreshTokenStore.RevokeAllForUserAsync(user.Id, cancellationToken);
-        return TypedResults.Ok(await TokenIssuing.IssueAsync(user, userManager, tokenService, refreshTokenStore, cancellationToken));
+        return TypedResults.Ok(await tokenIssuer.IssueAsync(user, cancellationToken));
     }
 }

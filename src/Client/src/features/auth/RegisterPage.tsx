@@ -1,9 +1,23 @@
 import { Link, useNavigate } from 'react-router'
+import { useAuthOptions } from './authQueries'
 import { RegisterForm } from './RegisterForm'
 import type { AuthLocationState } from './routeGuards'
 
 export function RegisterPage() {
   const navigate = useNavigate()
+  const options = useAuthOptions()
+
+  if (options.data?.allowRegistration === false) {
+    return (
+      <div className="mx-auto flex max-w-sm flex-col gap-3 p-8">
+        <h1 className="text-2xl font-semibold">Create an account</h1>
+        <p className="text-sm text-gray-600">Accounts are by invitation only. Ask an administrator to invite you.</p>
+        <Link to="/login" className="text-sm text-indigo-600 hover:underline">
+          Log in
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div>

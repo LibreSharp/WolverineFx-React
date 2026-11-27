@@ -36,6 +36,8 @@ services:
 #endif
 #if (Identity)
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env}
+      Accounts__AdminEmails__0: ${ADMIN_EMAIL:-}
+      Accounts__AllowRegistration: ${ALLOW_REGISTRATION:-true}
       Email__Smtp__Host: ${SMTP_HOST:-}
       Email__Smtp__Port: ${SMTP_PORT:-587}
       Email__Smtp__Security: ${SMTP_SECURITY:-Auto}

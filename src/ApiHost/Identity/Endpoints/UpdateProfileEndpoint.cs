@@ -63,6 +63,6 @@ public static class UpdateProfileEndpoint
             return (result.ToValidationProblem(), []);
         }
 
-        return (TypedResults.Ok(new UpdateProfileResponse(MeResponse.From(user), confirmationSentTo)), messages);
+        return (TypedResults.Ok(new UpdateProfileResponse(await MeResponse.FromAsync(user, userManager), confirmationSentTo)), messages);
     }
 }

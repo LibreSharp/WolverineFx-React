@@ -58,7 +58,8 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   migrations by hand.
 <!--#endif -->
 <!--#if (Identity) -->
-- **Auth:** protect endpoints with `[Authorize]` and scope data to `user.GetUserId()`. Answer
+- **Auth:** protect endpoints with `[Authorize]` (or `[Authorize(Roles = AppRoles.Admin)]`; roles
+  are constants in `Identity/AppRoles.cs`) and scope data to `user.GetUserId()`. Answer
   404, not 403, for another user's data. Add `[EnableRateLimiting(AuthRateLimiting.Policy)]` to
   endpoints that check passwords or create accounts.
 - **User data:** a feature that stores data about a user must handle `AccountDeleted` and delete

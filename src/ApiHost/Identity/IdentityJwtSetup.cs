@@ -19,6 +19,8 @@ public static class IdentityJwtSetup
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<JwtTokenService>();
+        services.AddScoped<TokenIssuer>();
+        services.Configure<AccountOptions>(configuration.GetSection(AccountOptions.SectionName));
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("Missing 'Jwt' configuration section");
@@ -54,6 +56,7 @@ public static class IdentityJwtSetup
         {
             opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<SignInManager<ApplicationUser>>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<TokenIssuer>();
         });
 
         // A ready-made login for local development only.
@@ -61,6 +64,9 @@ public static class IdentityJwtSetup
         {
             services.AddHostedService<DevelopmentUserSeeder>();
         }
+
+        // After the development user, so it can be made an admin (Accounts:AdminEmails).
+        services.AddHostedService<RoleSeeder>();
 
         services.AddAccountEmail(configuration);
     }

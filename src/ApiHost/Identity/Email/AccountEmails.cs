@@ -16,9 +16,13 @@ public record SendPasswordReset(string UserId, string ClientUrl);
 
 public record SendEmailChangeConfirmation(string UserId, string NewEmail, string ClientUrl);
 
+// InvitedBy is the inviting admin's name or email, shown in the email.
+public record SendInvitation(string UserId, string InvitedBy, string ClientUrl);
+
 // Sends the emails. Each handler creates the one-time token itself, when it runs, so no token is
 // ever stored in the message tables. Tokens are checked by the endpoints the links lead to
-// (ConfirmEmailEndpoint, ResetPasswordEndpoint, ConfirmEmailChangeEndpoint).
+// (ConfirmEmailEndpoint, ResetPasswordEndpoint, ConfirmEmailChangeEndpoint,
+// AcceptInvitationEndpoint).
 // Wolverine finds handlers by name: the class name must end in "Handler".
 public static class AccountEmailHandler
 {
@@ -87,6 +91,27 @@ public static class AccountEmailHandler
             {link}
 
             The link expires in a day. If you didn't ask for this, you can ignore this email.
+            """), cancellationToken);
+    }
+
+    // An account an admin created, with no password yet: the link lets the person choose one.
+    public static async Task Handle(
+        SendInvitation message, UserManager<ApplicationUser> userManager, IEmailSender emailSender, CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(message.UserId);
+        if (user?.Email is null || await userManager.HasPasswordAsync(user))
+        {
+            return;
+        }
+
+        var token = await userManager.GenerateUserTokenAsync(user, TokenProviders.Invitation, TokenProviders.AcceptInvitationPurpose);
+        var link = Link(message.ClientUrl, "accept-invitation", ("userId", user.Id), ("email", user.Email), ("token", token));
+        await emailSender.SendAsync(new EmailMessage(user.Email, "You're invited", $"""
+            {message.InvitedBy} has invited you to create an account. To choose your password, open:
+
+            {link}
+
+            The link expires in a week. If you weren't expecting this, you can ignore this email.
             """), cancellationToken);
     }
 

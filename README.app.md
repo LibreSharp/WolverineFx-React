@@ -31,7 +31,7 @@ only talks to one origin.
 <!--#if (Identity) -->
 
 Log in as **demo@example.com** / **Demo123!**. This user is created at startup in Development
-only, and the dev server pre-fills the login form with it. Change it under `DevelopmentUser` in
+only, is an admin (so `/admin` works), and the dev server pre-fills the login form with it. Change it under `DevelopmentUser` in
 `src/ApiHost/appsettings.Development.json` and in `src/Client/.env.development`.
 
 `docker compose up -d` also starts [Mailpit](https://mailpit.axllent.org/), which catches every
@@ -64,6 +64,7 @@ src/ApiHost/
 <!--#if (Identity) -->
   Identity/               Users, JWT tokens, refresh tokens, auth and account endpoints
   Identity/Email/         Account emails: messages, their handler, and the SMTP sender (MailKit)
+  Identity/Admin/         Admin endpoints: users, roles, locks and invitations
 <!--#endif -->
 src/Client/src/
   App.tsx                 Routes (React Router)
@@ -72,6 +73,7 @@ src/Client/src/
 <!--#if (Identity) -->
   features/auth/          Login, register, email confirmation and password reset pages, route guards
   features/account/       Settings page and the header's user menu
+  features/admin/         Admin page (/admin): users, roles, locks and invitations
 <!--#endif -->
   lib/api/                Typed API client generated from the OpenAPI document
 <!--#if (IncludeTests) -->
@@ -131,6 +133,13 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   Core Identity's lockout, set in `Identity/IdentityJwtSetup.cs`). While locked, login answers
   403 without checking the password, refresh tokens stop working, and resetting the password
   lifts the lock.
+- **Roles and the admin page** (`/admin`, Admin role only). Roles are constants in
+  `Identity/AppRoles.cs`, created in the database at startup (`RoleSeeder`); protect endpoints
+  with `[Authorize(Roles = AppRoles.Admin)]`. Admins list and search users, change their roles,
+  lock and unlock accounts (an admin lock has no end and ends the user's sessions), and invite
+  people: an invitation creates the account and emails a link to choose a password. Accounts
+  whose email is in `Accounts:AdminEmails` become admins once their email is confirmed. Set
+  `Accounts:AllowRegistration` to `false` to make accounts invitation-only.
 <!--#endif -->
 
 ## Adding a feature
@@ -252,6 +261,8 @@ Configure it with environment variables (or any ASP.NET Core configuration sourc
 <!--#if (Identity) -->
 | `Jwt__SigningKey` | A random secret of at least 32 bytes |
 | `Email__Smtp__Host`, `Email__Smtp__Port`, `Email__Smtp__UserName`, `Email__Smtp__Password`, `Email__Smtp__From` | Your email service's SMTP settings, for account emails |
+| `Accounts__AdminEmails__0` | Your email: that account becomes an admin once its email is confirmed (more: `__1`, `__2`, ...) |
+| `Accounts__AllowRegistration` | `false` to allow only invited people to create accounts (default `true`) |
 | `Email__Smtp__Security` | `Auto` (default: TLS when the server offers it), `StartTls`, `SslOnConnect` (port 465) or `None` |
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still

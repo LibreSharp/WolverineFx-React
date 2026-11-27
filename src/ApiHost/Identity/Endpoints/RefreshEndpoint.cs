@@ -49,7 +49,7 @@ public static class RefreshEndpoint
             return TypedResults.Unauthorized();
         }
 
-        var roles = await userManager.GetUserRolesAsync(user);
+        var roles = await userManager.GetRolesAsync(user);
         var (accessToken, expiresAtUtc) = tokenService.CreateAccessToken(user, roles);
 
         var newRefreshTokenPlaintext = JwtTokenService.GenerateRefreshTokenPlaintext();

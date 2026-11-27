@@ -6,21 +6,22 @@ using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
 
-public record MeResponse(string UserId, string Email, string? DisplayName)
+public record MeResponse(string UserId, string Email, string? DisplayName, IReadOnlyList<string> Roles)
 {
-    public static MeResponse From(ApplicationUser user) => new(user.Id, user.Email ?? string.Empty, user.DisplayName);
+    public static async Task<MeResponse> FromAsync(ApplicationUser user, UserManager<ApplicationUser> userManager)
+        => new(user.Id, user.Email ?? string.Empty, user.DisplayName, [.. await userManager.GetRolesAsync(user)]);
 }
 
 public static class MeEndpoint
 {
-    // Read from the database rather than the token's claims, so a changed email or display
-    // name shows straight away.
+    // Read from the database rather than the token's claims, so a changed email, display name or
+    // role shows straight away.
     [Authorize]
     [WolverineGet("/api/auth/me")]
     public static async Task<Results<Ok<MeResponse>, UnauthorizedHttpResult>> Get(
         ClaimsPrincipal principal, UserManager<ApplicationUser> userManager)
     {
         var user = await userManager.FindByIdAsync(principal.GetUserId());
-        return user is null ? TypedResults.Unauthorized() : TypedResults.Ok(MeResponse.From(user));
+        return user is null ? TypedResults.Unauthorized() : TypedResults.Ok(await MeResponse.FromAsync(user, userManager));
     }
 }

@@ -19,12 +19,18 @@ public class JwtTokenService
     {
         var expiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(_options.AccessTokenLifetimeMinutes);
 
-        var claims = new List<Claim>
+        var claims = new Dictionary<string, object>(StringComparer.Ordinal)
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            [JwtRegisteredClaimNames.Sub] = user.Id,
+            [JwtRegisteredClaimNames.Email] = user.Email ?? string.Empty,
         };
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+        // One claim per role (a JSON array in the token), read by [Authorize(Roles = ...)].
+        var roleNames = roles.ToArray();
+        if (roleNames.Length > 0)
+        {
+            claims[ClaimTypes.Role] = roleNames;
+        }
 
         var signingKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_options.SigningKey));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
@@ -34,7 +40,7 @@ public class JwtTokenService
         {
             Issuer = _options.Issuer,
             Audience = _options.Audience,
-            Claims = claims.ToDictionary(c => c.Type, c => (object)c.Value, StringComparer.Ordinal),
+            Claims = claims,
             Expires = expiresAtUtc.UtcDateTime,
             SigningCredentials = credentials
         });
