@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { useMe } from '../account/accountQueries'
+import { BillingSection } from '../billing/BillingSection'
 import {
   canManageMembers,
   roles,
@@ -48,6 +49,7 @@ export function OrganisationPage() {
     <div key={organisation.data.id} className="mx-auto max-w-3xl space-y-6 px-6 py-10">
       <h1 className="text-2xl font-semibold">{organisation.data.name}</h1>
       {role === 'Owner' && <RenameSection name={organisation.data.name} />}
+      <BillingSection />
       <MembersSection myRole={role} />
       {canManageMembers(role) && <InvitationsSection myRole={role} />}
       <CreateSection />

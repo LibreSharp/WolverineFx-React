@@ -6,6 +6,7 @@ import { index, layout, route, type RouteConfig } from '@react-router/dev/routes
 // When you add a page, add its path to pages.ts too.
 export default [
   index('routes/home.tsx'),
+  route('pricing', 'routes/pricing.tsx'),
   // Opened from links in emails, signed in or not.
   route('confirm-email', 'routes/confirm-email.tsx'),
   route('confirm-email-change', 'routes/confirm-email-change.tsx'),

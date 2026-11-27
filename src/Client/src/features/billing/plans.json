@@ -1,0 +1,80 @@
+{
+  "plans": [
+    {
+      "id": "free",
+      "version": 1,
+      "name": "Free",
+      "description": "For trying the app and for small teams.",
+      "isFree": true,
+      "prices": [],
+      "features": [
+        {
+          "name": "TodoReminders",
+          "description": "Todo reminders",
+          "included": false
+        }
+      ],
+      "limits": [
+        {
+          "name": "OpenTodos",
+          "description": "Open Todos",
+          "limit": 25
+        },
+        {
+          "name": "Members",
+          "description": "Members",
+          "limit": 3
+        },
+        {
+          "name": "Reminders",
+          "description": "Reminders a month",
+          "limit": 0
+        }
+      ]
+    },
+    {
+      "id": "pro",
+      "version": 1,
+      "name": "Pro",
+      "description": "For teams that rely on the app every day.",
+      "isFree": false,
+      "prices": [
+        {
+          "currency": "USD",
+          "monthlyAmount": 1200
+        },
+        {
+          "currency": "EUR",
+          "monthlyAmount": 1100
+        }
+      ],
+      "features": [
+        {
+          "name": "TodoReminders",
+          "description": "Todo reminders",
+          "included": true
+        }
+      ],
+      "limits": [
+        {
+          "name": "OpenTodos",
+          "description": "Open Todos",
+          "limit": null
+        },
+        {
+          "name": "Members",
+          "description": "Members",
+          "limit": 50
+        },
+        {
+          "name": "Reminders",
+          "description": "Reminders a month",
+          "limit": 1000
+        }
+      ]
+    }
+  ],
+  "trialDays": 14,
+  "trialPlanId": "pro",
+  "currency": "USD"
+}

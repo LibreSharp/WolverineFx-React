@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ApiHost.Billing;
 using ApiHost.Identity;
 using ApiHost.Organisations;
 using FluentValidation;
@@ -56,11 +57,12 @@ public static class JoinOrganisationEndpoints
     // Then switch to the organisation (POST /api/organisations/switch) to work in it.
     [Authorize]
     [WolverinePost("/api/join")]
-    public static async Task<Results<Ok<JoinOrganisationResponse>, NotFound, ValidationProblem>> Accept(
+    public static async Task<Results<Ok<JoinOrganisationResponse>, NotFound, ValidationProblem, ProblemHttpResult>> Accept(
         JoinOrganisationRequest request,
         ClaimsPrincipal principal,
         IOrganisationStore store,
         OrganisationAccess organisations,
+        Entitlements entitlements,
         UserManager<ApplicationUser> userManager,
         TimeProvider clock,
         CancellationToken cancellationToken)
@@ -77,6 +79,11 @@ public static class JoinOrganisationEndpoints
             return IdentityResultExtensions.ValidationProblem("Token", $"This invitation is for {invitation.Email}: log in with that email to accept it.");
         }
 
+        if (await RoomRefusedAsync(entitlements, invitation, cancellationToken) is { } refused)
+        {
+            return refused;
+        }
+
         await organisations.JoinAsync(invitation, user.Id, cancellationToken);
         return TypedResults.Ok(new JoinOrganisationResponse(invitation.OrganisationId));
     }
@@ -84,10 +91,11 @@ public static class JoinOrganisationEndpoints
     // Creates the account, joins, and signs in: the session starts in the organisation.
     [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/join/register")]
-    public static async Task<Results<Ok<LoginResponse>, NotFound, ValidationProblem>> Register(
+    public static async Task<Results<Ok<LoginResponse>, NotFound, ValidationProblem, ProblemHttpResult>> Register(
         JoinWithNewAccountRequest request,
         IOrganisationStore store,
         OrganisationAccess organisations,
+        Entitlements entitlements,
         UserManager<ApplicationUser> userManager,
         TokenIssuer tokenIssuer,
         TimeProvider clock,
@@ -104,6 +112,11 @@ public static class JoinOrganisationEndpoints
             return IdentityResultExtensions.ValidationProblem("Token", "You already have an account: log in to accept the invitation.");
         }
 
+        if (await RoomRefusedAsync(entitlements, invitation, cancellationToken) is { } refused)
+        {
+            return refused;
+        }
+
         var user = new ApplicationUser { UserName = invitation.Email, Email = invitation.Email, EmailConfirmed = true };
         var created = await userManager.CreateAsync(user, request.Password);
         if (!created.Succeeded)
@@ -114,6 +127,13 @@ public static class JoinOrganisationEndpoints
         await organisations.JoinAsync(invitation, user.Id, cancellationToken);
         return TypedResults.Ok(await tokenIssuer.IssueAsync(user, replacing: null, invitation.OrganisationId, cancellationToken));
     }
+
+    // The invitation already counts towards the plan's Members limit, so joining adds nothing; but
+    // an organisation that has since moved to a smaller plan may have no room for it.
+    private static async Task<ProblemHttpResult?> RoomRefusedAsync(Entitlements entitlements, OrganisationInvitation invitation, CancellationToken cancellationToken)
+        => await entitlements.CanAddAsync(invitation.OrganisationId, PlanLimits.Members, 0, cancellationToken)
+            ? null
+            : TypedResults.Problem(await entitlements.LimitReachedAsync(invitation.OrganisationId, PlanLimits.Members, cancellationToken));
 
     // A valid, unexpired invitation for the link's token.
     private static async Task<OrganisationInvitation?> FindAsync(IOrganisationStore store, string token, TimeProvider clock, CancellationToken cancellationToken)

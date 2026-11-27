@@ -17,7 +17,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261127074218_AddOrganisations";
+    public override string LastMigrationId => "20261127132647_AddBilling";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -28,6 +28,84 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
             .HasAnnotation("WolverineEnabled", "true");
 
         NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+        modelBuilder.Entity("ApiHost.Billing.BillingAccount", b =>
+            {
+                b.Property<Guid>("Id")
+                    .HasColumnType("uuid");
+
+                b.Property<bool>("CancelAtPeriodEnd")
+                    .HasColumnType("boolean");
+
+                b.Property<string>("Currency")
+                    .HasMaxLength(3)
+                    .HasColumnType("character varying(3)");
+
+                b.Property<DateTimeOffset?>("CurrentPeriodEnd")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<DateTimeOffset?>("CurrentPeriodStart")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("CustomerId")
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)");
+
+                b.Property<string>("PlanId")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<int>("PlanVersion")
+                    .HasColumnType("integer");
+
+                b.Property<string>("Provider")
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<string>("Status")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<string>("SubscriptionId")
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)");
+
+                b.Property<DateTimeOffset?>("TrialEndsAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<DateTimeOffset>("UpdatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.HasKey("Id");
+
+                b.HasIndex("CustomerId");
+
+                b.HasIndex("SubscriptionId");
+
+                b.ToTable("BillingAccounts");
+            });
+
+        modelBuilder.Entity("ApiHost.Billing.PeriodUsage", b =>
+            {
+                b.Property<Guid>("OrganisationId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("LimitName")
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<DateTimeOffset>("PeriodStart")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<int>("Used")
+                    .HasColumnType("integer");
+
+                b.HasKey("OrganisationId", "LimitName", "PeriodStart");
+
+                b.ToTable("PeriodUsage");
+            });
 
         modelBuilder.Entity("ApiHost.Features.Todos.Todo", b =>
             {

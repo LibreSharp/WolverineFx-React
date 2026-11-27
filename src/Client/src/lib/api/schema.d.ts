@@ -304,6 +304,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/billing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_billing
+         * @description GET_api_billing
+         */
+        get: operations["GET_api_billing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_billing_plans
+         * @description GET_api_billing_plans
+         */
+        get: operations["GET_api_billing_plans"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/accept-invitation": {
         parameters: {
             query?: never;
@@ -951,6 +991,23 @@ export interface components {
             allowRegistration: boolean;
             externalProviders: components["schemas"]["ExternalProvider"][];
         };
+        BillingSummary: {
+            planId: string;
+            /** Format: int32 */
+            planVersion: number | string;
+            planName: string;
+            status: string;
+            /** Format: date-time */
+            trialEndsAt: null | string;
+            /** Format: date-time */
+            periodStart: string;
+            /** Format: date-time */
+            periodEnd: string;
+            cancelAtPeriodEnd: boolean;
+            features: string[];
+            limits: components["schemas"]["LimitUsage"][];
+            canManage: boolean;
+        };
         ChangeMemberRoleRequest: {
             role: string;
         };
@@ -1029,6 +1086,17 @@ export interface components {
             token: string;
             password: string;
         };
+        LimitUsage: {
+            name: string;
+            kind: string;
+            description: string;
+            /** Format: int32 */
+            limit: null | number | string;
+            /** Format: int32 */
+            used: number | string;
+            nearLimit?: boolean;
+            reached?: boolean;
+        };
         LinkedLogin: {
             provider: string;
             displayName: string;
@@ -1089,6 +1157,40 @@ export interface components {
             role: string;
             /** Format: date-time */
             expiresAt: string;
+        };
+        PlanCatalogueResponse: {
+            plans: components["schemas"]["PlanOffer"][];
+            /** Format: int32 */
+            trialDays: number | string;
+            trialPlanId: string;
+            currency: string;
+        };
+        PlanFeatureOffer: {
+            name: string;
+            description: string;
+            included: boolean;
+        };
+        PlanLimitOffer: {
+            name: string;
+            description: string;
+            /** Format: int32 */
+            limit: null | number | string;
+        };
+        PlanOffer: {
+            id: string;
+            /** Format: int32 */
+            version: number | string;
+            name: string;
+            description: string;
+            isFree: boolean;
+            prices: components["schemas"]["PlanPrice"][];
+            features: components["schemas"]["PlanFeatureOffer"][];
+            limits: components["schemas"]["PlanLimitOffer"][];
+        };
+        PlanPrice: {
+            currency: string;
+            /** Format: int64 */
+            monthlyAmount: number | string;
         };
         RedirectHttpResult: {
             permanent?: boolean;
@@ -1765,6 +1867,60 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_billing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingSummary"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_billing_plans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanCatalogueResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

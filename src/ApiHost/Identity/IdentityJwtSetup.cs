@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Wolverine;
 #if (Saas)
+using ApiHost.Billing;
 using ApiHost.Organisations;
 #endif
 #if (IsMarten)
@@ -50,6 +51,9 @@ public static class IdentityJwtSetup
 
         // Organisations: each user's data belongs to the organisation they work in (Organisations/).
         services.AddOrganisations(configuration);
+
+        // Plans, trials, feature flags and limits for each organisation (Billing/).
+        services.AddBilling(configuration);
 #endif
 
         // Limits login, registration and password attempts per client IP (see AuthRateLimiting).

@@ -76,6 +76,11 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   `IOrganisationStore` saves each change at once, outside the endpoint's transaction; a change
   that must send a message with it publishes through Wolverine's outbox in the store, as
   `DeleteAsync` and `AddInvitationAsync` do.
+- **Plans:** check what an organisation's plan allows through `Entitlements` (`Billing/`), never
+  by the plan's name: `RequireFeatureAsync`/`RequireRoomAsync` in a `Before` method, `TryUseAsync`
+  for PerPeriod limits, and `IsEnabledAsync` in handlers that run later. Plans, features and
+  limits are defined only in `Billing/Plans.cs`; change a plan customers are on by adding a
+  version. A downgrade never deletes data. See `docs/billing.md`.
 <!--#endif -->
 - **Auth:** protect endpoints with `[Authorize]` (or `[Authorize(Roles = AppRoles.Admin)]`; roles
   are constants in `Identity/AppRoles.cs`) and scope a user's own data to `user.GetUserId()`.

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { getTokens, setTokens } from '../../lib/api/authTokens'
 import { server } from '../../test/server'
 import { meHandler, renderWithAuth, signIn } from '../auth/testing'
+import { billingHandler } from '../billing/testing'
 import { JoinPage } from './JoinPage'
 import { OrganisationPage } from './OrganisationPage'
 import { OrganisationSwitcher } from './OrganisationSwitcher'
@@ -46,6 +47,7 @@ describe('OrganisationPage', () => {
         HttpResponse.json([member('me', 'me@example.com', 'Admin'), member('o', 'owner@example.com', 'Owner'), member('m', 'm@example.com', 'Member')]),
       ),
       http.get('*/api/organisation/invitations', () => HttpResponse.json([])),
+      billingHandler(),
     )
   })
 

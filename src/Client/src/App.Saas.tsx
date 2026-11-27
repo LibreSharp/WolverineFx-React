@@ -1,4 +1,4 @@
-import { Layout } from './components/Layout'
+import { Layout, NavItem } from './components/Layout'
 import { AccountActions, Navigation } from './features/account/AccountNavigation'
 import { AuthProvider } from './features/auth/AuthContext'
 import { OrganisationSwitcher } from './features/organisations/OrganisationSwitcher'
@@ -10,7 +10,12 @@ export function App() {
   return (
     <AuthProvider>
       <Layout
-        nav={<Navigation />}
+        nav={
+          <>
+            <Navigation />
+            <NavItem to="/pricing">Pricing</NavItem>
+          </>
+        }
         actions={
           <div className="flex items-center gap-4">
             <OrganisationSwitcher />

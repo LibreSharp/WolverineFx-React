@@ -207,8 +207,9 @@
         },
         {
           "condition": "(Saas)",
-          "exclude": [ "src/Client/src/App.WithIdentity.tsx", "src/Client/src/routes.WithIdentity.ts", "src/Client/src/pages.WithIdentity.ts" ],
+          "exclude": [ "src/Client/src/App.WithIdentity.tsx", "src/Client/src/routes.WithIdentity.ts", "src/Client/src/pages.WithIdentity.ts", "src/Client/src/routes/todos.tsx" ],
           "rename": {
+            "src/Client/src/routes/todos.Saas.tsx": "src/Client/src/routes/todos.tsx",
             "src/Client/src/App.Saas.tsx": "src/Client/src/App.tsx",
             "src/Client/src/routes.Saas.ts": "src/Client/src/routes.ts",
             "src/Client/src/pages.Saas.ts": "src/Client/src/pages.ts"
@@ -231,7 +232,7 @@
         },
         {
           "condition": "(!Saas)",
-          "exclude": [ "src/ApiHost/Organisations/**", "src/ApiHost/Features/Organisations/**", "tests/ApiHost.Tests/OrganisationTests.cs", "src/Client/src/App.Saas.tsx", "src/Client/src/routes.Saas.ts", "src/Client/src/pages.Saas.ts", "src/Client/src/features/organisations/**", "src/Client/src/routes/organisation.tsx", "src/Client/src/routes/join.tsx", "tests/e2e/specs/organisations.spec.ts", "src/ApiHost/Data/EfCore/Migrations.WithSaas/**", "src/ApiHost/Features/Todos/DeleteTodosOfDeletedOrganisationHandler.*.cs" ]
+          "exclude": [ "src/ApiHost/Organisations/**", "src/ApiHost/Features/Organisations/**", "src/ApiHost/Billing/**", "src/ApiHost/Features/Billing/**", "src/ApiHost/Features/Todos/OpenTodosUsage.*.cs", "tests/ApiHost.Tests/BillingTests.cs", "src/Client/src/features/billing/**", "src/Client/src/routes/pricing.tsx", "src/Client/src/routes/todos.Saas.tsx", "docs.app/billing.md", "tests/ApiHost.Tests/OrganisationTests.cs", "src/Client/src/App.Saas.tsx", "src/Client/src/routes.Saas.ts", "src/Client/src/pages.Saas.ts", "src/Client/src/features/organisations/**", "src/Client/src/routes/organisation.tsx", "src/Client/src/routes/join.tsx", "tests/e2e/specs/organisations.spec.ts", "src/ApiHost/Data/EfCore/Migrations.WithSaas/**", "src/ApiHost/Features/Todos/DeleteTodosOfDeletedOrganisationHandler.*.cs" ]
         },
         {
           "condition": "(Saas)",
@@ -266,6 +267,8 @@
           "rename": {
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127074218_AddOrganisations.cs": "src/ApiHost/Data/EfCore/Migrations/20261127074218_AddOrganisations.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127074218_AddOrganisations.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127074218_AddOrganisations.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127132647_AddBilling.cs": "src/ApiHost/Data/EfCore/Migrations/20261127132647_AddBilling.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127132647_AddBilling.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127132647_AddBilling.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
           }
         },

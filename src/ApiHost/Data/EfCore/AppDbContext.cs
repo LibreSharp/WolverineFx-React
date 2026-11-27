@@ -3,6 +3,7 @@ using ApiHost.Features.Todos;
 using ApiHost.Identity;
 #endif
 #if (Saas)
+using ApiHost.Billing;
 using ApiHost.Organisations;
 #endif
 #if (Identity)
@@ -39,6 +40,10 @@ public class AppDbContext : DbContext
     public DbSet<Membership> Memberships => Set<Membership>();
 
     public DbSet<OrganisationInvitation> OrganisationInvitations => Set<OrganisationInvitation>();
+
+    public DbSet<BillingAccount> BillingAccounts => Set<BillingAccount>();
+
+    public DbSet<PeriodUsage> PeriodUsage => Set<PeriodUsage>();
 #endif
 
 #if (Identity)
@@ -66,6 +71,25 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<OrganisationInvitation>().Property(i => i.Email).HasMaxLength(256);
         modelBuilder.Entity<OrganisationInvitation>().Property(i => i.NormalizedEmail).HasMaxLength(256);
         modelBuilder.Entity<OrganisationInvitation>().Property(i => i.Role).HasMaxLength(20);
+
+        modelBuilder.Entity<BillingAccount>(account =>
+        {
+            account.Property(a => a.Id).ValueGeneratedNever();
+            account.Property(a => a.PlanId).HasMaxLength(50);
+            account.Property(a => a.Status).HasMaxLength(20);
+            account.Property(a => a.Currency).HasMaxLength(3);
+            account.Property(a => a.Provider).HasMaxLength(20);
+            account.Property(a => a.CustomerId).HasMaxLength(255);
+            account.Property(a => a.SubscriptionId).HasMaxLength(255);
+            account.HasIndex(a => a.CustomerId);
+            account.HasIndex(a => a.SubscriptionId);
+        });
+        modelBuilder.Entity<PeriodUsage>(usage =>
+        {
+            usage.ToTable("PeriodUsage");
+            usage.HasKey(u => new { u.OrganisationId, u.LimitName, u.PeriodStart });
+            usage.Property(u => u.LimitName).HasMaxLength(50);
+        });
 #endif
     }
 #endif

@@ -1,5 +1,7 @@
 #if (Saas)
+using ApiHost.Billing;
 using ApiHost.Organisations;
+using Microsoft.AspNetCore.Mvc;
 #endif
 #if (Identity)
 using System.Security.Claims;
@@ -14,6 +16,14 @@ namespace ApiHost.Features.Todos;
 
 public static class CreateTodoEndpoint
 {
+#if (Saas)
+    // Plan limits: a new Todo needs room in the organisation's OpenTodos limit, or the request gets
+    // 402 Payment Required. Wolverine runs a Before method ahead of the endpoint, and stops there
+    // when it returns a problem.
+    public static Task<ProblemDetails> BeforeAsync(ClaimsPrincipal user, Entitlements entitlements, CancellationToken cancellationToken)
+        => entitlements.RequireRoomAsync(user.GetOrganisationId(), PlanLimits.OpenTodos, 1, cancellationToken);
+
+#endif
 #if (Identity)
     [Authorize]
     [WolverinePost("/api/todos")]

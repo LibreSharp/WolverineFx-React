@@ -53,6 +53,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
 <!--#endif -->
+<!--#if (Saas) -->
+    <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
+<!--#endif -->
   </ItemGroup>
 
   <!--

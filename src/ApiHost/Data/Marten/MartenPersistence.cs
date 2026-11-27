@@ -3,8 +3,11 @@ using ApiHost.Features.Todos;
 using ApiHost.Identity;
 #endif
 #if (Saas)
+using ApiHost.Billing;
 using ApiHost.Organisations;
 using JasperFx.MultiTenancy;
+using Weasel.Postgresql;
+using Weasel.Postgresql.Tables;
 #endif
 using JasperFx.Events.Projections;
 using JasperFx.OpenTelemetry;
@@ -54,7 +57,25 @@ public static class MartenPersistence
             opts.Schema.For<OrganisationInvitation>()
                 .Index(i => i.OrganisationId)
                 .UniqueIndex(i => i.TokenHash!);
+
+            // Billing: accounts are documents; PerPeriod usage is a plain table that BillingStore
+            // adds to with one SQL statement, so requests at the same moment can't pass a limit.
+            opts.Schema.For<BillingAccount>();
+            var usage = new Table(new PostgresqlObjectName(opts.DatabaseSchemaName, BillingStore.UsageTable, SchemaUtils.IdentifierUsage.General));
+            usage.AddColumn<Guid>("organisation_id").AsPrimaryKey();
+            usage.AddColumn<string>("limit_name").AsPrimaryKey();
+            usage.AddColumn<DateTimeOffset>("period_start").AsPrimaryKey();
+            usage.AddColumn<int>("used").NotNull();
+            opts.Storage.ExtendedSchemaObjects.Add(usage);
 #endif
+#if (Saas)
+        })
+            // Creates the tables at startup, including billing_usage, which Marten doesn't create
+            // on first use as it does for documents.
+            .ApplyAllDatabaseChangesOnStartup()
+            .IntegrateWithWolverine();
+#else
         }).IntegrateWithWolverine();
+#endif
     }
 }

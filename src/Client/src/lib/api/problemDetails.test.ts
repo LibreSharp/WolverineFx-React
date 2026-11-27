@@ -11,6 +11,11 @@ describe('problemMessage', () => {
     expect(problemMessage({ title: 'Registration is closed.' }, 'fallback')).toBe('Registration is closed.')
   })
 
+  it("explains a plan's limit or feature with the detail", () => {
+    const error = { status: 402, title: 'Plan limit reached', detail: 'The Free plan includes 25 open todos.' }
+    expect(problemMessage(error, 'fallback')).toBe('The Free plan includes 25 open todos.')
+  })
+
   it('falls back when the body is not ProblemDetails', () => {
     expect(problemMessage(undefined, 'fallback')).toBe('fallback')
     expect(problemMessage('oops', 'fallback')).toBe('fallback')

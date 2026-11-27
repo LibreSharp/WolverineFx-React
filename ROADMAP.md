@@ -237,15 +237,99 @@ Then the option:
 - [x] **Team invitations** by email, to existing users and to new ones (who create an account
       from the invitation).
 
-### v0.4.1: billing
+### v0.4.1: billing and a full back office
+
+Billing, inside `--Auth saas` (no new options):
 
 - [ ] **Stripe subscriptions:** Checkout and the customer portal, with Stripe webhooks turned
       into durable Wolverine messages (the outbox makes webhook handling reliable).
       [Stripe.net](https://github.com/stripe/stripe-dotnet) is open source (Apache-2.0); Stripe
       itself charges fees. Keep payments behind an interface so others can add Paddle or Lemon
       Squeezy, which handle sales tax and VAT.
-- [ ] **Plan limits** enforced per organisation.
-- [ ] **Admin back office:** organisations, users and subscriptions.
+- [x] **A plan catalogue:** plans, prices per currency, limits and features defined in one place.
+      Each plan has a version, so existing customers keep their price when plans change
+      ("grandfathering"). The pricing page is generated from it.
+- [x] **Free plans and trials:** a free plan is a plan with a price of zero. Trials include a
+      "reverse trial": a new organisation starts on the top plan for 14 days, then drops to the
+      free plan unless it upgrades.
+- [x] **Entitlements and plan limits,** enforced per organisation through one check: "can this
+      organisation use feature X?" and "how much of limit Y is left?". Wolverine middleware uses
+      it on commands, and the React client uses it to show or hide features and upgrade prompts.
+      Built on [Microsoft.FeatureManagement](https://github.com/microsoft/FeatureManagement-Dotnet)
+      (MIT), so feature flags and plan features are the same thing.
+- [x] **Usage counters** per organisation per billing period, for limits such as "100 items" or
+      "50 AI credits a month", with a warning at 80% and a stop at 100%.
+- [x] **Downgrades never delete data:** anything over a limit stays but becomes read-only until
+      the organisation is back under the limit, and paid features switch off.
+- [ ] **A local copy of billing state** (customer, subscription, plan, invoices), kept in step by
+      Stripe webhooks, so the app and the back office never call Stripe to answer "which plan is
+      this organisation on?".
+
+Admin back office. The admin page manages users only today; the bar for a full back office is
+the one in the [template comparison](https://libresharp.github.io/templates/) (PlatformPlatform:
+revenue, accounts, users, invoices and feature flags):
+
+- [ ] **Dashboard:** sign-ups, active organisations, monthly recurring revenue, trials ending and
+      failed payments.
+- [ ] **Organisations:** search; members; plan; usage against limits; invoices; extend a trial or
+      give a plan for free; suspend and delete; internal notes.
+- [ ] **Users:** as today, plus each user's organisations, ending their sessions, and resending
+      the confirmation email.
+- [ ] **Subscriptions and invoices:** read-only, with links to the Stripe dashboard. Refunds stay
+      in Stripe.
+- [ ] **Feature flags:** turn features on globally, per plan or per organisation.
+- [ ] **Audit log:** every admin action (who changed what, and when). Needed before "sign in as a
+      user" is ever added.
+- [ ] **Failed messages:** view and replay Wolverine's dead-letter queue, such as an email that
+      failed or a Stripe webhook that errored. JasperFx sells monitoring tooling for this; a small
+      free page fits this template's purpose.
+
+### v0.5 onwards: building blocks most SaaS apps need
+
+Added one at a time, in the order that real apps built on the template need them, and taken
+from that real use rather than designed in advance. No new options: each goes inside
+`--Auth identity` or `saas`, wherever it makes sense.
+
+- [ ] **API keys per organisation:** create, name, revoke and rotate; stored hashed; scopes (read,
+      or read and write); rate limits per key.
+- [ ] **Outgoing webhooks:** organisations register URLs for events. Each delivery is signed
+      (HMAC), sent from a durable Wolverine queue with retries, and logged with its response, so
+      owners can see failures and resend.
+- [ ] **Incoming webhooks, as a pattern:** check the signature, store the event, hand it to a
+      durable message and answer quickly. Billing builds this for Stripe; turn it into a reusable
+      helper with a worked example for other providers, such as chat platforms.
+- [ ] **File uploads** to S3-compatible storage (MinIO in `docker-compose` for development;
+      Cloudflare R2, Backblaze B2 or AWS S3 in production): signed upload URLs, size and type
+      limits, image resizing, and storage per organisation counted towards plan limits.
+- [ ] **Notifications:** an in-app list delivered through the existing SignalR transport, and
+      email preferences with a one-click unsubscribe link.
+- [ ] **An MCP endpoint example:** the Todos exposed as MCP tools with the official C# MCP SDK,
+      authenticated with an API key and scoped to the organisation, so AI assistants can use the
+      app. Check the SDK's licence first.
+- [ ] **Encrypted secrets per organisation,** for storing customers' own API keys and OAuth
+      tokens, encrypted with ASP.NET Core Data Protection (whose keys the app already keeps in
+      PostgreSQL).
+- [ ] **Personal data export:** download everything stored about the signed-in user (and, for
+      owners, the organisation) as JSON, to go with account deletion. Privacy laws such as GDPR
+      and Thailand's PDPA give people this right.
+
+### Extension points for libraries built on the template
+
+Some apps add a shared library on top of a generated app, such as a kit for multi-tenant public
+websites. These changes let a library plug in without forking the template:
+
+- [ ] **Swappable tenant resolution:** today the tenant comes from the organisation claim in the
+      access token. Put that behind one interface, so an app can also find the tenant from the
+      request's host name (for public pages that anonymous visitors see). Wolverine still carries
+      one tenant ID through messages either way.
+- [ ] **Room for other public pages:** the React Router pre-rendering, the single-page app
+      fallback and the 404 handling mustn't assume they own every path outside `/api`.
+      Server-rendered pages that an app adds (for example, Razor components) must be able to
+      take paths of their own, with their own status codes.
+- [ ] **One entitlement interface** (from v0.4.1) that a library can add its own features and
+      limits to.
+- [ ] **Documented seams:** a page in the generated app's `docs/` on where an app or library adds
+      endpoints, messages, admin pages and settings, so its additions survive template updates.
 
 ### Later: .NET Aspire for local development (an opt-in option)
 
@@ -261,7 +345,10 @@ Then the option:
 
 - [ ] **UI components:** [shadcn/ui](https://ui.shadcn.com/) (MIT) with dark mode, so admin and
       billing screens look finished.
-- [ ] **Translations** with react-i18next (MIT), if users ask.
+- [ ] **Translations** with react-i18next (MIT): the interface's text in resource files, a
+      language switcher, and dates and numbers formatted for the user's language. Apps for
+      markets outside English-speaking countries need this from the start, so it comes before
+      "if users ask".
 
 ### Keep out
 
@@ -276,11 +363,16 @@ Then the option:
       settings in production)? Yes (v0.3).
 - [ ] Which cheap host should the deployment guide target first: a VPS with Docker Compose and
       Caddy, or Fly.io or Railway?
-- [ ] **Rendering:** pre-rendering the public pages (above) gives static HTML that a CDN serves
-      from cache, which is as fast as a page can be and needs no rendering server. Server-side
-      rendering per request (React Router with a Node server) is only worth its cost when public
-      pages show data that changes per request, such as a public catalogue or user-generated
-      content. Revisit if a user needs that.
+- [x] **Rendering** (decided November 2026): pre-rendering the public pages (above) gives static
+      HTML that a CDN serves from cache, which is as fast as a page can be and needs no
+      rendering server. It suits pages that are the same for every visitor and change only when
+      the app is rebuilt. Public pages that show data changing per request (a public catalogue,
+      listings, user-generated content) need rendering per request. For those, the direction is
+      server-rendered Razor components (Blazor's static server rendering) **in the same ASP.NET
+      Core host**, cached by a CDN, with the React app unchanged for signed-in pages: still one
+      deployable, and no Node server. An app or library adds these pages (see "Extension
+      points"); they aren't a template option. This replaces the earlier idea of a separate
+      Blazor template.
 
 ## Later, if users ask
 
@@ -292,9 +384,6 @@ Then the option:
       memory today, which is safer against injected scripts.
 - [ ] **Running more than one instance:** a SignalR backplane (Redis, MIT-licensed client) and
       rate limits shared between instances.
-- [ ] **A separate Blazor template** (Wolverine with Blazor's static server rendering), for teams
-      who want C# end to end. A separate template, not an option: it shares little with the
-      React client, and it isn't needed for SEO or speed (see "Rendering" under Open decisions).
 - [ ] **API types only for the chosen options:** apps without Identity carry the account
       endpoints' types in `schema.d.ts` (harmless, but untidy).
 

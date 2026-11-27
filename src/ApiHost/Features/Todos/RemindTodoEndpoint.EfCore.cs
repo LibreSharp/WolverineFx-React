@@ -1,6 +1,8 @@
 #if (Saas)
+using ApiHost.Billing;
 using ApiHost.Organisations;
 using JasperFx.MultiTenancy;
+using Microsoft.AspNetCore.Mvc;
 #endif
 #if (Identity)
 using System.Security.Claims;
@@ -19,10 +21,15 @@ public static class RemindTodoEndpoint
     // Schedules a TodoReminderDue message. Local queues are durable (Program.cs), so scheduled
     // messages are stored in PostgreSQL and still fire after a restart.
 #if (Saas)
+    // Reminders are a plan feature (PlanFeatures.TodoReminders): without it, 402 Payment Required.
+    public static Task<ProblemDetails> BeforeAsync(ClaimsPrincipal user, Entitlements entitlements, CancellationToken cancellationToken)
+        => entitlements.RequireFeatureAsync(user.GetOrganisationId(), PlanFeatures.TodoReminders, cancellationToken);
+
+    // Each reminder uses one of the plan's reminders for the month (PlanLimits.Reminders).
     [Authorize]
     [WolverinePost("/api/todos/{id}/remind")]
-    public static async Task<(Results<Accepted<TodoReminderScheduled>, NotFound>, OutgoingMessages)> Post(
-        Guid id, RemindTodo request, AppDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken)
+    public static async Task<(Results<Accepted<TodoReminderScheduled>, NotFound, ProblemHttpResult>, OutgoingMessages)> Post(
+        Guid id, RemindTodo request, AppDbContext db, ClaimsPrincipal user, Entitlements entitlements, CancellationToken cancellationToken)
     {
         // Only the request's organisation's Todos are found.
         var todo = await db.Todos.FindAsync([id], cancellationToken);
@@ -47,6 +54,14 @@ public static class RemindTodoEndpoint
             return (TypedResults.NotFound(), []);
         }
 
+#if (Saas)
+        var organisationId = user.GetOrganisationId();
+        if (!await entitlements.TryUseAsync(organisationId, PlanLimits.Reminders, 1, cancellationToken))
+        {
+            return (TypedResults.Problem(await entitlements.LimitReachedAsync(organisationId, PlanLimits.Reminders, cancellationToken)), []);
+        }
+
+#endif
         var delay = TimeSpan.FromMinutes(request.Minutes);
         var messages = new OutgoingMessages();
 #if (Saas)
@@ -62,11 +77,11 @@ public static class TodoReminderDueHandler
 {
 #if (Saas)
     // Runs when the reminder is due. Nothing happens if the Todo was completed or deleted in the
-    // meantime, or the member who asked for it has left the organisation; otherwise their open
-    // tabs show the reminder.
+    // meantime, the member who asked for it has left the organisation, or the organisation's plan
+    // no longer includes reminders (it was downgraded); otherwise their open tabs show the reminder.
     // tenantId: the organisation the reminder was scheduled in; Wolverine keeps it on the message.
     public static async Task<object?> Handle(
-        TodoReminderDue message, AppDbContext db, IOrganisationStore organisations, TenantId tenantId, CancellationToken cancellationToken)
+        TodoReminderDue message, AppDbContext db, IOrganisationStore organisations, Entitlements entitlements, TenantId tenantId, CancellationToken cancellationToken)
 #else
     // Runs when the reminder is due. Nothing happens if the Todo was completed or deleted in
     // the meantime; otherwise the owner's open tabs show the reminder.
@@ -80,7 +95,9 @@ public static class TodoReminderDueHandler
         }
 
 #if (Saas)
-        if (await organisations.FindMembershipAsync(Guid.Parse(tenantId.Value), message.UserId, cancellationToken) is null)
+        var organisationId = Guid.Parse(tenantId.Value);
+        if (await organisations.FindMembershipAsync(organisationId, message.UserId, cancellationToken) is null
+            || !await entitlements.IsEnabledAsync(organisationId, PlanFeatures.TodoReminders, cancellationToken))
         {
             return null;
         }

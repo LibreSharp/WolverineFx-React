@@ -10,6 +10,10 @@ How ApiHost works, how to change it, and how to run it in production. Start with
 - [Accounts](accounts.md): sign-in, emails, settings, lockout, roles and the admin page,
   Google/GitHub and passkeys.
 <!--#endif -->
+<!--#if (Saas) -->
+- [Plans, trials and limits](billing.md): the plan catalogue, the reverse trial, feature flags,
+  and checking features and limits.
+<!--#endif -->
 - [Security](security.md): what the app does to protect users and data, and what's left to you.
 - [Testing](testing.md): the test suites, how to run them, and how to add tests.
 - [Observability](observability.md): health checks, traces, metrics and logs.

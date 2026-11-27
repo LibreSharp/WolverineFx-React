@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ApiHost.Billing;
 using ApiHost.Identity;
 using ApiHost.Organisations;
 using FluentValidation;
@@ -31,10 +32,11 @@ public static class InvitationEndpoints
     [Authorize]
     [EnableRateLimiting(OrganisationSetup.InvitationsPolicy)]
     [WolverinePost("/api/organisation/invitations")]
-    public static async Task<Results<Accepted, ValidationProblem>> Invite(
+    public static async Task<Results<Accepted, ValidationProblem, ProblemHttpResult>> Invite(
         InviteMemberRequest request,
         ClaimsPrincipal principal,
         IOrganisationStore store,
+        Entitlements entitlements,
         UserManager<ApplicationUser> userManager,
         IOptions<OrganisationOptions> options,
         IConfiguration configuration,
@@ -61,12 +63,18 @@ public static class InvitationEndpoints
         }
 
         // A new invitation to someone already invited replaces theirs, so it doesn't count.
-        var pending = (await store.InvitationsAsync(organisationId, cancellationToken))
-            .Count(i => !string.Equals(i.Email, request.Email.Trim(), StringComparison.OrdinalIgnoreCase));
+        var invitations = await store.InvitationsAsync(organisationId, cancellationToken);
+        var pending = invitations.Count(i => !string.Equals(i.Email, request.Email.Trim(), StringComparison.OrdinalIgnoreCase));
         if (pending >= options.Value.MaxPendingInvitations)
         {
             return IdentityResultExtensions.ValidationProblem("Email",
                 $"This organisation already has {pending} invitations waiting: revoke some, or wait for them to be accepted or expire.");
+        }
+
+        // The plan's Members limit counts invitations waiting too (MembersUsage).
+        if (!await entitlements.CanAddAsync(organisationId, PlanLimits.Members, pending == invitations.Count ? 1 : 0, cancellationToken))
+        {
+            return TypedResults.Problem(await entitlements.LimitReachedAsync(organisationId, PlanLimits.Members, cancellationToken));
         }
 
         var now = clock.GetUtcNow();

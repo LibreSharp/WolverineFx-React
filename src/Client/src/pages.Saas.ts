@@ -11,6 +11,7 @@ export interface Page {
 
 export const pages: Page[] = [
   { path: '/', index: true },
+  { path: '/pricing', index: true },
   { path: '/todos', index: false },
   { path: '/login', index: false },
   { path: '/register', index: false },

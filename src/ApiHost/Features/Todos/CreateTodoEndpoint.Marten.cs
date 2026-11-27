@@ -1,5 +1,7 @@
 #if (Saas)
+using ApiHost.Billing;
 using ApiHost.Organisations;
+using Microsoft.AspNetCore.Mvc;
 #endif
 #if (Identity)
 using System.Security.Claims;
@@ -19,6 +21,12 @@ public static class CreateTodoEndpoint
     // that GET /api/todos reads, in the same transaction. The TodoChanged notification
     // goes through the outbox, so open tabs only hear about the Todo once it is saved.
 #if (Saas)
+    // Plan limits: a new Todo needs room in the organisation's OpenTodos limit, or the request gets
+    // 402 Payment Required. Wolverine runs a Before method ahead of the endpoint, and stops there
+    // when it returns a problem.
+    public static Task<ProblemDetails> BeforeAsync(ClaimsPrincipal user, Entitlements entitlements, CancellationToken cancellationToken)
+        => entitlements.RequireRoomAsync(user.GetOrganisationId(), PlanLimits.OpenTodos, 1, cancellationToken);
+
     // The stream belongs to the request's organisation: Wolverine opens the session for it.
     [Authorize]
     [WolverinePost("/api/todos")]
