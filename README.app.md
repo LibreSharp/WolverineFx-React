@@ -102,6 +102,7 @@ The [docs](docs/README.md) folder explains how the app works and how to change i
   [Deployment](docs/deployment.md) (with all the production settings).
 - How-to guides:
   - [Add a feature](docs/how-to/add-a-feature.md)
+  - [Put Cloudflare in front](docs/how-to/put-cloudflare-in-front.md)
 <!--#if (IsEfCore) -->
   - [Change the database schema](docs/how-to/add-a-migration.md)
 <!--#endif -->

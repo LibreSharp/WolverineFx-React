@@ -34,6 +34,12 @@ change can start from the reasons rather than rediscovering them.
 - **Email through the outbox, tokens made at send time.** Endpoints return messages, so emails
   survive restarts and are retried; the handler creates the one-time token when sending, so no
   token is ever stored in the message tables.
+- **Creating a user and queueing its confirmation email aren't one transaction.** Identity saves
+  the user through its own store, then Wolverine stores the email message. A crash in between
+  leaves an account without a confirmation email; the user recovers with "Send the confirmation
+  email again" on the login page. Making it atomic would mean running Identity's store inside
+  Wolverine's transaction, which neither store supports cleanly; not worth it for a recoverable
+  edge case.
 - **Email confirmation required to log in,** with Mailpit in development so it costs nothing to
   try. Password reset also confirms the email (it proves ownership).
 - **Roles are constants, seeded at startup.** A role does nothing until code checks it, so roles
@@ -47,6 +53,18 @@ change can start from the reasons rather than rediscovering them.
 - **Passkeys without SignInManager's cookie.** Identity's `IPasskeyHandler` returns the ceremony
   state as a string; the API encrypts it (Data Protection, time-limited, bound to the user when
   registering) for the client to send back.
+
+## Hosting and search engines
+
+- **One instance by default.** SignalR and the sign-in rate limits are per instance; scaling out
+  needs a backplane and a shared store, which waits for demand. A CDN in front carries most of
+  the load for static files.
+- **Real 404s and `noindex` by default.** The API knows the client's pages (`routes.ts`, built
+  into `client-routes.json`), so unknown paths answer 404 instead of a soft 404. Only pages that
+  opt in may be indexed. `robots.txt` blocks only `/api/`, so crawlers can see `noindex`.
+- **Pre-rendering before server-side rendering.** Static HTML for public pages, cached by a CDN,
+  is as fast as a page gets and keeps one .NET deployable; per-request rendering (Node, or a
+  Blazor template) waits for public pages that change per request.
 
 ## Tests
 

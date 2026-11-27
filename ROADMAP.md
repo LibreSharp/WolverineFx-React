@@ -185,15 +185,15 @@ From an architecture and SEO review after v0.3.0 (November 2026).
 - [x] **Real 404s:** unknown URLs return the app's HTML with status 200, which search engines treat
       as duplicate "soft 404" pages. Answer 404 for paths that aren't client routes (and add
       `noindex` to the not-found page).
-- [ ] **Say plainly that the app runs as one instance,** and what scaling out would need: today
+- [x] **Say plainly that the app runs as one instance,** and what scaling out would need: today
       SignalR only reaches browsers connected to the instance that sent the message, and the
       sign-in rate limits are counted per instance. (Scheduled messages and the outbox already
       coordinate through the database.)
-- [ ] **Cloudflare in front, documented:** caching rules (cache the built assets and public pages,
+- [x] **Cloudflare in front, documented:** caching rules (cache the built assets and public pages,
       bypass `/api/`), "Full (strict)" TLS to Caddy, and Caddy trusting Cloudflare's addresses
       so the app sees each visitor's real IP. Without that, the sign-in rate limits count per
       Cloudflare server instead of per visitor.
-- [ ] **Record in `decisions.md`** that creating a user and storing its confirmation email aren't
+- [x] **Record in `decisions.md`** that creating a user and storing its confirmation email aren't
       one transaction: a crash in between leaves an account without the email, which the user
       recovers with "Send the confirmation email again".
 

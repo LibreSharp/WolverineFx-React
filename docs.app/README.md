@@ -19,6 +19,7 @@ How ApiHost works, how to change it, and how to run it in production. Start with
 ## How-to guides
 
 - [Add a feature](how-to/add-a-feature.md)
+- [Put Cloudflare in front](how-to/put-cloudflare-in-front.md)
 <!--#if (IsEfCore) -->
 - [Change the database schema (EF Core migrations)](how-to/add-a-migration.md)
 <!--#endif -->

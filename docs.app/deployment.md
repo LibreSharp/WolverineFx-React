@@ -70,4 +70,24 @@ ASP.NET Core Data Protection keys, which protect the tokens in account emails, a
 PostgreSQL, so email links keep working across restarts and on every instance of the app.
 <!--#endif -->
 
+## Running more than one instance
+
+The app is built to run as **one instance**, which a small server handles comfortably. Some parts
+already work across several instances, because they coordinate through PostgreSQL: Wolverine's
+outbox and scheduled messages, and the Data Protection keys.
+
+Two parts don't yet:
+
+- **Live updates (SignalR):** a message only reaches browsers connected to the instance that sent
+  it. Several instances need a SignalR backplane (for example Redis).
+<!--#if (Identity) -->
+- **Sign-in rate limits:** each instance counts attempts separately, so the limits are multiplied
+  by the number of instances. Shared limits need a shared store (for example Redis).
+<!--#else -->
+- **In-memory state** you add yourself (caches, counters) is per instance.
+<!--#endif -->
+
+Behind a CDN such as Cloudflare, one instance goes a long way, since the built client is served
+from the CDN's cache; see [Put Cloudflare in front](how-to/put-cloudflare-in-front.md).
+
 Before going live, read the deployment checklist in [Security](security.md#when-you-deploy).
