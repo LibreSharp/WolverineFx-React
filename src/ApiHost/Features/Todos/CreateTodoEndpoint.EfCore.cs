@@ -1,3 +1,6 @@
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 #if (Identity)
 using System.Security.Claims;
 using ApiHost.Identity;
@@ -34,7 +37,10 @@ public static class CreateTodoEndpoint
         // notification in the outbox, so open tabs only hear about the Todo once it exists.
         db.Todos.Add(todo);
 
-#if (Identity)
+#if (Saas)
+        // Wolverine stamps the new row with the request's organisation.
+        return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id, user.GetOrganisationId().ToString())]);
+#elif (Identity)
         return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id, todo.OwnerId)]);
 #else
         return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id)]);

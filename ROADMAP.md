@@ -219,17 +219,17 @@ Then the option:
 - [x] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
       2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option. `saas`
       supports both Marten and EF Core.
-- [ ] **Organisations (multi-tenancy)** in `saas`: each new account gets its own organisation,
+- [x] **Organisations (multi-tenancy)** in `saas`: each new account gets its own organisation,
       and a user can create more or be invited into others, with a switcher in the header. The
       access token carries the current organisation (checked against membership when issued;
       switching issues new tokens), and Wolverine reads the tenant ID from that claim and carries
       it through messages. Data is kept apart by Marten's conjoined multi-tenancy or an EF Core
       global query filter, so a forgotten filter can't leak another organisation's data. Todos
       and their realtime updates belong to the organisation.
-- [ ] **Organisation roles:** Owner, Admin and Member. Owners and admins invite and remove
+- [x] **Organisation roles:** Owner, Admin and Member. Owners and admins invite and remove
       members; only owners rename or delete the organisation and change who is an owner; there is
       always at least one owner.
-- [ ] **Team invitations** by email, to existing users and to new ones (who create an account
+- [x] **Team invitations** by email, to existing users and to new ones (who create an account
       from the invitation).
 
 ### v0.4.1: billing

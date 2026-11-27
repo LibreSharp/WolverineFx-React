@@ -1,3 +1,6 @@
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 #if (Identity)
 using System.Security.Claims;
 using ApiHost.Identity;
@@ -15,7 +18,19 @@ public static class CreateTodoEndpoint
     // The inline snapshot projection (MartenPersistence) writes the Todo document
     // that GET /api/todos reads, in the same transaction. The TodoChanged notification
     // goes through the outbox, so open tabs only hear about the Todo once it is saved.
-#if (Identity)
+#if (Saas)
+    // The stream belongs to the request's organisation: Wolverine opens the session for it.
+    [Authorize]
+    [WolverinePost("/api/todos")]
+    public static (TodoCreationResponse, IStartStream, OutgoingMessages) Post(CreateTodo command, ClaimsPrincipal user)
+    {
+        var id = Guid.CreateVersion7();
+        return (
+            new TodoCreationResponse(id),
+            MartenOps.StartStream<Todo>(id, new TodoCreated(command.Title, user.GetUserId())),
+            [TodoNotifications.Changed(id, user.GetOrganisationId().ToString())]);
+    }
+#elif (Identity)
     [Authorize]
     [WolverinePost("/api/todos")]
     public static (TodoCreationResponse, IStartStream, OutgoingMessages) Post(CreateTodo command, ClaimsPrincipal user)

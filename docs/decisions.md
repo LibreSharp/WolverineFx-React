@@ -76,3 +76,10 @@ change can start from the reasons rather than rediscovering them.
   client; unhandled requests fail.
 - **End-to-end tests against the published app** with real email (Mailpit), in the installed
   Chrome, with a software or virtual authenticator for passkeys.
+- **Organisations: the token names the tenant, checked on every request.** The access token's
+  `org` claim is the tenant id, so Wolverine opens Marten sessions and EF Core DbContexts for it
+  without a lookup, and every tab works in the same organisation. Membership is still checked
+  when each token is validated (one indexed query), so a removed member or a deleted organisation
+  loses access at once rather than when the token expires. Conjoined tenancy (a tenant id
+  column), not a database per organisation, keeps one database and one deployable.
+

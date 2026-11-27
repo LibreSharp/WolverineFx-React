@@ -15,8 +15,13 @@ and `features/admin/`. For how each part protects users, see
   reusing an old one revokes the user's tokens. Tokens are kept in memory, not in browser
   storage, so reloading the page signs you out. Lifetimes are under `Jwt` in `appsettings.json`.
 - **Ways to sign in:** email and password, a passkey, or Google/GitHub when configured.
+<!--#if (Saas) -->
+- **Data belongs to organisations.** Each user works in one organisation at a time (see
+  [Organisations](#organisations)), and sees only its data.
+<!--#else -->
 - **Each user sees only their own data.** Endpoints scope queries to the signed-in user
   (`principal.GetUserId()`), and SignalR updates go only to that user's tabs.
+<!--#endif -->
 
 ## Account emails
 
@@ -82,6 +87,44 @@ Passkeys belong to the site's host name: a passkey created on one domain doesn't
 so moving the app to a new domain means users add new passkeys. In development, passkeys work on
 `localhost`.
 
+<!--#if (Saas) -->
+## Organisations
+
+Data belongs to organisations, the app's tenants. The code is in `src/ApiHost/Organisations/`
+(the model, its store, and choosing a session's organisation) and `Features/Organisations/`
+(the endpoints); the pages are in `src/Client/src/features/organisations/`.
+
+- **Everyone has one.** A new account gets its own organisation, named after the user. Users can
+  create more, and be invited into others; the switcher in the header picks the current one.
+- **The access token names the organisation** (the `org` claim), chosen when the token is issued:
+  the one the session was in, or the one the user used last. Switching issues new tokens.
+  Every request checks that the user is still a member, so removing someone, or deleting the
+  organisation, takes effect at once; the browser then refreshes its tokens into another of the
+  user's organisations.
+- **Multi-tenancy.** Wolverine reads the claim as each request's tenant id and carries it on the
+  messages the request sends. Tenanted data (`Todo`, which implements `ITenanted`) is stored with
+  a tenant id
+<!--#if (IsMarten) -->
+  (Marten's conjoined multi-tenancy),
+<!--#else -->
+  (Wolverine's conjoined multi-tenancy for EF Core: a `tenant_id` column and a global query filter),
+<!--#endif -->
+  so queries only ever see the current organisation's, without a filter in each endpoint.
+  Organisations, memberships and invitations themselves aren't tenanted.
+- **Roles:** Owner, Admin and Member. Owners and admins invite and remove members and change
+  roles, but only owners make owners, change an owner's role, rename or delete the organisation.
+  There's always an owner: the last one can't leave or step down, and can't delete their account
+  while others are members (`Features/Organisations/OrganisationRules.cs`).
+- **Invitations** go by email, with a link to `/join` that works for a week. Someone with an
+  account logs in with the invited email and accepts; someone without one chooses a password,
+  and the link confirms their email. Only a hash of the link's token is stored.
+- **Deleting an organisation** deletes it for everyone. Its data is deleted in the background:
+  each feature handles `OrganisationDeleted`, which runs for that organisation's tenant (see
+  `Features/Todos/DeleteTodosOfDeletedOrganisationHandler.cs`).
+- **Realtime updates** go to everyone working in the organisation; the browser reconnects when it
+  switches.
+
+<!--#endif -->
 ## Development
 
 The demo user (`demo@example.com` / `Demo123!`) is created at startup in Development only, is

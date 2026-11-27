@@ -143,6 +143,20 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
   in without a password.
 - **Account lockout** with Identity's lockout, which also stops refresh tokens.
 
+### Organisations (`--Auth saas`)
+
+- **Multi-tenancy with Wolverine:** data belongs to organisations. The access token names the
+  organisation the user works in, Wolverine reads it as each request's tenant id and carries it
+  through messages, and Marten's (or Wolverine's EF Core) conjoined tenancy keeps each
+  organisation's data apart, with no filters to forget in endpoints.
+- **Every account gets its own organisation;** users create more, are invited into others, and
+  switch between them in the header. Removing a member takes effect at once.
+- **Roles:** Owner, Admin and Member, with at least one owner always.
+- **Invitations by email:** existing users accept after logging in; new users create their
+  account from the link, which confirms their email.
+- **Deleting an organisation** deletes its data through an `OrganisationDeleted` message that
+  each feature handles for that tenant.
+
 ### Security
 
 - Browser security headers on every response (a strict Content-Security-Policy, framing, MIME

@@ -1,3 +1,6 @@
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
@@ -15,7 +18,12 @@ public class JwtTokenService
         _options = options.Value;
     }
 
+#if (Saas)
+    // organisationId: the organisation the user works in with this token (see Organisations/).
+    public (string AccessToken, DateTimeOffset ExpiresAtUtc) CreateAccessToken(ApplicationUser user, IEnumerable<string> roles, Guid organisationId)
+#else
     public (string AccessToken, DateTimeOffset ExpiresAtUtc) CreateAccessToken(ApplicationUser user, IEnumerable<string> roles)
+#endif
     {
         var expiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(_options.AccessTokenLifetimeMinutes);
 
@@ -23,6 +31,9 @@ public class JwtTokenService
         {
             [JwtRegisteredClaimNames.Sub] = user.Id,
             [JwtRegisteredClaimNames.Email] = user.Email ?? string.Empty,
+#if (Saas)
+            [OrganisationClaims.OrganisationId] = organisationId.ToString(),
+#endif
         };
 
         // One claim per role (a JSON array in the token), read by [Authorize(Roles = ...)].

@@ -1,4 +1,7 @@
 using ApiHost.Identity;
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +36,9 @@ public static class DeleteAccountEndpoint
         ClaimsPrincipal principal,
         UserManager<ApplicationUser> userManager,
         IRefreshTokenStore refreshTokenStore,
+#if (Saas)
+        OrganisationAccess organisations,
+#endif
         CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(principal.GetUserId());
@@ -46,6 +52,16 @@ public static class DeleteAccountEndpoint
             return (IdentityResultExtensions.ValidationProblem("Password", "The password is incorrect."), []);
         }
 
+#if (Saas)
+        // Every organisation keeps an owner.
+        var needingOwner = await organisations.NeedingAnotherOwnerAsync(user.Id, cancellationToken);
+        if (needingOwner.Count > 0)
+        {
+            return (IdentityResultExtensions.ValidationProblem("Password",
+                $"Make someone else an owner of {string.Join(", ", needingOwner)} first."), []);
+        }
+
+#endif
         await refreshTokenStore.RevokeAllForUserAsync(user.Id, cancellationToken);
         var result = await userManager.DeleteAsync(user);
         if (!result.Succeeded)

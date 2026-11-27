@@ -11,7 +11,15 @@ namespace ApiHost.Features.Todos;
 public static class GetTodosEndpoint
 {
     // Reads the Todo documents that the inline snapshot projection keeps up to date.
-#if (Identity)
+#if (Saas)
+    // The organisation's Todos: Wolverine's session only sees the request's organisation.
+    [Authorize]
+    [WolverineGet("/api/todos")]
+    public static Task<IReadOnlyList<Todo>> Get(IQuerySession session, CancellationToken cancellationToken)
+    {
+        return session.Query<Todo>().ToListAsync(cancellationToken);
+    }
+#elif (Identity)
     [Authorize]
     [WolverineGet("/api/todos")]
     public static Task<IReadOnlyList<Todo>> Get(IQuerySession session, ClaimsPrincipal user, CancellationToken cancellationToken)

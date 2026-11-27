@@ -15,7 +15,7 @@ public static class RefreshEndpoint
     public static async Task<Results<Ok<RefreshResponse>, UnauthorizedHttpResult>> Post(
         RefreshRequest request,
         UserManager<ApplicationUser> userManager,
-        JwtTokenService tokenService,
+        TokenIssuer tokenIssuer,
         IRefreshTokenStore refreshTokenStore,
         CancellationToken cancellationToken)
     {
@@ -50,22 +50,12 @@ public static class RefreshEndpoint
             return TypedResults.Unauthorized();
         }
 
-        var roles = await userManager.GetRolesAsync(user);
-        var (accessToken, expiresAtUtc) = tokenService.CreateAccessToken(user, roles);
-
-        var newRefreshTokenPlaintext = JwtTokenService.GenerateRefreshTokenPlaintext();
-        var newHash = JwtTokenService.HashToken(newRefreshTokenPlaintext);
-
-        await refreshTokenStore.RevokeAsync(existing, newHash, cancellationToken);
-        await refreshTokenStore.StoreAsync(new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            TokenHash = newHash,
-            CreatedAtUtc = DateTimeOffset.UtcNow,
-            ExpiresAtUtc = tokenService.RefreshTokenExpiry()
-        }, cancellationToken);
-
-        return TypedResults.Ok(new RefreshResponse(accessToken, newRefreshTokenPlaintext, expiresAtUtc));
+        // New tokens for the same session; the old refresh token is revoked as replaced.
+#if (Saas)
+        var tokens = await tokenIssuer.IssueAsync(user, existing, organisationId: null, cancellationToken);
+#else
+        var tokens = await tokenIssuer.IssueAsync(user, existing, cancellationToken);
+#endif
+        return TypedResults.Ok(new RefreshResponse(tokens.AccessToken, tokens.RefreshToken, tokens.ExpiresAtUtc));
     }
 }

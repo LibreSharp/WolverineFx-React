@@ -13,7 +13,9 @@ export const api = createClient<paths>({
 
 let refreshPromise: Promise<boolean> | null = null
 
-async function refreshTokens(): Promise<boolean> {
+// Exchanges the refresh token for new tokens (also used after leaving or deleting an
+// organisation, to move the session to another). False if the session has ended.
+export async function refreshTokens(): Promise<boolean> {
   const current = getTokens()
   if (!current) return false
 

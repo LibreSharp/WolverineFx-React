@@ -17,6 +17,9 @@ using ApiHost.Errors;
 using ApiHost.Features.Todos;
 using ApiHost.Observability;
 using ApiHost.Realtime;
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 using ApiHost.Security;
 #if (Identity)
 using ApiHost.Identity;
@@ -121,6 +124,13 @@ app.MapWolverineEndpoints(opts =>
 {
     // Run a request's validator before the endpoint; failures return 400 ProblemDetails.
     opts.UseFluentValidationProblemDetailMiddleware();
+#if (Saas)
+
+    // Multi-tenancy: each request works in the organisation named in its access token. Wolverine
+    // opens Marten sessions and EF Core DbContexts for that tenant, so tenanted data (Todos) is
+    // filtered to it, and messages the request sends carry it on to their handlers.
+    opts.TenantId.IsClaimTypeNamed(OrganisationClaims.OrganisationId);
+#endif
 });
 
 app.MapWolverineSignalRHub<AppHub>(AppHub.Path);

@@ -46,9 +46,20 @@ What the app does to protect its users and data, and what's left to you when you
   and `Accounts:AuthAttemptsPerMinute`).
 - **Sessions end when they should:** changing or resetting a password, deleting the account, and
   an admin lock all revoke the user's refresh tokens.
+<!--#if (Saas) -->
+- **Each organisation's data is kept apart** by multi-tenancy in the data layer, not by filters in
+  each endpoint, so a forgotten filter can't leak another organisation's data; its records answer
+  404. A token is only accepted while its user is still a member of its organisation. Deleting an
+  organisation deletes its data, including Todo event history; deleting an account deletes the
+  organisations the user was alone in.
+- **Organisation roles** are checked on every change (only owners make owners or delete the
+  organisation), and invitation links are single-use, expire after a week, and are stored only
+  as a hash.
+<!--#else -->
 - **Each user sees only their own data:** another user's records answer 404, so their existence
   isn't revealed. Deleting an account (which needs the password again) deletes the user's data
   too, including Todo event history.
+<!--#endif -->
 
 ## Roles and the admin page
 

@@ -3,6 +3,9 @@ using ApiHost.Features.Todos;
 using ApiHost.Identity;
 using Microsoft.AspNetCore.Authorization;
 #endif
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 using Wolverine.SignalR;
 using Wolverine.SignalR.Internals;
 
@@ -21,7 +24,12 @@ public class AppHub(SignalRTransport endpoint) : WolverineHub(endpoint)
 
     public override async Task OnConnectedAsync()
     {
+#if (Saas)
+        // The organisation in the access token; the browser reconnects when it switches.
+        await Groups.AddToGroupAsync(Context.ConnectionId, TodoNotifications.OrganisationGroup(Context.User!.GetOrganisationId().ToString()));
+#else
         await Groups.AddToGroupAsync(Context.ConnectionId, TodoNotifications.UserGroup(Context.User!.GetUserId()));
+#endif
         await base.OnConnectedAsync();
     }
 #endif

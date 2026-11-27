@@ -11,7 +11,16 @@ namespace ApiHost.Features.Todos;
 
 public static class CompleteTodoEndpoint
 {
-#if (Identity)
+#if (Saas)
+    [Authorize]
+    [WolverinePost("/api/todos/{id}/complete")]
+    public static async Task<(IResult, OutgoingMessages)> Post(Guid id, AppDbContext db, CancellationToken cancellationToken)
+    {
+        // The DbContext only sees the request's organisation, so another organisation's Todo is
+        // a 404 like any missing one.
+        var todo = await db.Todos.FindAsync([id], cancellationToken);
+        if (todo is null)
+#elif (Identity)
     [Authorize]
     [WolverinePost("/api/todos/{id}/complete")]
     public static async Task<(IResult, OutgoingMessages)> Post(Guid id, AppDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken)
@@ -40,7 +49,7 @@ public static class CompleteTodoEndpoint
 
         // Cascaded message: Wolverine saves it to the outbox in the same transaction as
         // the change above (AutoApplyTransactions), then TodoCompletedHandler runs it.
-#if (Identity)
+#if (Identity && !Saas)
         return (Results.NoContent(), [new TodoCompleted(todo.Id, todo.Title, todo.OwnerId)]);
 #else
         return (Results.NoContent(), [new TodoCompleted(todo.Id, todo.Title)]);

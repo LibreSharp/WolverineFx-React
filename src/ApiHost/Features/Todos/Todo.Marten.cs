@@ -1,3 +1,8 @@
+#if (Saas)
+using System.Text.Json.Serialization;
+using JasperFx.MultiTenancy;
+
+#endif
 namespace ApiHost.Features.Todos;
 
 // Event-sourced: a Todo's state is built from the events in its stream.
@@ -9,9 +14,21 @@ public record TodoCreated(string Title, string OwnerId);
 public record TodoCreated(string Title);
 #endif
 
+#if (Saas)
+// ITenanted: each Todo belongs to an organisation (the tenant). Wolverine and
+// Marten set and filter TenantId, so the app never does.
+public class Todo : ITenanted
+#else
 public class Todo
+#endif
 {
     public Guid Id { get; set; }
+#if (Saas)
+
+    [JsonIgnore]
+    public string? TenantId { get; set; }
+
+#endif
 #if (Identity)
     public string OwnerId { get; set; } = string.Empty;
 #endif

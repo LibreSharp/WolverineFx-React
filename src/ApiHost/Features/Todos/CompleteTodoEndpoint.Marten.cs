@@ -16,7 +16,14 @@ public static class CompleteTodoEndpoint
     // The method is a pure function that decides what happens: Wolverine appends the
     // returned Events to the stream (with an optimistic concurrency check) and sends the
     // OutgoingMessages through the outbox, all in one transaction.
-#if (Identity)
+#if (Saas)
+    // Wolverine loads the stream for the request's organisation only, so another
+    // organisation's Todo is a 404 like any missing one.
+    [Authorize]
+    [WolverinePost("/api/todos/{id}/complete")]
+    public static (IResult, Events, OutgoingMessages) Post([WriteAggregate] Todo todo)
+    {
+#elif (Identity)
     [Authorize]
     [WolverinePost("/api/todos/{id}/complete")]
     public static (IResult, Events, OutgoingMessages) Post([WriteAggregate] Todo todo, ClaimsPrincipal user)
@@ -38,7 +45,7 @@ public static class CompleteTodoEndpoint
             return (Results.NoContent(), [], []);
         }
 
-#if (Identity)
+#if (Identity && !Saas)
         var completed = new TodoCompleted(todo.Id, todo.Title, todo.OwnerId);
 #else
         var completed = new TodoCompleted(todo.Id, todo.Title);

@@ -9,6 +9,11 @@ public class RefreshToken
     public DateTimeOffset ExpiresAtUtc { get; set; }
     public DateTimeOffset? RevokedAtUtc { get; set; }
     public string? ReplacedByTokenHash { get; set; }
+#if (Saas)
+
+    // The organisation the session works in, kept when its tokens are refreshed.
+    public Guid? OrganisationId { get; set; }
+#endif
 
     public bool IsActive => RevokedAtUtc is null && DateTimeOffset.UtcNow < ExpiresAtUtc;
 }

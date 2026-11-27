@@ -13,7 +13,17 @@ public record TodoChanged(Guid TodoId);
 
 public static class TodoNotifications
 {
-#if (Identity)
+#if (Saas)
+    // Each SignalR connection joins its organisation's group (AppHub.OnConnectedAsync), so a
+    // notification reaches every open tab of that organisation's members and nobody else's.
+    public static string OrganisationGroup(string organisationId) => $"organisation:{organisationId}";
+
+    public static object Changed(Guid todoId, string organisationId)
+        => new TodoChanged(todoId).ToWebSocketGroup(OrganisationGroup(organisationId));
+
+    public static object Reminder(Todo todo, string organisationId)
+        => new TodoReminder(todo.Id, todo.Title).ToWebSocketGroup(OrganisationGroup(organisationId));
+#elif (Identity)
     // Each SignalR connection joins its user's group (AppHub.OnConnectedAsync), so a
     // notification reaches all of that user's tabs and nobody else's.
     public static string UserGroup(string userId) => $"user:{userId}";

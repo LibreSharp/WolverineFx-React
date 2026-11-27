@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/account/passkeys/options": {
+    "/api/todos/{id}/complete": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,17 +14,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST_api_account_passkeys_options
-         * @description POST_api_account_passkeys_options
+         * POST_api_todos_id_complete
+         * @description POST_api_todos_id_complete
          */
-        post: operations["POST_api_account_passkeys_options"];
+        post: operations["POST_api_todos_id_complete"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/account/passkeys": {
+    "/api/todos": {
         parameters: {
             query?: never;
             header?: never;
@@ -32,23 +32,23 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * GET_api_account_passkeys
-         * @description GET_api_account_passkeys
+         * GET_api_todos
+         * @description GET_api_todos
          */
-        get: operations["GET_api_account_passkeys"];
+        get: operations["GET_api_todos"];
         put?: never;
         /**
-         * POST_api_account_passkeys
-         * @description POST_api_account_passkeys
+         * POST_api_todos
+         * @description POST_api_todos
          */
-        post: operations["POST_api_account_passkeys"];
+        post: operations["POST_api_todos"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/account/passkeys/{id}": {
+    "/api/todos/{id}/remind": {
         parameters: {
             query?: never;
             header?: never;
@@ -56,63 +56,47 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put?: never;
         /**
-         * PUT_api_account_passkeys_id
-         * @description PUT_api_account_passkeys_id
+         * POST_api_todos_id_remind
+         * @description POST_api_todos_id_remind
          */
-        put: operations["PUT_api_account_passkeys_id"];
+        post: operations["POST_api_todos_id_remind"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organisation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_organisation
+         * @description GET_api_organisation
+         */
+        get: operations["GET_api_organisation"];
+        /**
+         * PUT_api_organisation
+         * @description PUT_api_organisation
+         */
+        put: operations["PUT_api_organisation"];
         post?: never;
         /**
-         * DELETE_api_account_passkeys_id
-         * @description DELETE_api_account_passkeys_id
+         * DELETE_api_organisation
+         * @description DELETE_api_organisation
          */
-        delete: operations["DELETE_api_account_passkeys_id"];
+        delete: operations["DELETE_api_organisation"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/auth/passkey/options": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST_api_auth_passkey_options
-         * @description POST_api_auth_passkey_options
-         */
-        post: operations["POST_api_auth_passkey_options"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/passkey/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST_api_auth_passkey_login
-         * @description POST_api_auth_passkey_login
-         */
-        post: operations["POST_api_auth_passkey_login"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/external/{provider}": {
+    "/api/organisation/members": {
         parameters: {
             query?: never;
             header?: never;
@@ -120,10 +104,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * GET_api_auth_external_provider
-         * @description GET_api_auth_external_provider
+         * GET_api_organisation_members
+         * @description GET_api_organisation_members
          */
-        get: operations["GET_api_auth_external_provider"];
+        get: operations["GET_api_organisation_members"];
         put?: never;
         post?: never;
         delete?: never;
@@ -132,47 +116,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/external/callback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET_api_auth_external_callback
-         * @description GET_api_auth_external_callback
-         */
-        get: operations["GET_api_auth_external_callback"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/account/external-logins": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET_api_account_external_logins
-         * @description GET_api_account_external_logins
-         */
-        get: operations["GET_api_account_external_logins"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/account/external-logins/link-ticket": {
+    "/api/organisation/members/{userId}/role": {
         parameters: {
             query?: never;
             header?: never;
@@ -180,19 +124,19 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
         /**
-         * POST_api_account_external_logins_link_ticket
-         * @description POST_api_account_external_logins_link_ticket
+         * PUT_api_organisation_members_userId_role
+         * @description PUT_api_organisation_members_userId_role
          */
-        post: operations["POST_api_account_external_logins_link_ticket"];
+        put: operations["PUT_api_organisation_members_userId_role"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/account/external-logins/{provider}": {
+    "/api/organisation/members/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -203,10 +147,158 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * DELETE_api_account_external_logins_provider
-         * @description DELETE_api_account_external_logins_provider
+         * DELETE_api_organisation_members_userId
+         * @description DELETE_api_organisation_members_userId
          */
-        delete: operations["DELETE_api_account_external_logins_provider"];
+        delete: operations["DELETE_api_organisation_members_userId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organisation/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_organisation_invitations
+         * @description GET_api_organisation_invitations
+         */
+        get: operations["GET_api_organisation_invitations"];
+        put?: never;
+        /**
+         * POST_api_organisation_invitations
+         * @description POST_api_organisation_invitations
+         */
+        post: operations["POST_api_organisation_invitations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organisation/invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * DELETE_api_organisation_invitations_id
+         * @description DELETE_api_organisation_invitations_id
+         */
+        delete: operations["DELETE_api_organisation_invitations_id"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/join/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_join_token
+         * @description GET_api_join_token
+         */
+        get: operations["GET_api_join_token"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_join
+         * @description POST_api_join
+         */
+        post: operations["POST_api_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/join/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_join_register
+         * @description POST_api_join_register
+         */
+        post: operations["POST_api_join_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organisations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_organisations
+         * @description GET_api_organisations
+         */
+        get: operations["GET_api_organisations"];
+        put?: never;
+        /**
+         * POST_api_organisations
+         * @description POST_api_organisations
+         */
+        post: operations["POST_api_organisations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organisations/switch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_organisations_switch
+         * @description POST_api_organisations_switch
+         */
+        post: operations["POST_api_organisations_switch"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -246,46 +338,6 @@ export interface paths {
         get: operations["GET_api_auth_options"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/account/password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST_api_account_password
-         * @description POST_api_account_password
-         */
-        post: operations["POST_api_account_password"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/confirm-email-change": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST_api_auth_confirm_email_change
-         * @description POST_api_auth_confirm_email_change
-         */
-        post: operations["POST_api_auth_confirm_email_change"];
         delete?: never;
         options?: never;
         head?: never;
@@ -332,20 +384,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/account/delete": {
+    "/api/auth/external/{provider}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
-         * POST_api_account_delete
-         * @description POST_api_account_delete
+         * GET_api_auth_external_provider
+         * @description GET_api_auth_external_provider
          */
-        post: operations["POST_api_account_delete"];
+        get: operations["GET_api_auth_external_provider"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/external/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_auth_external_callback
+         * @description GET_api_auth_external_callback
+         */
+        get: operations["GET_api_auth_external_callback"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -412,20 +484,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/me": {
+    "/api/auth/passkey/options": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * GET_api_auth_me
-         * @description GET_api_auth_me
-         */
-        get: operations["GET_api_auth_me"];
+        get?: never;
         put?: never;
-        post?: never;
+        /**
+         * POST_api_auth_passkey_options
+         * @description POST_api_auth_passkey_options
+         */
+        post: operations["POST_api_auth_passkey_options"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/passkey/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_auth_passkey_login
+         * @description POST_api_auth_passkey_login
+         */
+        post: operations["POST_api_auth_passkey_login"];
         delete?: never;
         options?: never;
         head?: never;
@@ -486,26 +578,6 @@ export interface paths {
          * @description POST_api_auth_reset_password
          */
         post: operations["POST_api_auth_reset_password"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/account/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT_api_account_profile
-         * @description PUT_api_account_profile
-         */
-        put: operations["PUT_api_account_profile"];
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -612,7 +684,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/todos/{id}/complete": {
+    "/api/account/password": {
         parameters: {
             query?: never;
             header?: never;
@@ -622,41 +694,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST_api_todos_id_complete
-         * @description POST_api_todos_id_complete
+         * POST_api_account_password
+         * @description POST_api_account_password
          */
-        post: operations["POST_api_todos_id_complete"];
+        post: operations["POST_api_account_password"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/todos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET_api_todos
-         * @description GET_api_todos
-         */
-        get: operations["GET_api_todos"];
-        put?: never;
-        /**
-         * POST_api_todos
-         * @description POST_api_todos
-         */
-        post: operations["POST_api_todos"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/todos/{id}/remind": {
+    "/api/auth/confirm-email-change": {
         parameters: {
             query?: never;
             header?: never;
@@ -666,10 +714,198 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * POST_api_todos_id_remind
-         * @description POST_api_todos_id_remind
+         * POST_api_auth_confirm_email_change
+         * @description POST_api_auth_confirm_email_change
          */
-        post: operations["POST_api_todos_id_remind"];
+        post: operations["POST_api_auth_confirm_email_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_account_delete
+         * @description POST_api_account_delete
+         */
+        post: operations["POST_api_account_delete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/external-logins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_account_external_logins
+         * @description GET_api_account_external_logins
+         */
+        get: operations["GET_api_account_external_logins"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/external-logins/link-ticket": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_account_external_logins_link_ticket
+         * @description POST_api_account_external_logins_link_ticket
+         */
+        post: operations["POST_api_account_external_logins_link_ticket"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/external-logins/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * DELETE_api_account_external_logins_provider
+         * @description DELETE_api_account_external_logins_provider
+         */
+        delete: operations["DELETE_api_account_external_logins_provider"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_auth_me
+         * @description GET_api_auth_me
+         */
+        get: operations["GET_api_auth_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/passkeys/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_account_passkeys_options
+         * @description POST_api_account_passkeys_options
+         */
+        post: operations["POST_api_account_passkeys_options"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/passkeys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET_api_account_passkeys
+         * @description GET_api_account_passkeys
+         */
+        get: operations["GET_api_account_passkeys"];
+        put?: never;
+        /**
+         * POST_api_account_passkeys
+         * @description POST_api_account_passkeys
+         */
+        post: operations["POST_api_account_passkeys"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/passkeys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT_api_account_passkeys_id
+         * @description PUT_api_account_passkeys_id
+         */
+        put: operations["PUT_api_account_passkeys_id"];
+        post?: never;
+        /**
+         * DELETE_api_account_passkeys_id
+         * @description DELETE_api_account_passkeys_id
+         */
+        delete: operations["DELETE_api_account_passkeys_id"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/account/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT_api_account_profile
+         * @description PUT_api_account_profile
+         */
+        put: operations["PUT_api_account_profile"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -715,6 +951,9 @@ export interface components {
             allowRegistration: boolean;
             externalProviders: components["schemas"]["ExternalProvider"][];
         };
+        ChangeMemberRoleRequest: {
+            role: string;
+        };
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
@@ -728,8 +967,17 @@ export interface components {
             userId: string;
             token: string;
         };
+        CreateOrganisationRequest: {
+            name: string;
+        };
         CreateTodo: {
             title: string;
+        };
+        CurrentOrganisation: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            role: string;
         };
         DeleteAccountRequest: {
             password: string;
@@ -752,11 +1000,32 @@ export interface components {
                 [key: string]: string[];
             };
         };
+        InvitationDetails: {
+            organisationName: string;
+            email: string;
+            role: string;
+            accountExists: boolean;
+        };
+        InviteMemberRequest: {
+            email: string;
+            role: string;
+        };
         InviteUserRequest: {
             email: string;
             roles: null | string[];
         };
         IResult: Record<string, never>;
+        JoinOrganisationRequest: {
+            token: string;
+        };
+        JoinOrganisationResponse: {
+            /** Format: uuid */
+            organisationId: string;
+        };
+        JoinWithNewAccountRequest: {
+            token: string;
+            password: string;
+        };
         LinkedLogin: {
             provider: string;
             displayName: string;
@@ -783,6 +1052,19 @@ export interface components {
             displayName: null | string;
             roles: string[];
         };
+        OrganisationCreationResponse: {
+            /** Format: uuid */
+            id: string;
+            url?: string;
+        };
+        OrganisationMember: {
+            userId: string;
+            email: string;
+            displayName: null | string;
+            role: string;
+            /** Format: date-time */
+            joinedAt: string;
+        };
         PasskeyLoginRequest: {
             credentialJson: string;
             state: string;
@@ -796,6 +1078,14 @@ export interface components {
             name: string;
             /** Format: date-time */
             createdAt: string;
+        };
+        PendingInvitation: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            role: string;
+            /** Format: date-time */
+            expiresAt: string;
         };
         RedirectHttpResult: {
             permanent?: boolean;
@@ -820,6 +1110,9 @@ export interface components {
             /** Format: int32 */
             minutes: number | string;
         };
+        RenameOrganisationRequest: {
+            name: string;
+        };
         RenamePasskeyRequest: {
             name: string;
         };
@@ -833,6 +1126,11 @@ export interface components {
         };
         SetRolesRequest: {
             roles: string[];
+        };
+        SwitchOrganisationRequest: {
+            /** Format: uuid */
+            organisationId: string;
+            refreshToken: string;
         };
         Todo: {
             /** Format: uuid */
@@ -858,6 +1156,13 @@ export interface components {
             profile: components["schemas"]["MeResponse"];
             confirmationSentTo: null | string;
         };
+        UserOrganisation: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            role: string;
+            isCurrent: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -867,7 +1172,36 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    POST_api_account_passkeys_options: {
+    POST_api_todos_id_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IResult"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_todos: {
         parameters: {
             query?: never;
             header?: never;
@@ -882,11 +1216,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PasskeyOptionsResponse"];
+                    "application/json": components["schemas"]["Todo"][];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -894,34 +1228,7 @@ export interface operations {
             };
         };
     };
-    GET_api_account_passkeys: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PasskeySummary"][];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    POST_api_account_passkeys: {
+    POST_api_todos: {
         parameters: {
             query?: never;
             header?: never;
@@ -930,7 +1237,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AddPasskeyRequest"];
+                "application/json": components["schemas"]["CreateTodo"];
             };
         };
         responses: {
@@ -939,7 +1246,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TodoCreationResponse"];
+                };
             };
             /** @description Bad Request */
             400: {
@@ -950,16 +1259,9 @@ export interface operations {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
-    PUT_api_account_passkeys_id: {
+    POST_api_todos_id_remind: {
         parameters: {
             query?: never;
             header?: never;
@@ -970,16 +1272,18 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RenamePasskeyRequest"];
+                "application/json": components["schemas"]["RemindTodo"];
             };
         };
         responses: {
-            /** @description No Content */
-            204: {
+            /** @description Accepted */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TodoReminderScheduled"];
+                };
             };
             /** @description Bad Request */
             400: {
@@ -999,43 +1303,7 @@ export interface operations {
             };
         };
     };
-    DELETE_api_account_passkeys_id: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    POST_api_auth_passkey_options: {
+    GET_api_organisation: {
         parameters: {
             query?: never;
             header?: never;
@@ -1050,7 +1318,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PasskeyOptionsResponse"];
+                    "application/json": components["schemas"]["CurrentOrganisation"];
                 };
             };
             /** @description Not Found */
@@ -1062,7 +1330,7 @@ export interface operations {
             };
         };
     };
-    POST_api_auth_passkey_login: {
+    PUT_api_organisation: {
         parameters: {
             query?: never;
             header?: never;
@@ -1071,7 +1339,313 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PasskeyLoginRequest"];
+                "application/json": components["schemas"]["RenameOrganisationRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DELETE_api_organisation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_organisation_members: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganisationMember"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PUT_api_organisation_members_userId_role: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeMemberRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DELETE_api_organisation_members_userId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_organisation_invitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PendingInvitation"][];
+                };
+            };
+        };
+    };
+    POST_api_organisation_invitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteMemberRequest"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    DELETE_api_organisation_invitations_id: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_join_token: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinOrganisationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinOrganisationResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_join_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinWithNewAccountRequest"];
             };
         };
         responses: {
@@ -1093,28 +1667,6 @@ export interface operations {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GET_api_auth_external_provider: {
-        parameters: {
-            query?: {
-                link?: string;
-            };
-            header?: never;
-            path: {
-                provider: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
             /** @description Not Found */
             404: {
                 headers: {
@@ -1124,7 +1676,7 @@ export interface operations {
             };
         };
     };
-    GET_api_auth_external_callback: {
+    GET_api_organisations: {
         parameters: {
             query?: never;
             header?: never;
@@ -1139,7 +1691,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RedirectHttpResult"];
+                    "application/json": components["schemas"]["UserOrganisation"][];
                 };
             };
             /** @description Not Found */
@@ -1151,77 +1703,27 @@ export interface operations {
             };
         };
     };
-    GET_api_account_external_logins: {
+    POST_api_organisations: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrganisationRequest"];
+            };
+        };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Created */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LinkedLogin"][];
+                    "application/json": components["schemas"]["OrganisationCreationResponse"];
                 };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    POST_api_account_external_logins_link_ticket: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LinkTicketResponse"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    DELETE_api_account_external_logins_provider: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                provider: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Bad Request */
             400: {
@@ -1232,15 +1734,32 @@ export interface operations {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+        };
+    };
+    POST_api_organisations_switch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwitchOrganisationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
             };
-            /** @description Not Found */
-            404: {
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1308,77 +1827,6 @@ export interface operations {
             };
         };
     };
-    POST_api_account_password: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChangePasswordRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LoginResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    POST_api_auth_confirm_email_change: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmEmailChangeRequest"];
-            };
-        };
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                };
-            };
-        };
-    };
     POST_api_auth_confirm_email: {
         parameters: {
             query?: never;
@@ -1441,37 +1889,48 @@ export interface operations {
             };
         };
     };
-    POST_api_account_delete: {
+    GET_api_auth_external_provider: {
+        parameters: {
+            query?: {
+                link?: string;
+            };
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_auth_external_callback: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeleteAccountRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Bad Request */
-            400: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    "application/json": components["schemas"]["RedirectHttpResult"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1563,7 +2022,7 @@ export interface operations {
             };
         };
     };
-    GET_api_auth_me: {
+    POST_api_auth_passkey_options: {
         parameters: {
             query?: never;
             header?: never;
@@ -1578,7 +2037,47 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MeResponse"];
+                    "application/json": components["schemas"]["PasskeyOptionsResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_auth_passkey_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasskeyLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
             /** @description Unauthorized */
@@ -1680,46 +2179,6 @@ export interface operations {
                 content: {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
-            };
-        };
-    };
-    PUT_api_account_profile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateProfileRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UpdateProfileResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -1896,63 +2355,7 @@ export interface operations {
             };
         };
     };
-    POST_api_todos_id_complete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IResult"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GET_api_todos: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Todo"][];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    POST_api_todos: {
+    POST_api_account_password: {
         parameters: {
             query?: never;
             header?: never;
@@ -1961,7 +2364,294 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateTodo"];
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_auth_confirm_email_change: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmEmailChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    POST_api_account_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_account_external_logins: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkedLogin"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_account_external_logins_link_ticket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinkTicketResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DELETE_api_account_external_logins_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_auth_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_account_passkeys_options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasskeyOptionsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GET_api_account_passkeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasskeySummary"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_account_passkeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddPasskeyRequest"];
             };
         };
         responses: {
@@ -1970,9 +2660,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TodoCreationResponse"];
-                };
+                content?: never;
             };
             /** @description Bad Request */
             400: {
@@ -1983,9 +2671,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    POST_api_todos_id_remind: {
+    PUT_api_account_passkeys_id: {
         parameters: {
             query?: never;
             header?: never;
@@ -1996,18 +2691,16 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RemindTodo"];
+                "application/json": components["schemas"]["RenamePasskeyRequest"];
             };
         };
         responses: {
-            /** @description Accepted */
-            202: {
+            /** @description No Content */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["TodoReminderScheduled"];
-                };
+                content?: never;
             };
             /** @description Bad Request */
             400: {
@@ -2020,6 +2713,82 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DELETE_api_account_passkeys_id: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PUT_api_account_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateProfileResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

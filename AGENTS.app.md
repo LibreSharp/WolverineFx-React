@@ -64,9 +64,19 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   migrations by hand.
 <!--#endif -->
 <!--#if (Identity) -->
+<!--#if (Saas) -->
+- **Organisations (tenants):** data that belongs to an organisation implements `ITenanted`
+  (like `Features/Todos/Todo.cs`).
+<!--#if (IsMarten) -->
+  Register it with `.MultiTenanted()` in `Data/Marten/MartenPersistence.cs`.
+<!--#endif -->
+  Wolverine then filters it to the request's organisation; don't filter by organisation by hand. Handle `OrganisationDeleted` to delete it,
+  like `Features/Todos/DeleteTodosOfDeletedOrganisationHandler.cs`. Check organisation roles with
+  `IOrganisationStore` and the rules in `Features/Organisations/OrganisationRules.cs`.
+<!--#endif -->
 - **Auth:** protect endpoints with `[Authorize]` (or `[Authorize(Roles = AppRoles.Admin)]`; roles
-  are constants in `Identity/AppRoles.cs`) and scope data to `user.GetUserId()`. Answer
-  404, not 403, for another user's data. Add `[EnableRateLimiting(AuthRateLimiting.Policy)]` to
+  are constants in `Identity/AppRoles.cs`) and scope a user's own data to `user.GetUserId()`.
+  Answer 404, not 403, for data the user can't see. Add `[EnableRateLimiting(AuthRateLimiting.Policy)]` to
   endpoints that check passwords or create accounts.
 - **User data:** a feature that stores data about a user must handle `AccountDeleted` and delete
   it, like `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`.

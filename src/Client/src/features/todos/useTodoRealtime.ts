@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
-import { getTokens } from '../../lib/api/authTokens'
+import { getOrganisationId, getTokens, subscribeTokens } from '../../lib/api/authTokens'
 import { todoKeys } from './todoQueries'
 
 export interface TodoReminder {
@@ -16,6 +16,9 @@ export interface TodoReminder {
 export function useTodoRealtime() {
   const queryClient = useQueryClient()
   const [reminders, setReminders] = useState<TodoReminder[]>([])
+  // With organisations, the hub sends each connection its organisation's updates: reconnect when
+  // the user switches.
+  const organisationId = useSyncExternalStore(subscribeTokens, getOrganisationId, () => null)
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
@@ -51,7 +54,7 @@ export function useTodoRealtime() {
     return () => {
       void started.then(() => connection.stop())
     }
-  }, [queryClient])
+  }, [queryClient, organisationId])
 
   const dismiss = useCallback(
     (todoId: string) => setReminders((current) => current.filter((r) => r.todoId !== todoId)),

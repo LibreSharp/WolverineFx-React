@@ -60,6 +60,10 @@ src/ApiHost/
   Features/Account/       The signed-in user: profile, password, sign-in methods, passkeys, delete account
   Features/Admin/         Admin endpoints: users, roles, locks and invitations
 <!--#endif -->
+<!--#if (Saas) -->
+  Features/Organisations/ Organisations: switching, members and roles, invitations, joining
+  Organisations/          The organisation model, its store, and choosing a session's organisation
+<!--#endif -->
   Realtime/AppHub.cs      SignalR hub that pushes messages to browsers
 <!--#if (IsMarten) -->
   Data/Marten/            Marten setup: event store, projections, indexes
@@ -83,6 +87,9 @@ src/Client/src/
   features/account/       Settings page and the header's user menu
   features/admin/         Admin page (/admin): users, roles, locks and invitations
 <!--#endif -->
+<!--#if (Saas) -->
+  features/organisations/ The organisation switcher, /organisation (members, invitations) and /join
+<!--#endif -->
   lib/api/                Typed API client generated from the OpenAPI document
   test/                   Unit test setup: the fake API (MSW) and render helpers
 docs/                       Documentation and how-to guides
@@ -101,6 +108,9 @@ The [docs](docs/README.md) folder explains how the app works and how to change i
 <!--#if (Identity) -->
 - [Accounts](docs/accounts.md): sign-in, emails, settings, lockout, roles and the admin page,
   Google/GitHub and passkeys.
+<!--#if (Saas) -->
+  Organisations, their members and invitations are there too.
+<!--#endif -->
 <!--#endif -->
 - [Security](docs/security.md): every protection the app has, and a checklist for deploying.
 - [Testing](docs/testing.md), [Observability](docs/observability.md) and

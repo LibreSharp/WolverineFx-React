@@ -6,7 +6,7 @@ import { useAuth } from './useAuth'
 // What the login page remembers: where to go after logging in, and a message to show (for
 // example after registering or resetting a password).
 export interface AuthLocationState {
-  from?: { pathname: string }
+  from?: { pathname: string; search?: string }
   notice?: string
 }
 
@@ -27,7 +27,7 @@ export function GuestOnly() {
   const { isAuthenticated } = useAuth()
   const state = useLocation().state as AuthLocationState | null
   if (isAuthenticated) {
-    return <Navigate to={state?.from?.pathname ?? '/todos'} replace />
+    return <Navigate to={state?.from ? `${state.from.pathname}${state.from.search ?? ''}` : '/todos'} replace />
   }
   return <Outlet />
 }

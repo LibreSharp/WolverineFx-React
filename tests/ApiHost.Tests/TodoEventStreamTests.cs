@@ -1,6 +1,10 @@
 using System.Net;
 using Alba;
 using ApiHost.Features.Todos;
+#if (Saas)
+using ApiHost.Organisations;
+using Microsoft.IdentityModel.JsonWebTokens;
+#endif
 using Marten;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,7 +49,13 @@ public class TodoEventStreamTests
             s.StatusCodeShouldBe(HttpStatusCode.NoContent);
         });
 
+#if (Saas)
+        // The stream belongs to the user's organisation (the tenant in their access token).
+        var organisationId = new JsonWebToken(token).GetClaim(OrganisationClaims.OrganisationId).Value;
+        await using var session = _fixture.Host.Services.GetRequiredService<IDocumentStore>().QuerySession(organisationId);
+#else
         await using var session = _fixture.Host.Services.GetRequiredService<IDocumentStore>().QuerySession();
+#endif
         var events = await session.Events.FetchStreamAsync(id);
 
         Assert.Collection(events,

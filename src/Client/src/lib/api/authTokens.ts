@@ -20,6 +20,26 @@ export function setTokens(next: AuthTokens | null): void {
   listeners.forEach((listener) => listener())
 }
 
+// The organisation the access token is for (its "org" claim), or null without organisations or
+// tokens. It changes when the user switches organisation, which is when the realtime connection
+// reconnects and cached data is dropped.
+let scopeFor: { token: string; organisationId: string | null } | null = null
+export function getOrganisationId(): string | null {
+  const token = tokens?.accessToken
+  if (!token) return null
+  if (scopeFor?.token !== token) {
+    let organisationId: string | null = null
+    try {
+      const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+      organisationId = (JSON.parse(atob(payload)) as { org?: string }).org ?? null
+    } catch {
+      organisationId = null
+    }
+    scopeFor = { token, organisationId }
+  }
+  return scopeFor.organisationId
+}
+
 export function subscribeTokens(listener: () => void): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)

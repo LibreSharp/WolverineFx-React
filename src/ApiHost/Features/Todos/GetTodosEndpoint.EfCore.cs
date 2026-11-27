@@ -11,7 +11,15 @@ namespace ApiHost.Features.Todos;
 
 public static class GetTodosEndpoint
 {
-#if (Identity)
+#if (Saas)
+    // The organisation's Todos: the DbContext only sees the request's organisation.
+    [Authorize]
+    [WolverineGet("/api/todos")]
+    public static async Task<IReadOnlyList<Todo>> Get(AppDbContext db, CancellationToken cancellationToken)
+    {
+        return await db.Todos.AsNoTracking().ToListAsync(cancellationToken);
+    }
+#elif (Identity)
     [Authorize]
     [WolverineGet("/api/todos")]
     public static async Task<IReadOnlyList<Todo>> Get(AppDbContext db, ClaimsPrincipal user, CancellationToken cancellationToken)

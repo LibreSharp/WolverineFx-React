@@ -7,6 +7,9 @@ using ApiHost.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Wolverine;
+#if (Saas)
+using ApiHost.Organisations;
+#endif
 #if (IsMarten)
 using ApiHost.Identity.Marten;
 #elif (IsEfCore)
@@ -42,6 +45,11 @@ public static class IdentityJwtSetup
         services.AddPasskeys(configuration);
 
         services.AddAuthorization();
+#if (Saas)
+
+        // Organisations: each user's data belongs to the organisation they work in (Organisations/).
+        services.AddOrganisations();
+#endif
 
         // Limits login, registration and password attempts per client IP (see AuthRateLimiting).
         services.AddAuthRateLimiting(configuration);

@@ -138,7 +138,14 @@ public class TodoRealtimeTests
             s.StatusCodeShouldBe(HttpStatusCode.Accepted);
         }));
         Assert.Contains(scheduling.Scheduled.MessagesOf<TodoReminderDue>(), m => m.TodoId == id);
+#if (Saas)
+        // Run it for its organisation, as Wolverine will when it's due (the tracking tool's replay
+        // would drop the tenant id).
+        var due = scheduling.Scheduled.Envelopes().Single(e => e.Message is TodoReminderDue);
+        await _fixture.Host.ExecuteAndWaitAsync(c => c.InvokeForTenantAsync(due.TenantId!, due.Message!), (int)Timeout.TotalMilliseconds);
+#else
         await scheduling.PlayScheduledMessagesAsync(Timeout);
+#endif
 
         var reminder = await tab.NextAsync("todo-reminder", id, Timeout);
         Assert.Equal(title, reminder.GetProperty("data").GetProperty("title").GetString());

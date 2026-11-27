@@ -1,6 +1,11 @@
 using ApiHost.Features.Todos;
 #if (Identity)
 using ApiHost.Identity;
+#endif
+#if (Saas)
+using ApiHost.Organisations;
+#endif
+#if (Identity)
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 #endif
@@ -27,6 +32,14 @@ public class AppDbContext : DbContext
     // instance of the app and kept across restarts. See EfCoreIdentityExtensions.
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 #endif
+#if (Saas)
+
+    public DbSet<Organisation> Organisations => Set<Organisation>();
+
+    public DbSet<Membership> Memberships => Set<Membership>();
+
+    public DbSet<OrganisationInvitation> OrganisationInvitations => Set<OrganisationInvitation>();
+#endif
 
 #if (Identity)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,6 +55,18 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Todo>()
             .HasIndex(t => t.OwnerId);
+#if (Saas)
+
+        modelBuilder.Entity<Organisation>().Property(o => o.Name).HasMaxLength(OrganisationNames.MaxLength);
+        modelBuilder.Entity<Membership>().HasIndex(m => m.UserId);
+        modelBuilder.Entity<Membership>().HasIndex(m => new { m.OrganisationId, m.UserId }).IsUnique();
+        modelBuilder.Entity<Membership>().Property(m => m.Role).HasMaxLength(20);
+        modelBuilder.Entity<OrganisationInvitation>().HasIndex(i => i.TokenHash).IsUnique();
+        modelBuilder.Entity<OrganisationInvitation>().HasIndex(i => new { i.OrganisationId, i.NormalizedEmail });
+        modelBuilder.Entity<OrganisationInvitation>().Property(i => i.Email).HasMaxLength(256);
+        modelBuilder.Entity<OrganisationInvitation>().Property(i => i.NormalizedEmail).HasMaxLength(256);
+        modelBuilder.Entity<OrganisationInvitation>().Property(i => i.Role).HasMaxLength(20);
+#endif
     }
 #endif
 }
