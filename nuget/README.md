@@ -47,22 +47,38 @@ and read the app's emails in Mailpit at http://localhost:8025.
 - **Messaging with a transactional outbox:** messages are saved with your data and handled in
   the background, surviving restarts.
 - **Event sourcing** (Marten): event streams and Wolverine's aggregate handler workflow.
-- **Realtime updates** with SignalR: every open tab refreshes, scoped to the signed-in user.
+- **Realtime updates** with SignalR: every open tab refreshes, scoped to the signed-in user (or,
+  with `saas`, their organisation).
 - **Accounts** (`--Auth identity` or `saas`): ASP.NET Core Identity with JWT access tokens and rotating
   refresh tokens; email confirmation, password reset and invitations sent through the outbox
   (MailKit, with Mailpit in development); account settings; lockout; roles and an admin page;
   sign-in with Google and GitHub; and passkeys.
+- **Organisations** (`--Auth saas`): multi-tenancy with Wolverine, so each organisation's data is
+  kept apart in the data layer; every account gets its own organisation, and users create more,
+  switch between them, and invite others by email; Owner, Admin and Member roles.
+- **Pre-rendered public pages** (React Router's framework mode): the home page is real HTML for
+  search engines and link previews, with real 404s, `robots.txt` and `sitemap.xml`.
 - **Security by default:** strict security headers, HTTPS in production, rate limiting and
-  lockout on sign-in, one-time email links, and the generated README's Security section.
+  lockout on sign-in, one-time email links built from the configured address, and a Security
+  page in the generated docs.
 - **Deployment:** a container image, a production `docker-compose` with PostgreSQL and Caddy for
   HTTPS, health checks and OpenTelemetry.
 - **A typed API client** generated from the OpenAPI document.
 - **Production-ready publish:** `dotnet publish` pre-generates Wolverine's code and bundles the
   React app, so production starts fast with no runtime compilation.
 - **Tests** with xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers, covering
-  endpoints, messaging, SignalR and, with Identity, every account feature including passkeys.
+  endpoints, messaging, SignalR and, with accounts, every account and organisation feature
+  including passkeys; and end-to-end tests with Playwright.
 
 Every option combination is built, tested and published in CI on each change.
+
+## Changes in 0.4.0
+
+- **`--Identity` is replaced by `--Auth`:** `--Auth identity` for `--Identity true`, `--Auth none`
+  for `--Identity false`, and the new `--Auth saas` for organisations.
+- **With accounts, production needs `App__ClientUrl`,** the app's public address (such as
+  `https://app.example.com`): email links are built from it, and the app won't start without it
+  outside Development. The production `docker-compose` sets it from `DOMAIN`.
 
 ## Links
 

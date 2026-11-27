@@ -50,10 +50,13 @@ jobs:
           --api-key "${{ steps.nuget.outputs.NUGET_API_KEY }}"
           --source https://api.nuget.org/v3/index.json
 
+      # The notes come from docs/releases/<tag>.md when there is one (commits go straight to main,
+      # so generated notes, which list pull requests, would say little).
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >
-          gh release create "$GITHUB_REF_NAME" dist/*.nupkg
-          --title "$GITHUB_REF_NAME" --generate-notes
-          ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}
+        run: |
+          notes="docs/releases/$GITHUB_REF_NAME.md"
+          if [ -f "$notes" ]; then notes_args=(--notes-file "$notes"); else notes_args=(--generate-notes); fi
+          gh release create "$GITHUB_REF_NAME" dist/*.nupkg --title "$GITHUB_REF_NAME" "${notes_args[@]}" \
+            ${{ contains(github.ref_name, '-') && '--prerelease' || '' }}

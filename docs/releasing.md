@@ -13,6 +13,9 @@ Before tagging:
 - The roadmap's items for the version are done, and `ROADMAP.md` says so.
 - `README.md` and `nuget/README.md` describe what the version adds (nuget.org shows the latter).
 - CI is green on `main`.
+- `docs/releases/<tag>.md` (such as `docs/releases/v0.4.0.md`) holds the release notes, with any
+  breaking changes first: the GitHub release uses it. Without one, GitHub generates notes from
+  pull requests, which say little when commits go straight to `main`.
 
 ## One-time setup
 

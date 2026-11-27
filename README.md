@@ -35,7 +35,7 @@ dotnet new install LibreSharp.Templates.WolverineFxReact
 | To | Run |
 |---|---|
 | Update to the latest version | `dotnet new update` |
-| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.3.1` |
+| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.4.0` |
 | See the template's options | `dotnet new wolverine-react --help` |
 | Uninstall | `dotnet new uninstall LibreSharp.Templates.WolverineFxReact` |
 
@@ -43,6 +43,18 @@ Updating the template only affects projects you create afterwards.
 
 To try unreleased changes, install from a clone of this repository instead:
 `dotnet new install ./` (run `dotnet new uninstall ./` to remove it).
+
+### Changes in 0.4.0
+
+- **`--Identity` is replaced by `--Auth`:** use `--Auth identity` for `--Identity true` and
+  `--Auth none` for `--Identity false`. The new `--Auth saas` adds organisations.
+- **With accounts, production needs `App__ClientUrl`:** the app's public address, such as
+  `https://app.example.com`. Links in emails are built from it, never from the request's host,
+  and the app won't start without it outside Development. The production `docker-compose` sets
+  it from `DOMAIN`.
+- The public pages are pre-rendered (React Router's framework mode), account endpoints moved to
+  `Features/Auth`, `Features/Account` and `Features/Admin`, and code that differs between Marten
+  and EF Core is in `Name.Marten.cs` / `Name.EfCore.cs` files.
 
 ## Usage
 
@@ -100,7 +112,8 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
   - **Validation.** FluentValidation rejects bad input with a 400 `ProblemDetails` response
     before the endpoint runs; the React forms show the messages.
   - **Realtime updates with SignalR** through Wolverine's SignalR transport: every open tab
-    refreshes. With accounts (`--Auth identity` or `saas`), updates go only to the signed-in user's own tabs.
+    refreshes. With `--Auth identity`, updates go only to the signed-in user's own tabs; with
+    `saas`, to everyone working in the organisation, and reminders only to whoever set them.
 - **Production-ready code generation.** Development generates Wolverine's code at runtime;
   `dotnet publish` runs `codegen write` and Production loads it ready-made
   (`TypeLoadMode.Static`): a faster start, no runtime compilation, and a clear error at startup if
@@ -115,8 +128,12 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
 
 - **React, Vite, TypeScript and Tailwind CSS**, with an app shell (header, user menu, home page,
   footer, not-found page).
-- **React Router** with real URLs; with accounts, signed-out users are sent to `/login`
-  and back to the page they wanted.
+- **React Router** (framework mode, as a single-page app) with real URLs; with accounts,
+  signed-out users are sent to `/login` and back to the page they wanted.
+- **Pre-rendered public pages:** the home page is real HTML at build time, so search engines and
+  link previews see its content without JavaScript, and a CDN can cache it. Unknown paths are
+  real 404s, private pages are marked `noindex`, and the API serves `robots.txt` and
+  `sitemap.xml`. Still one deployable, with no Node server.
 - **TanStack Query** for server data, invalidated by mutations and SignalR messages, and cleared
   on logout so the next user never sees the previous user's data.
 - **A typed API client** generated from the OpenAPI document (`openapi-typescript` +
@@ -127,7 +144,8 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
 ### Accounts (`--Auth identity` or `saas`)
 
 - **ASP.NET Core Identity with JWT:** short-lived access tokens and rotating refresh tokens with
-  reuse detection, kept in memory in the browser. Each user sees only their own data.
+  reuse detection, kept in memory in the browser. With `identity`, each user sees only their own
+  data; with `saas`, their organisation's.
 - **Account emails:** email confirmation (required to log in), confirmed email changes, password
   reset and invitations, sent with [MailKit](https://github.com/jstedfast/MailKit) from a
   Wolverine handler, so they go through the durable outbox and are retried. In Development,
@@ -153,22 +171,25 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
   switch between them in the header. Removing a member takes effect at once.
 - **Roles:** Owner, Admin and Member, with at least one owner always.
 - **Invitations by email:** existing users accept after logging in; new users create their
-  account from the link, which confirms their email.
+  account from the link, which confirms their email. Invitations are limited per user and per
+  organisation, so the app can't be used to send spam.
 - **Deleting an organisation** deletes its data through an `OrganisationDeleted` message that
-  each feature handles for that tenant.
+  each feature handles for that tenant, published in the same transaction as the deletion.
 
 ### Security
 
-- Browser security headers on every response (a strict Content-Security-Policy, framing, MIME
-  sniffing and referrer protections), HTTPS redirection and HSTS in production, and
-  development-only tools kept out of production.
+- Browser security headers on every response (a strict Content-Security-Policy that allows only
+  the build's own inline start-up scripts, by hash; framing, MIME sniffing and referrer
+  protections), HTTPS redirection and HSTS in production, and development-only tools kept out of
+  production.
 - With accounts: verified emails, one-time and short-lived email links whose tokens are
   never stored, no account enumeration from "forgot password", rate limiting on sign-in and
   account endpoints, lockout, sessions ended on password changes and admin locks, verified-email
-  rules and pre-hijacking protection for Google/GitHub sign-in, and a startup check that refuses
-  a weak or development signing key in production.
-- The generated app's README has a Security section describing each measure and what to do when
-  deploying.
+  rules and pre-hijacking protection for Google/GitHub sign-in, email links built from the
+  configured address (never the request's host), realtime connections closed when their token
+  expires, and startup checks that refuse a weak or development signing key, or a missing
+  `App:ClientUrl`, in production.
+- The generated app's `docs/security.md` describes each measure and what to do when deploying.
 
 ### Deployment
 
@@ -177,21 +198,23 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
   with a step-by-step guide for a small VPS (`deploy/`).
 - **Data Protection keys in PostgreSQL**, so email links and other protected tokens work across
   restarts and instances.
+- The generated `docs/deployment.md` lists every production setting.
 
 ### Tests
 
 - **Client unit tests** (always included): Vitest and React Testing Library with the API faked
   by [MSW](https://mswjs.io/), next to the code they test, covering the Todo page and, with
   accounts, the token refresh, every sign-in page, route guards, Settings and the admin
-  page.
+  page, and with `saas` the organisation switcher, the organisation page and the join page.
 
 With `--IncludeTests true` (the default):
 
 - **End-to-end tests** with [Playwright](https://playwright.dev/) (Apache-2.0) in the installed
-  Chrome, against the running app: Todos with live updates and, with accounts, sign-up
-  with the real confirmation email (read from Mailpit), settings, password reset, lockout, the
-  admin page and invitations, and passkeys with Chrome's virtual authenticator. CI runs them
-  against each published combination.
+  Chrome, against the running app: Todos with live updates, the pre-rendered pages and search
+  engine files and, with accounts, sign-up with the real confirmation email (read from Mailpit),
+  settings, password reset, lockout, the admin page and invitations, passkeys with Chrome's
+  virtual authenticator, and (with `saas`) a teammate joining from an invitation email. CI runs
+  them against each published combination.
 
 - A `tests/` project (xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers) that
   boots the real app against a throwaway Postgres and drives it over HTTP, so one project covers
@@ -202,15 +225,18 @@ With `--IncludeTests true` (the default):
   emails), login, token rotation and reuse detection, account settings, password reset, lockout,
   rate limiting, roles and the admin endpoints, invitations, Google/GitHub sign-in rules, and
   passkeys (with a software authenticator, so Identity's real WebAuthn checks run).
+- With `saas`: organisations kept apart, switching, roles and the always-an-owner rule (including
+  changes at the same moment), removal taking effect at once, invitations and their limits,
+  deleting an organisation's data, and organisation-wide realtime updates.
 
 ### Developer experience
 
 - **Documentation for the generated app:** a short README (running it, the project layout,
   common tasks) and a `docs/` folder (from `docs.app/` here) with architecture, accounts,
   security, testing, observability and deployment pages, plus how-to guides: add a feature,
-  change the database schema, send email through your provider, set up Google/GitHub sign-in,
-  add a role, make someone an admin, and change the JWT signing key. Each app gets only the
-  pages that match its options.
+  put Cloudflare in front, change the database schema, send email through your provider, set up
+  Google/GitHub sign-in, add a role, make someone an admin, and change the JWT signing key. Each
+  app gets only the pages that match its options.
 - **Help for AI coding assistants:** `AGENTS.md` (with `CLAUDE.md` importing it) describes the
   app's conventions and the rules that are easy to miss.
 - **Housekeeping:** central package management (`Directory.Packages.props`), the free Meziantou

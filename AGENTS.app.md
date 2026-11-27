@@ -73,16 +73,27 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   Wolverine then filters it to the request's organisation; don't filter by organisation by hand. Handle `OrganisationDeleted` to delete it,
   like `Features/Todos/DeleteTodosOfDeletedOrganisationHandler.cs`. Check organisation roles with
   `IOrganisationStore` and the rules in `Features/Organisations/OrganisationRules.cs`.
+  `IOrganisationStore` saves each change at once, outside the endpoint's transaction; a change
+  that must send a message with it publishes through Wolverine's outbox in the store, as
+  `DeleteAsync` and `AddInvitationAsync` do.
 <!--#endif -->
 - **Auth:** protect endpoints with `[Authorize]` (or `[Authorize(Roles = AppRoles.Admin)]`; roles
   are constants in `Identity/AppRoles.cs`) and scope a user's own data to `user.GetUserId()`.
   Answer 404, not 403, for data the user can't see. Add `[EnableRateLimiting(AuthRateLimiting.Policy)]` to
   endpoints that check passwords or create accounts.
+<!--#if (Saas) -->
+- **User data:** a feature that stores data about a user (not their organisation) must handle
+  `AccountDeleted` and delete it.
+<!--#else -->
 - **User data:** a feature that stores data about a user must handle `AccountDeleted` and delete
   it, like `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`.
+<!--#endif -->
 - **Email:** never call `IEmailSender` from an endpoint. Return a message and send it from a
   handler, as `Identity/Email/AccountEmails.cs` does, so it goes through the durable outbox and
   is retried. Create one-time tokens in the handler, not the endpoint, so they aren't stored.
+  Build links with `ClientUrl.For` (`App:ClientUrl`), never from the request's `Host` header,
+  which the caller controls. Endpoints take tokens in request bodies, not URLs, which are logged
+  and traced.
 - **Identity:** use `UserManager`/`SignInManager` for account rules (password checks, lockout,
   tokens) rather than reimplementing them.
 <!--#endif -->

@@ -63,6 +63,43 @@ Content-Type: application/json
 GET {{baseUrl}}/api/admin/users?search=example
 Authorization: Bearer {{login.response.body.$.accessToken}}
 
+#if (Saas)
+### My organisations (isCurrent: the one my access token is for)
+GET {{baseUrl}}/api/organisations
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### The current organisation, and my role in it
+GET {{baseUrl}}/api/organisation
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Its members
+GET {{baseUrl}}/api/organisation/members
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Invite someone to it (the email lands in Mailpit: http://localhost:8025)
+POST {{baseUrl}}/api/organisation/invitations
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "email": "teammate@example.com", "role": "Member" }
+
+### Create another organisation (I'm its owner)
+# @name createOrganisation
+POST {{baseUrl}}/api/organisations
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "name": "Another team" }
+
+### Switch to it: new tokens for the same session (its Todos are separate). This replaces the
+### login's refresh token, so run "Log in" again before the requests below.
+POST {{baseUrl}}/api/organisations/switch
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{ "organisationId": "{{createOrganisation.response.body.$.id}}", "refreshToken": "{{login.response.body.$.refreshToken}}" }
+
+#endif
 ### Without a token, the Todo endpoints answer 401
 GET {{baseUrl}}/api/todos
 

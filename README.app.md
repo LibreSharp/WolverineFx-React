@@ -35,7 +35,7 @@ only, is an admin (so `/admin` works), and the dev server pre-fills the login fo
 `src/ApiHost/appsettings.Development.json` and in `src/Client/.env.development`.
 
 `docker compose up -d` also starts [Mailpit](https://mailpit.axllent.org/), which catches every
-email the app sends in Development (confirmation, password reset): read them at
+email the app sends in Development (confirmation, password reset, invitations): read them at
 http://localhost:8025. New accounts must confirm their email before they can log in; the demo
 user is already confirmed.
 <!--#endif -->

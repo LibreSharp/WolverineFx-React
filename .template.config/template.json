@@ -65,6 +65,21 @@
     }
   },
   "SpecialCustomOperations": {
+    "**/*.http": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": [ "#if" ],
+            "else": [ "#else" ],
+            "elseif": [ "#elseif" ],
+            "endif": [ "#endif" ],
+            "trim": "true",
+            "wholeLine": "true"
+          }
+        }
+      ]
+    },
     "**/env.example": {
       "operations": [
         {

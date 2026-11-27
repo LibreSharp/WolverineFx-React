@@ -24,17 +24,22 @@ issues.
   snapshot projection.
 - **Validation:** FluentValidation middleware returning `ProblemDetails`, shown in the UI.
 - **Realtime:** SignalR through Wolverine's transport; every open tab updates, scoped to the
-  signed-in user when Identity is on.
-- **Identity** (`--Identity true`): JWT access tokens with rotating refresh tokens and reuse
-  detection, per-user Todos, and a Development-only demo login.
+  signed-in user with accounts, or to their organisation with `saas`.
+- **Accounts** (`--Auth identity`): JWT access tokens with rotating refresh tokens and reuse
+  detection, email confirmation, settings, lockout, roles and an admin page, Google/GitHub
+  sign-in and passkeys, per-user Todos, and a Development-only demo login.
+- **Organisations** (`--Auth saas`): multi-tenancy with Wolverine, roles, invitations and a
+  switcher.
 - **Frontend:** React, Vite, TypeScript and Tailwind CSS, React Router and TanStack Query, with an
-  API client generated from the OpenAPI document. Single deployable: Kestrel serves the built client in production.
+  API client generated from the OpenAPI document, and pre-rendered public pages. Single
+  deployable: Kestrel serves the built client in production.
 - **Tests** (`--IncludeTests true`): xUnit, Alba and Testcontainers against a real Postgres,
-  covering the endpoints, auth, messaging, the event stream and SignalR.
+  covering the endpoints, auth, organisations, messaging, the event stream and SignalR; and
+  Playwright end-to-end tests against the published app.
 - **Documentation in every generated app:** a README covering running, layout, patterns,
   adding a feature, common tasks and deployment, tailored to the chosen options.
-- **Requests to try in your IDE:** a `.http` file with the app's requests (login first when
-  Identity is on), each reusing earlier responses such as the new Todo's id.
+- **Requests to try in your IDE:** a `.http` file with the app's requests (login first with
+  accounts), each reusing earlier responses such as the new Todo's id.
 - **CI:** all 12 option combinations (8 before v0.4.0) on every push: build, tests, and a Production publish
   that is started and called.
 
