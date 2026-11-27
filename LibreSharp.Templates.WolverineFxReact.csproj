@@ -7,8 +7,8 @@
     <PackageVersion>0.1.0</PackageVersion>
     <Title>LibreSharp WolverineFx + React Template</Title>
     <Authors>LibreSharp</Authors>
-    <Description>A dotnet new template pairing a WolverineFx backend with a React (Vite + TypeScript + Tailwind) frontend: HTTP endpoints, messaging with a transactional outbox, Marten event sourcing or EF Core, validation, SignalR realtime updates, and optional JWT-based Identity. Built entirely on free, open-source libraries. A community template from LibreSharp, not an official WolverineFx/JasperFx package.</Description>
-    <PackageTags>dotnet-new;templates;wolverine;wolverinefx;marten;react;vite;signalr;libresharp</PackageTags>
+    <Description>A dotnet new template pairing a WolverineFx backend with a React (Vite + TypeScript + Tailwind) frontend: HTTP endpoints, messaging with a transactional outbox, Marten event sourcing or EF Core, validation, SignalR realtime updates, and optional accounts with ASP.NET Core Identity: JWT, email confirmation, lockout, roles and an admin page, invitations, Google/GitHub sign-in and passkeys. Tested end to end, with deployment to a small server. Built entirely on free, open-source libraries. A community template from LibreSharp, not an official WolverineFx/JasperFx package.</Description>
+    <PackageTags>dotnet-new;templates;wolverine;wolverinefx;marten;react;vite;signalr;identity;passkeys;libresharp</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://libresharp.github.io</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LibreSharp/WolverineFx-React</RepositoryUrl>
