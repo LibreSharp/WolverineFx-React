@@ -35,7 +35,7 @@ public static class LinkedLoginsEndpoints
     public static LinkTicketResponse LinkTicket(ClaimsPrincipal principal, ExternalLinkTickets linkTickets)
         => new(linkTickets.Create(principal.GetUserId()));
 
-    // Refused if it's the only way left to sign in (no password, and no other linked login).
+    // Refused if it's the only way left to sign in (see SignInMethods).
     [Authorize]
     [WolverineDelete("/api/account/external-logins/{provider}")]
     public static async Task<Results<NoContent, NotFound, ValidationProblem, UnauthorizedHttpResult>> Remove(
@@ -54,10 +54,10 @@ public static class LinkedLoginsEndpoints
             return TypedResults.NotFound();
         }
 
-        if (logins.Count == 1 && !await userManager.HasPasswordAsync(user))
+        if (await userManager.CountSignInMethodsAsync(user) <= 1)
         {
             return IdentityResultExtensions.ValidationProblem("Provider",
-                "This is the only way you can sign in. Set a password first (Forgot your password? on the login page).");
+                "This is the only way you can sign in. Add a passkey or set a password first (Forgot your password? on the login page).");
         }
 
         var result = await userManager.RemoveLoginAsync(user, login.LoginProvider, login.ProviderKey);

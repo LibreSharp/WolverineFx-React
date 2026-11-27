@@ -125,7 +125,12 @@ billing records but no payment provider (see the
       unconfirmed account with that email loses its password first (pre-hijacking). The SPA
       gets a refresh token in the URL fragment and rotates it at once. Marten's user store
       gained `IUserLoginStore`.
-- [ ] **Passkeys** with ASP.NET Core Identity (added in .NET 10; confirm the API first).
+- [x] **Passkeys** with ASP.NET Core Identity (added in .NET 10): `IPasskeyHandler` used
+      directly, without SignInManager's cookie, by encrypting the ceremony state for the client.
+      Add, rename and remove in Settings; log in with discoverable credentials. EF Core moves to
+      Identity schema version 3 (an `AddPasskeys` migration); Marten's user store gained
+      `IUserPasskeyStore`. Tests use a software authenticator, so Identity's real signature,
+      challenge, origin and counter checks run.
 - [x] **Account lockout** after repeated failed logins: Identity's own lockout (5 attempts,
       15 minutes) through `SignInManager.CheckPasswordSignInAsync`; refresh tokens stop working
       while locked, and a password reset lifts it.

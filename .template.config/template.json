@@ -125,6 +125,8 @@
             "tests/ApiHost.Tests/AccountLockoutTests.cs",
             "tests/ApiHost.Tests/AdminEndpointsTests.cs",
             "tests/ApiHost.Tests/ExternalLoginTests.cs",
+            "tests/ApiHost.Tests/PasskeyTests.cs",
+            "tests/ApiHost.Tests/SoftwarePasskey.cs",
             "tests/ApiHost.Tests/AuthRateLimitingTests.cs",
             "tests/ApiHost.Tests/TodoAuthorizationTests.cs"
           ]
@@ -156,6 +158,8 @@
           "rename": {
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126130647_InitialCreate.cs": "src/ApiHost/Data/EfCore/Migrations/20261126130647_InitialCreate.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261126130647_InitialCreate.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261126130647_InitialCreate.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127034335_AddPasskeys.cs": "src/ApiHost/Data/EfCore/Migrations/20261127034335_AddPasskeys.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127034335_AddPasskeys.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127034335_AddPasskeys.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
           }
         }

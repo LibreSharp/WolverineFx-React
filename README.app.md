@@ -66,6 +66,7 @@ src/ApiHost/
   Identity/Email/         Account emails: messages, their handler, and the SMTP sender (MailKit)
   Identity/Admin/         Admin endpoints: users, roles, locks and invitations
   Identity/External/      Sign-in with Google and GitHub
+  Identity/Passkeys/      Passkeys: adding them in Settings, and logging in with one
 <!--#endif -->
 src/Client/src/
   App.tsx                 Routes (React Router)
@@ -149,6 +150,14 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   provider, the API redirects to `/external-login` with a refresh token in the URL fragment
   (never sent to servers), which the client swaps for new tokens at once. Settings lists, links
   and removes providers; the last way to sign in can't be removed.
+
+- **Passkeys.** Users add passkeys in Settings and can then log in with one instead of a
+  password ("Log in with a passkey"; the browser offers the passkeys it has for the site, so no
+  email is typed). This is ASP.NET Core Identity's own WebAuthn support (`IPasskeyHandler`), used
+  without cookies: the ceremony's state is encrypted and handed to the client for five minutes
+  (`Identity/Passkeys/PasskeySetup.cs`). The relying party ID is the site's host name, so
+  passkeys created on one domain don't work on another. Settings won't remove the last way a
+  user can sign in (password, linked provider or passkey).
 
   To set one up, create an OAuth app with the provider and register its callback URL:
   `https://your-domain/api/auth/external/signin-google` (or `signin-github`); in Development,

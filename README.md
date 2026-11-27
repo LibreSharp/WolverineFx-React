@@ -123,6 +123,8 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 - **Sign-in with Google and GitHub** (`--Identity true`), each on when its client ID and secret
   are set: verified emails only, linking and unlinking in Settings, and protection against
   account pre-hijacking.
+- **Passkeys** (`--Identity true`) with ASP.NET Core Identity's WebAuthn support: add them in
+  Settings, then log in without a password.
 - **Account lockout** (`--Identity true`): Identity's lockout after five failed logins (15
   minutes), which also stops refresh tokens; a password reset lifts it.
 - **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With

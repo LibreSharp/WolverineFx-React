@@ -2,10 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api/client'
 import { setTokens } from '../../lib/api/authTokens'
 import { problemMessage } from '../../lib/api/problemDetails'
+import { addPasskey } from '../../lib/passkeys'
 
 export const accountKeys = {
   me: ['me'] as const,
   externalLogins: ['external-logins'] as const,
+  passkeys: ['passkeys'] as const,
 }
 
 // The signed-in user's profile (id, email, display name).
@@ -87,4 +89,46 @@ export async function startLinkingExternalLogin(provider: string) {
   const { data } = await api.POST('/api/account/external-logins/link-ticket')
   if (!data) throw new Error('Could not start linking.')
   window.location.assign(`/api/auth/external/${encodeURIComponent(provider)}?link=${encodeURIComponent(data.ticket)}`)
+}
+
+// The signed-in user's passkeys.
+export function usePasskeys() {
+  return useQuery({
+    queryKey: accountKeys.passkeys,
+    queryFn: async () => {
+      const { data, response } = await api.GET('/api/account/passkeys')
+      if (!response.ok || !data) throw new Error('Could not load your passkeys.')
+      return data
+    },
+  })
+}
+
+export function useAddPasskey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (name: string) => addPasskey(name),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: accountKeys.passkeys }),
+  })
+}
+
+export function useRenamePasskey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const { error, response } = await api.PUT('/api/account/passkeys/{id}', { params: { path: { id } }, body: { name } })
+      if (!response.ok) throw new Error(problemMessage(error, 'Could not rename the passkey.'))
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: accountKeys.passkeys }),
+  })
+}
+
+export function useRemovePasskey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error, response } = await api.DELETE('/api/account/passkeys/{id}', { params: { path: { id } } })
+      if (!response.ok) throw new Error(problemMessage(error, 'Could not remove the passkey.'))
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: accountKeys.passkeys }),
+  })
 }

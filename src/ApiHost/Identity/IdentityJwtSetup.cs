@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ApiHost.Identity.Email;
 using ApiHost.Identity.External;
+using ApiHost.Identity.Passkeys;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -28,20 +29,7 @@ public static class IdentityJwtSetup
         ValidateSigningKey(jwtOptions.SigningKey, environment);
 
         services.AddApplicationIdentity().AddAppTokenProviders();
-        services.Configure<IdentityOptions>(options =>
-        {
-            options.User.RequireUniqueEmail = true;
-
-            // Login is refused until the user opens the link in the confirmation email sent when
-            // they register (see LoginEndpoint and RegisterEndpoint).
-            options.SignIn.RequireConfirmedEmail = true;
-
-            // Five wrong passwords in a row lock the account for 15 minutes (see LoginEndpoint).
-            // An admin can also lock an account indefinitely (see Lockout.cs).
-            options.Lockout.AllowedForNewUsers = true;
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-        });
+        services.Configure<IdentityOptions>(ConfigureIdentity);
 
         services.AddJwtBearerAuthentication(jwtOptions);
 
@@ -49,6 +37,9 @@ public static class IdentityJwtSetup
         services.AddAuthentication().AddExternalProviders(configuration);
         services.AddScoped<ExternalLoginService>();
         services.AddSingleton<ExternalLinkTickets>();
+
+        // Passkeys (Identity's WebAuthn support); see Passkeys/.
+        services.AddPasskeys(configuration);
 
         services.AddAuthorization();
 
@@ -64,6 +55,7 @@ public static class IdentityJwtSetup
             opts.CodeGeneration.AlwaysUseServiceLocationFor<SignInManager<ApplicationUser>>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<TokenIssuer>();
             opts.CodeGeneration.AlwaysUseServiceLocationFor<ExternalLoginService>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<IPasskeyHandler<ApplicationUser>>();
         });
 
         // A ready-made login for local development only.
@@ -76,6 +68,25 @@ public static class IdentityJwtSetup
         services.AddHostedService<RoleSeeder>();
 
         services.AddAccountEmail(configuration);
+    }
+
+    // ASP.NET Core Identity's rules for accounts.
+    private static void ConfigureIdentity(IdentityOptions options)
+    {
+        options.User.RequireUniqueEmail = true;
+
+        // Identity's schema with passkeys (the AspNetUserPasskeys table, with EF Core).
+        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+
+        // Login is refused until the user opens the link in the confirmation email sent when
+        // they register (see LoginEndpoint and RegisterEndpoint).
+        options.SignIn.RequireConfirmedEmail = true;
+
+        // Five wrong passwords in a row lock the account for 15 minutes (see LoginEndpoint).
+        // An admin can also lock an account indefinitely (see Lockout.cs).
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     }
 
     private static void AddJwtBearerAuthentication(this IServiceCollection services, JwtOptions jwtOptions)

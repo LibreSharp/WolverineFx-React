@@ -1,6 +1,7 @@
 using Marten;
 using Marten.AspNetIdentity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace ApiHost.Identity.Marten;
 
@@ -15,6 +16,7 @@ namespace ApiHost.Identity.Marten;
 // - IUserRoleStore: UserManager's role methods (AddToRoleAsync, GetRolesAsync, ...), keeping the
 //   role names in the user document's RoleClaims, where Marten.AspNetIdentity puts them.
 // - IUserLoginStore: external sign-in (Google, GitHub), kept in the user document's Logins.
+// - IUserPasskeyStore: passkeys, kept in the user document's Passkeys.
 //
 // Marten.AspNetIdentity has no nullable annotations, so its FindBy...Async methods don't match
 // Identity's (which may return null); the warning is about annotations only.
@@ -24,7 +26,8 @@ public class ApplicationUserStore
       IUserSecurityStampStore<ApplicationUser>,
       IUserLockoutStore<ApplicationUser>,
       IUserRoleStore<ApplicationUser>,
-      IUserLoginStore<ApplicationUser>
+      IUserLoginStore<ApplicationUser>,
+      IUserPasskeyStore<ApplicationUser>
 {
     // The base class keeps its own reference privately.
     private readonly IDocumentStore _documentStore;
@@ -139,6 +142,60 @@ public class ApplicationUserStore
         return await session.Query<ApplicationUser>()
             .FirstOrDefaultAsync(u => u.Logins.Any(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey), cancellationToken);
     }
+
+    public Task AddOrUpdatePasskeyAsync(ApplicationUser user, UserPasskeyInfo passkey, CancellationToken cancellationToken)
+    {
+        var id = WebEncoders.Base64UrlEncode(passkey.CredentialId);
+        var stored = new StoredPasskey(id, passkey.PublicKey, passkey.Name, passkey.CreatedAt, passkey.SignCount, passkey.Transports,
+            passkey.IsUserVerified, passkey.IsBackupEligible, passkey.IsBackedUp, passkey.AttestationObject, passkey.ClientDataJson, passkey.Aaguid);
+        var index = user.Passkeys.ToList().FindIndex(p => p.CredentialId == id);
+        if (index >= 0)
+        {
+            user.Passkeys[index] = stored;
+        }
+        else
+        {
+            user.Passkeys.Add(stored);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<IList<UserPasskeyInfo>> GetPasskeysAsync(ApplicationUser user, CancellationToken cancellationToken)
+        => Task.FromResult<IList<UserPasskeyInfo>>([.. user.Passkeys.Select(ToPasskeyInfo)]);
+
+    public async Task<ApplicationUser?> FindByPasskeyIdAsync(byte[] credentialId, CancellationToken cancellationToken)
+    {
+        var id = WebEncoders.Base64UrlEncode(credentialId);
+        await using var session = _documentStore.QuerySession();
+        return await session.Query<ApplicationUser>().FirstOrDefaultAsync(u => u.Passkeys.Any(p => p.CredentialId == id), cancellationToken);
+    }
+
+    public Task<UserPasskeyInfo?> FindPasskeyAsync(ApplicationUser user, byte[] credentialId, CancellationToken cancellationToken)
+    {
+        var id = WebEncoders.Base64UrlEncode(credentialId);
+        var stored = user.Passkeys.FirstOrDefault(p => p.CredentialId == id);
+        return Task.FromResult(stored is null ? null : ToPasskeyInfo(stored));
+    }
+
+    public Task RemovePasskeyAsync(ApplicationUser user, byte[] credentialId, CancellationToken cancellationToken)
+    {
+        var id = WebEncoders.Base64UrlEncode(credentialId);
+        foreach (var passkey in user.Passkeys.Where(p => p.CredentialId == id).ToList())
+        {
+            user.Passkeys.Remove(passkey);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static UserPasskeyInfo ToPasskeyInfo(StoredPasskey p)
+        => new(WebEncoders.Base64UrlDecode(p.CredentialId), p.PublicKey, p.CreatedAt, p.SignCount, p.Transports ?? [],
+            p.IsUserVerified, p.IsBackupEligible, p.IsBackedUp, p.AttestationObject, p.ClientDataJson)
+        {
+            Name = p.Name,
+            Aaguid = p.Aaguid,
+        };
 
     private async Task<string?> FindRoleNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
     {

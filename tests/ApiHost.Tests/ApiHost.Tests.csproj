@@ -15,6 +15,10 @@
     <PackageReference Include="Alba" />
     <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+<!--#if (Identity) -->
+    <!-- CBOR, for the software passkey authenticator in PasskeyTests. -->
+    <PackageReference Include="System.Formats.Cbor" />
+<!--#endif -->
   </ItemGroup>
 
   <ItemGroup>

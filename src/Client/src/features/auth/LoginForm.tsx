@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { api } from '../../lib/api/client'
+import { setTokens } from '../../lib/api/authTokens'
+import { isCancelled, loginWithPasskey, passkeysSupported } from '../../lib/passkeys'
 import { useAuth, type LoginRefusal } from './useAuth'
 
 // The demo login the API creates in Development (see .env.development). Both values are
@@ -34,6 +36,17 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
     }
 
     onSuccess?.()
+  }
+
+  async function handlePasskey() {
+    setError(null)
+    setRefusal(null)
+    try {
+      setTokens(await loginWithPasskey())
+      onSuccess?.()
+    } catch (e) {
+      if (!isCancelled(e)) setError(e instanceof Error ? e.message : 'Passkey login failed')
+    }
   }
 
   return (
@@ -92,6 +105,16 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
       >
         {submitting ? 'Logging in…' : 'Log in'}
       </button>
+
+      {passkeysSupported() && (
+        <button
+          type="button"
+          onClick={handlePasskey}
+          className="rounded border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50"
+        >
+          Log in with a passkey
+        </button>
+      )}
     </form>
   )
 }

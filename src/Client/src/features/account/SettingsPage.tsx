@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { useAuthOptions } from '../auth/authQueries'
+import { isCancelled, passkeysSupported } from '../../lib/passkeys'
 import { useNavigate } from 'react-router'
 import { setTokens } from '../../lib/api/authTokens'
 import type { HomeLocationState } from '../../components/HomePage'
@@ -7,9 +8,13 @@ import {
   startLinkingExternalLogin,
   useChangePassword,
   useDeleteAccount,
+  useAddPasskey,
   useExternalLogins,
   useMe,
+  usePasskeys,
   useRemoveExternalLogin,
+  useRemovePasskey,
+  useRenamePasskey,
   useUpdateProfile,
 } from './accountQueries'
 
@@ -129,6 +134,92 @@ function PasswordSection() {
   )
 }
 
+function PasskeyRow({ passkey }: { passkey: { id: string; name: string; createdAt: string } }) {
+  const rename = useRenamePasskey()
+  const remove = useRemovePasskey()
+  const [name, setName] = useState<string | null>(null)
+  const error = rename.error ?? remove.error
+
+  return (
+    <li className="text-sm">
+      <div className="flex items-center gap-2">
+        {name === null ? (
+          <span className="flex-1">
+            {passkey.name}{' '}
+            <span className="text-gray-500">· added {new Date(passkey.createdAt).toLocaleDateString()}</span>
+          </span>
+        ) : (
+          <input value={name} maxLength={100} onChange={(e) => setName(e.target.value)} className={`${inputClass} flex-1`} />
+        )}
+        {name === null ? (
+          <button type="button" onClick={() => setName(passkey.name)} className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100">
+            Rename
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={!name.trim() || rename.isPending}
+            onClick={() => rename.mutate({ id: passkey.id, name }, { onSuccess: () => setName(null) })}
+            className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+          >
+            Save
+          </button>
+        )}
+        <button
+          type="button"
+          disabled={remove.isPending}
+          onClick={() => remove.mutate(passkey.id)}
+          className="rounded border border-gray-300 px-2 py-1 hover:bg-gray-100 disabled:opacity-50"
+        >
+          Remove
+        </button>
+      </div>
+      {error && <p role="alert" className="mt-1 text-red-600">{error.message}</p>}
+    </li>
+  )
+}
+
+function PasskeysSection() {
+  const passkeys = usePasskeys()
+  const add = useAddPasskey()
+  const [name, setName] = useState('')
+
+  if (!passkeysSupported()) return null
+
+  function submit(event: FormEvent) {
+    event.preventDefault()
+    add.mutate(name, { onSuccess: () => setName('') })
+  }
+
+  return (
+    <Section title="Passkeys">
+      <p className="mb-4 text-sm text-gray-600">
+        Log in with your fingerprint, face or device PIN instead of a password. A passkey stays on your device (or in
+        your password manager) and works only on this site.
+      </p>
+      <ul className="mb-4 space-y-2">
+        {passkeys.data?.map((passkey) => <PasskeyRow key={passkey.id} passkey={passkey} />)}
+        {passkeys.data?.length === 0 && <li className="text-sm text-gray-500">No passkeys yet.</li>}
+      </ul>
+      <form onSubmit={submit} className="flex gap-2">
+        <input
+          placeholder="Name, e.g. Laptop"
+          value={name}
+          maxLength={100}
+          onChange={(e) => setName(e.target.value)}
+          className={`${inputClass} flex-1`}
+        />
+        <button type="submit" disabled={add.isPending} className={buttonClass}>
+          Add a passkey
+        </button>
+      </form>
+      <div className="mt-3">
+        <Result error={add.error && !isCancelled(add.error) ? add.error : null} success={add.isSuccess && 'Passkey added.'} />
+      </div>
+    </Section>
+  )
+}
+
 // The API sends the browser back here after linking a provider, with the result in the URL
 // fragment (#linked=Google or #error=...).
 function readLinkResult(): { linked?: string; error?: string } {
@@ -237,6 +328,7 @@ export function SettingsPage() {
       <h1 className="text-2xl font-semibold">Settings</h1>
       <ProfileSection />
       <PasswordSection />
+      <PasskeysSection />
       <SignInMethodsSection />
       <DeleteAccountSection />
     </div>
