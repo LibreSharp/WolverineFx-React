@@ -40,7 +40,9 @@ public interface IOrganisationStore
 
     Task RemoveInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken);
 
-    // The organisation, its memberships and its invitations. Its data (Todos) is deleted by the features that own
-    // it, which handle the OrganisationDeleted message.
+    // Deletes the organisation, its memberships and its invitations, and publishes OrganisationDeleted
+    // (for the organisation's tenant) in the same transaction, through Wolverine's outbox: the
+    // features that own its data (Todos) delete it when they handle the message. Both happen or
+    // neither does, so a crash can't leave data behind for an organisation that no longer exists.
     Task DeleteAsync(Guid organisationId, CancellationToken cancellationToken);
 }

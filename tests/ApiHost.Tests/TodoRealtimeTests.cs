@@ -5,6 +5,10 @@ using Alba;
 using ApiHost.Features.Todos;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Http.Connections;
+#if (Identity)
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+#endif
 using Microsoft.AspNetCore.SignalR.Client;
 using Wolverine.Tracking;
 
@@ -174,6 +178,18 @@ public class TodoRealtimeTests
     {
         var exception = await Assert.ThrowsAsync<HttpRequestException>(() => ConnectAsync(token: null));
         Assert.Equal(HttpStatusCode.Unauthorized, exception.StatusCode);
+    }
+
+    // Authentication only runs when a connection opens: the hub must close connections whose
+    // access token has expired, or a removed member would keep receiving live updates.
+    [Fact]
+    public void the_hub_closes_connections_when_their_access_token_expires()
+    {
+        var hub = _fixture.Host.Services.GetRequiredService<EndpointDataSource>().Endpoints
+            .OfType<RouteEndpoint>()
+            .Single(e => e.RoutePattern.RawText == $"{AppHub.Path}/negotiate")
+            .Metadata.GetRequiredMetadata<HttpConnectionDispatcherOptions>();
+        Assert.True(hub.CloseOnAuthenticationExpiration);
     }
 #endif
 }

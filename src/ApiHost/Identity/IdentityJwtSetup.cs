@@ -30,6 +30,7 @@ public static class IdentityJwtSetup
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("Missing 'Jwt' configuration section");
         ValidateSigningKey(jwtOptions.SigningKey, environment);
+        ClientUrl.Validate(configuration, environment);
 
         services.AddApplicationIdentity().AddAppTokenProviders();
         services.Configure<IdentityOptions>(ConfigureIdentity);

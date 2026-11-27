@@ -18,7 +18,9 @@ public class OrganisationAccess(IOrganisationStore store, TimeProvider clock)
             return chosen.OrganisationId;
         }
 
-        var personal = await CreateAsync(user.DisplayName ?? user.Email ?? "My organisation", user.Id, cancellationToken);
+        // Named after the user. An email can be longer than an organisation's name may be.
+        var name = (user.DisplayName ?? user.Email ?? "My organisation").Trim();
+        var personal = await CreateAsync(name.Length > OrganisationNames.MaxLength ? name[..OrganisationNames.MaxLength].TrimEnd() : name, user.Id, cancellationToken);
         return personal.Id;
     }
 

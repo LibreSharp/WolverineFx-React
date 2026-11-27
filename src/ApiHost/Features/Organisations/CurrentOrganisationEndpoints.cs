@@ -73,21 +73,22 @@ public static class CurrentOrganisationEndpoints
     }
 
     // Deletes the organisation for everyone. Its data is deleted in the background by each
-    // feature's OrganisationDeleted handler, run for this organisation's tenant. Members' tokens
-    // stop working at once; the browser then refreshes them into another organisation.
+    // feature's OrganisationDeleted handler, run for this organisation's tenant (the store
+    // publishes the message in the same transaction as the deletion). Members' tokens stop
+    // working at once; the browser then refreshes them into another organisation.
     [Authorize]
     [WolverineDelete("/api/organisation")]
-    public static async Task<(Results<NoContent, ForbidHttpResult>, OutgoingMessages)> Delete(
+    public static async Task<Results<NoContent, ForbidHttpResult>> Delete(
         ClaimsPrincipal user, IOrganisationStore store, CancellationToken cancellationToken)
     {
         var organisationId = user.GetOrganisationId();
         if (!await IsOwnerAsync(store, organisationId, user, cancellationToken))
         {
-            return (TypedResults.Forbid(), []);
+            return TypedResults.Forbid();
         }
 
         await store.DeleteAsync(organisationId, cancellationToken);
-        return (TypedResults.NoContent(), [new OrganisationDeleted(organisationId).WithTenantId(organisationId.ToString())]);
+        return TypedResults.NoContent();
     }
 
     [Authorize]

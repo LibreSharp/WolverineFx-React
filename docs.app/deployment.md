@@ -54,6 +54,7 @@ Set these with environment variables (or any ASP.NET Core configuration source):
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Optional: where to send traces, metrics and logs |
 <!--#if (Identity) -->
 | `Jwt__SigningKey` | A random secret of at least 32 bytes ([how to change it](how-to/rotate-the-signing-key.md)) |
+| `App__ClientUrl` | The app's public address, such as `https://app.example.com`: links in emails use it |
 | `Email__Smtp__Host`, `Email__Smtp__Port`, `Email__Smtp__Security`, `Email__Smtp__UserName`, `Email__Smtp__Password`, `Email__Smtp__From` | Your email provider's SMTP settings ([how-to](how-to/configure-email.md)) |
 | `Accounts__AdminEmails__0` | Your email: that account becomes an admin once its email is confirmed (more: `__1`, `__2`, ...) |
 | `Accounts__AllowRegistration` | `false` to allow only invited people to create accounts (default `true`) |
@@ -62,7 +63,14 @@ Set these with environment variables (or any ASP.NET Core configuration source):
 | `Authentication__GitHub__ClientId`, `Authentication__GitHub__ClientSecret` | Optional: turns on "Continue with GitHub" |
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still
-the development key. The demo user is never created outside Development. Without
+the development key, or if `App:ClientUrl` isn't set. Email links (confirmation, password reset,
+invitations) are built from `App:ClientUrl`, never from the request's `Host` header: that header
+is chosen by whoever sends the request, so a password reset requested with a forged host would
+email a real link to someone else's site. Also refuse requests for other host names: the Caddy
+setup in `deploy/` only serves `DOMAIN`, and without such a proxy set `AllowedHosts` (for example
+`AllowedHosts=app.example.com`; keep your load balancer's health check host in it too).
+
+The demo user is never created outside Development. Without
 `Email:Smtp:Host`, no emails are sent and the app logs a warning instead (never the link), and
 since new accounts must confirm their email, nobody can finish signing up: configure SMTP before
 people register.

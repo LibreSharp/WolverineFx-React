@@ -36,6 +36,8 @@ services:
 #endif
 #if (Identity)
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in .env}
+      # The address in email links (never taken from the request's Host header).
+      App__ClientUrl: https://${DOMAIN:?Set DOMAIN in .env}
       Accounts__AdminEmails__0: ${ADMIN_EMAIL:-}
       Accounts__AllowRegistration: ${ALLOW_REGISTRATION:-true}
       Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID:-}

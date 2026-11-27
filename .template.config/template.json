@@ -186,7 +186,8 @@
             "tests/ApiHost.Tests/PasskeyTests.cs",
             "tests/ApiHost.Tests/SoftwarePasskey.cs",
             "tests/ApiHost.Tests/AuthRateLimitingTests.cs",
-            "tests/ApiHost.Tests/TodoAuthorizationTests.cs"
+            "tests/ApiHost.Tests/TodoAuthorizationTests.cs",
+            "tests/ApiHost.Tests/ClientUrlTests.cs"
           ]
         },
         {

@@ -133,7 +133,15 @@ app.MapWolverineEndpoints(opts =>
 #endif
 });
 
+#if (Identity)
+// The hub (MapWolverineSignalRHub is MapHub with no options). Authentication only runs when a
+// connection opens, so without CloseOnAuthenticationExpiration a connection would outlive its
+// access token: a removed member, a deleted organisation or a locked account would keep receiving
+// live updates for as long as the tab stays open. The browser reconnects with a fresh token.
+app.MapHub<AppHub>(AppHub.Path, options => options.CloseOnAuthenticationExpiration = true);
+#else
 app.MapWolverineSignalRHub<AppHub>(AppHub.Path);
+#endif
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });

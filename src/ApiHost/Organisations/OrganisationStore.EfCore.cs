@@ -1,11 +1,13 @@
 using ApiHost.Data.EfCore;
 using Microsoft.EntityFrameworkCore;
+using Wolverine;
+using Wolverine.EntityFrameworkCore;
 
 namespace ApiHost.Organisations;
 
 // Organisations and memberships are ordinary (not tenanted) tables; see
 // Data/EfCore/AppDbContext.cs for their keys and indexes.
-public class OrganisationStore(AppDbContext db) : IOrganisationStore
+public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox) : IOrganisationStore
 {
     public Task<Organisation?> FindAsync(Guid organisationId, CancellationToken cancellationToken)
         => db.Organisations.FirstOrDefaultAsync(o => o.Id == organisationId, cancellationToken);
@@ -104,8 +106,15 @@ public class OrganisationStore(AppDbContext db) : IOrganisationStore
 
     public async Task DeleteAsync(Guid organisationId, CancellationToken cancellationToken)
     {
-        await db.OrganisationInvitations.Where(i => i.OrganisationId == organisationId).ExecuteDeleteAsync(cancellationToken);
-        await db.Memberships.Where(m => m.OrganisationId == organisationId).ExecuteDeleteAsync(cancellationToken);
-        await db.Organisations.Where(o => o.Id == organisationId).ExecuteDeleteAsync(cancellationToken);
+        // Loaded and removed (not ExecuteDeleteAsync, which would run at once, outside the
+        // transaction below): an organisation has few memberships and invitations.
+        db.OrganisationInvitations.RemoveRange(await db.OrganisationInvitations.Where(i => i.OrganisationId == organisationId).ToListAsync(cancellationToken));
+        db.Memberships.RemoveRange(await db.Memberships.Where(m => m.OrganisationId == organisationId).ToListAsync(cancellationToken));
+        db.Organisations.RemoveRange(await db.Organisations.Where(o => o.Id == organisationId).ToListAsync(cancellationToken));
+
+        // Saves the removals and the message in one transaction, then sends the message.
+        outbox.Enroll(db);
+        await outbox.PublishAsync(new OrganisationDeleted(organisationId), new DeliveryOptions { TenantId = organisationId.ToString() });
+        await outbox.SaveChangesAndFlushMessagesAsync(cancellationToken);
     }
 }

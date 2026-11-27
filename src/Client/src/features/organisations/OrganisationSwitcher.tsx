@@ -1,7 +1,8 @@
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { getOrganisationId, subscribeTokens } from '../../lib/api/authTokens'
+import { onOrganisationLost } from '../../lib/api/client'
 import { useAuth } from '../auth/useAuth'
 import { useOrganisations, useSwitchOrganisation } from './organisationQueries'
 
@@ -28,6 +29,11 @@ function SignedInSwitcher() {
     }
   }, [organisationId, queryClient])
 
+  // Removed from the organisation (or it was deleted) mid-session: the session moved to another
+  // of the user's organisations, and what they were doing wasn't done (lib/api/client.ts).
+  const [lost, setLost] = useState(false)
+  useEffect(() => onOrganisationLost(() => setLost(true)), [])
+
   const current = organisations.data?.find((o) => o.isCurrent)
   if (!organisations.data) return null
 
@@ -52,6 +58,15 @@ function SignedInSwitcher() {
       <Link to="/organisation" className="text-gray-600 hover:text-gray-900">
         Manage
       </Link>
+      {lost && (
+        <p role="alert" className="flex items-center gap-2 text-amber-800">
+          You no longer have access to the organisation you were working in, and your last change
+          there wasn&apos;t saved. You&apos;re now in {current?.name ?? 'another organisation'}.
+          <button type="button" onClick={() => setLost(false)} className="underline">
+            Dismiss
+          </button>
+        </p>
+      )}
     </div>
   )
 }

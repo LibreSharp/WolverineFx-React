@@ -1,11 +1,13 @@
 using ApiHost.Identity;
 using Marten;
+using Wolverine;
+using Wolverine.Marten;
 
 namespace ApiHost.Organisations;
 
 // Organisations and memberships are ordinary (not tenanted) Marten documents; see
 // Data/Marten/MartenPersistence.cs for their indexes.
-public class OrganisationStore(IDocumentSession session) : IOrganisationStore
+public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox) : IOrganisationStore
 {
     public Task<Organisation?> FindAsync(Guid organisationId, CancellationToken cancellationToken)
         => session.LoadAsync<Organisation>(organisationId, cancellationToken);
@@ -104,11 +106,16 @@ public class OrganisationStore(IDocumentSession session) : IOrganisationStore
         return session.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(Guid organisationId, CancellationToken cancellationToken)
+    public async Task DeleteAsync(Guid organisationId, CancellationToken cancellationToken)
     {
         session.DeleteWhere<OrganisationInvitation>(i => i.OrganisationId == organisationId);
         session.DeleteWhere<Membership>(m => m.OrganisationId == organisationId);
         session.Delete<Organisation>(organisationId);
-        return session.SaveChangesAsync(cancellationToken);
+
+        // The message is stored by this session's SaveChangesAsync, in the same transaction, and
+        // sent once it commits.
+        outbox.Enroll(session);
+        await outbox.PublishAsync(new OrganisationDeleted(organisationId), new DeliveryOptions { TenantId = organisationId.ToString() });
+        await session.SaveChangesAsync(cancellationToken);
     }
 }

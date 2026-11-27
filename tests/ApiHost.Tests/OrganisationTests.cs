@@ -32,9 +32,9 @@ public class OrganisationTests(AppFixture fixture)
         public Guid OrganisationId => Guid.Parse(new JsonWebToken(AccessToken).GetClaim(OrganisationClaims.OrganisationId).Value);
     }
 
-    private async Task<Session> SignUpAsync()
+    private async Task<Session> SignUpAsync(string? email = null)
     {
-        var email = $"{Guid.NewGuid():N}@example.com";
+        email ??= $"{Guid.NewGuid():N}@example.com";
         await fixture.RegisterConfirmedUserAsync(email, Password);
         var tokens = (await fixture.Host.Scenario(s =>
         {
@@ -123,6 +123,19 @@ public class OrganisationTests(AppFixture fixture)
         Assert.True(own.IsCurrent);
         Assert.Equal(OrganisationRoles.Owner, own.Role);
         Assert.Equal(session.OrganisationId, own.Id);
+    }
+
+    [Fact]
+    public async Task a_new_account_with_a_long_email_gets_an_organisation_named_within_the_limit()
+    {
+        // Longer than an organisation's name may be (emails can be up to 256 characters).
+        var email = $"{Guid.NewGuid():N}{Guid.NewGuid():N}@{new string('a', 50)}.example.com";
+        Assert.True(email.Length > OrganisationNames.MaxLength);
+
+        var session = await SignUpAsync(email);
+
+        var own = Assert.Single(await SignInOrganisationsAsync(session));
+        Assert.Equal(email[..OrganisationNames.MaxLength], own.Name);
     }
 
     [Fact]

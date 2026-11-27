@@ -34,7 +34,9 @@ What the app does to protect its users and data, and what's left to you when you
   and a changed email only takes effect once the new address is confirmed.
 - **One-time, short-lived links.** Confirmation, password reset and invitation links carry tokens
   that expire, stop working once used, and are created only when the email is sent, so they're
-  never stored in the database's message tables or written to logs.
+  never stored in the database's message tables or written to logs. The links point at
+  `App:ClientUrl`, never at the request's `Host` header, so a forged host can't redirect them
+  (the app won't start without the setting outside Development).
 - **No account enumeration where it matters:** "forgot password" and "resend confirmation" answer
   the same whether or not an account exists, and a login only says an email is unconfirmed to
   someone who knows the password.
@@ -92,8 +94,8 @@ What the app does to protect its users and data, and what's left to you when you
 <!--#if (Identity) -->
 - Set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` behind a reverse proxy (the production compose
   file does), so rate limits apply to each client's real address and HTTPS is detected.
-- Use a long random `Jwt:SigningKey`, configure SMTP before people register, and set
-  `Accounts:AdminEmails`.
+- Use a long random `Jwt:SigningKey`, set `App:ClientUrl` to the app's public address, configure
+  SMTP before people register, and set `Accounts:AdminEmails`.
 - ASP.NET Core Data Protection keys (which protect the tokens in emails, link tickets and passkey
   state) are stored in PostgreSQL so they work across restarts and instances. Like the rest of
   your data they're unencrypted at rest: protect database access and backups.

@@ -142,6 +142,8 @@ jobs:
           ConnectionStrings__Marten: Host=localhost;Database=myapp;Username=postgres;Password=postgres
           ConnectionStrings__Postgres: Host=localhost;Database=myapp;Username=postgres;Password=postgres
           Jwt__SigningKey: ci-only-signing-key-that-is-long-enough-0123456789
+          # Required outside Development with accounts: the address in email links.
+          App__ClientUrl: http://localhost:5000
           # For the end-to-end tests (ignored with --Auth none): email through Mailpit, an admin
           # account, and a higher sign-in rate limit, since every test comes from one address.
           Email__Smtp__Host: localhost

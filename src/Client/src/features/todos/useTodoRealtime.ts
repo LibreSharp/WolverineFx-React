@@ -2,7 +2,17 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 import { getOrganisationId, getTokens, subscribeTokens } from '../../lib/api/authTokens'
+import { refreshTokens } from '../../lib/api/client'
 import { todoKeys } from './todoQueries'
+
+// The access token for (re)connecting, refreshed first if it expires within 30 seconds.
+export async function freshAccessToken(): Promise<string> {
+  const tokens = getTokens()
+  if (tokens && Date.parse(tokens.expiresAtUtc) - Date.now() < 30_000) {
+    await refreshTokens()
+  }
+  return getTokens()?.accessToken ?? ''
+}
 
 export interface TodoReminder {
   todoId: string
@@ -23,9 +33,10 @@ export function useTodoRealtime() {
   useEffect(() => {
     const connection = new HubConnectionBuilder()
       .withUrl('/api/hub', {
-        // Read on every (re)connect, so a refreshed access token is picked up. With no
-        // login (Identity off) there is no token and the hub doesn't require one.
-        accessTokenFactory: () => getTokens()?.accessToken ?? '',
+        // Read on every (re)connect. The server closes the connection when its access token
+        // expires, so refresh a token that has expired or is about to before reconnecting. With
+        // no login (Identity off) there is no token and the hub doesn't require one.
+        accessTokenFactory: freshAccessToken,
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Warning)
@@ -45,13 +56,35 @@ export function useTodoRealtime() {
     // Changes may have been missed while disconnected.
     connection.onreconnected(() => void queryClient.invalidateQueries({ queryKey: todoKeys.all }))
 
-    const started = connection.start().catch((error: unknown) => {
-      // React's StrictMode mounts twice in development, stopping the first connection
-      // mid-start; that and a hub that is briefly unavailable are not worth surfacing.
-      console.debug('Realtime updates unavailable', error)
-    })
+    const start = () =>
+      connection.start().then(
+        () => true,
+        (error: unknown) => {
+          // React's StrictMode mounts twice in development, stopping the first connection
+          // mid-start; that and a hub that is briefly unavailable are not worth surfacing.
+          console.debug('Realtime updates unavailable', error)
+          return false
+        },
+      )
+    let started = start()
+
+    // Closed for good: by the server when the access token expired (which automatic reconnect
+    // doesn't retry), or after automatic reconnect gave up. Start again a little later, until it
+    // works, and refetch what may have been missed.
+    let stopped = false
+    let restart: ReturnType<typeof setTimeout> | undefined
+    const restartLater = () => {
+      if (stopped) return
+      restart = setTimeout(() => {
+        started = start()
+        void started.then((ok) => (ok ? queryClient.invalidateQueries({ queryKey: todoKeys.all }) : restartLater()))
+      }, 5_000)
+    }
+    connection.onclose(restartLater)
 
     return () => {
+      stopped = true
+      clearTimeout(restart)
       void started.then(() => connection.stop())
     }
   }, [queryClient, organisationId])

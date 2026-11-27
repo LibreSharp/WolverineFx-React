@@ -1,6 +1,6 @@
 import createClient from 'openapi-fetch'
 import type { paths } from './schema'
-import { getTokens, setTokens } from './authTokens'
+import { getTokens, organisationIdOf, setTokens } from './authTokens'
 
 // The page's own origin: the same as a relative URL in the browser, and resolvable in tests.
 // (Empty when the build pre-renders a page in Node, which makes no requests.)
@@ -42,6 +42,15 @@ export async function refreshTokens(): Promise<boolean> {
   return refreshPromise
 }
 
+// With organisations: a request was refused because the user is no longer a member of the
+// organisation it was for (removed, or the organisation was deleted), and refreshing moved the
+// session to another of theirs. The request isn't repeated there; listeners tell the user.
+const organisationLostListeners = new Set<() => void>()
+export function onOrganisationLost(listener: () => void): () => void {
+  organisationLostListeners.add(listener)
+  return () => organisationLostListeners.delete(listener)
+}
+
 api.use({
   onRequest({ request }) {
     const tokens = getTokens()
@@ -54,7 +63,14 @@ api.use({
     // A refused refresh token must not trigger another refresh: that would wait on itself.
     const isRefresh = new URL(request.url).pathname === '/api/auth/refresh'
     if (response.status === 401 && !isRefresh && !request.headers.has('X-Retried-After-Refresh')) {
+      const sentFor = organisationIdOf(request.headers.get('Authorization')?.replace(/^Bearer /, ''))
       const refreshed = await refreshTokens()
+      if (refreshed && organisationIdOf(getTokens()?.accessToken) !== sentFor) {
+        // Repeating it would act in a different organisation than the user chose, such as
+        // adding their Todo to another team's list.
+        organisationLostListeners.forEach((listener) => listener())
+        return response
+      }
       if (refreshed) {
         const retryRequest = new Request(request)
         retryRequest.headers.set('X-Retried-After-Refresh', '1')
