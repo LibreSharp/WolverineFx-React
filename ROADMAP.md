@@ -63,7 +63,7 @@ issues.
       November 2026). `Marten.AspNetIdentity` states MIT only in its GitHub repo, not in its
       package metadata, so licence scanners report it as unlicensed; worth raising with its author.
 - [ ] **Reserve the `LibreSharp.` ID prefix** on nuget.org after the first package is out.
-- [x] **List the template** on the [LibreSharp site](https://libresharp.github.io/templates/#libresharp-wolverinefx-react)
+- [x] **List the template** on the [LibreSharp site](https://libresharp.github.io/templates/#libresharp-saas-starter)
       (26 November 2026).
 - [ ] **List the template** in the `dotnet/templating` wiki's list of available templates.
 
@@ -237,7 +237,7 @@ Then the option:
 - [x] **Team invitations** by email, to existing users and to new ones (who create an account
       from the invitation).
 
-### v0.4.1: billing and a full back office (done, not yet released)
+### v0.4.1: billing and a full back office released 27 November 2026
 
 Billing, inside `--Auth saas` (no new options):
 
@@ -295,12 +295,6 @@ from that real use rather than designed in advance. No new options: each goes in
 - [ ] **Outgoing webhooks:** organisations register URLs for events. Each delivery is signed
       (HMAC), sent from a durable Wolverine queue with retries, and logged with its response, so
       owners can see failures and resend.
-- [ ] **Incoming webhooks, as a pattern:** check the signature, store the event, hand it to a
-      durable message and answer quickly. Billing builds this for Stripe; turn it into a reusable
-      helper with a worked example for other providers, such as chat platforms.
-- [ ] **File uploads** to S3-compatible storage (MinIO in `docker-compose` for development;
-      Cloudflare R2, Backblaze B2 or AWS S3 in production): signed upload URLs, size and type
-      limits, image resizing, and storage per organisation counted towards plan limits.
 - [ ] **Notifications:** an in-app list delivered through the existing SignalR transport, and
       email preferences with a one-click unsubscribe link.
 - [ ] **An MCP endpoint example:** the Todos exposed as MCP tools with the official C# MCP SDK,
@@ -312,6 +306,25 @@ from that real use rather than designed in advance. No new options: each goes in
 - [ ] **Personal data export:** download everything stored about the signed-in user (and, for
       owners, the organisation) as JSON, to go with account deletion. Privacy laws such as GDPR
       and Thailand's PDPA give people this right.
+- [ ] **Incoming webhooks, as a pattern:** check the signature, store the event, hand it to a
+      durable message and answer quickly. Billing builds this for Stripe; turn it into a reusable
+      helper with a worked example for other providers, such as chat platforms.
+
+### v0.6
+
+
+- [ ] **File uploads** to S3-compatible storage (MinIO in `docker-compose` for development;
+      Cloudflare R2, Backblaze B2 or AWS S3 in production): signed upload URLs, size and type
+      limits, image resizing, and storage per organisation counted towards plan limits.
+- [ ] **`--aspire`**, off by default: adds an Aspire AppHost and ServiceDefaults project, so one
+      command starts PostgreSQL, Mailpit, the API and the Vite dev server, with the Aspire
+      dashboard showing logs, traces and metrics (Wolverine and Marten emit OpenTelemetry data).
+      Aspire is MIT licensed. Docker Compose stays the default for local development, and
+      production stays Docker Compose with Caddy, whichever option is chosen. Another yes/no
+      option doubles the CI combinations, so consider it after `--Auth` lands, and test
+      `--aspire` builds without rerunning every combination's full test suite.
+- [ ] **`sessionStorage` token option,** so logins survive a page reload. Tokens are kept in
+      memory today, which is safer against injected scripts.
 
 ### Extension points for libraries built on the template
 
@@ -330,16 +343,6 @@ websites. These changes let a library plug in without forking the template:
       limits to.
 - [ ] **Documented seams:** a page in the generated app's `docs/` on where an app or library adds
       endpoints, messages, admin pages and settings, so its additions survive template updates.
-
-### Later: .NET Aspire for local development (an opt-in option)
-
-- [ ] **`--aspire`**, off by default: adds an Aspire AppHost and ServiceDefaults project, so one
-      command starts PostgreSQL, Mailpit, the API and the Vite dev server, with the Aspire
-      dashboard showing logs, traces and metrics (Wolverine and Marten emit OpenTelemetry data).
-      Aspire is MIT licensed. Docker Compose stays the default for local development, and
-      production stays Docker Compose with Caddy, whichever option is chosen. Another yes/no
-      option doubles the CI combinations, so consider it after `--Auth` lands, and test
-      `--aspire` builds without rerunning every combination's full test suite.
 
 ### Frontend quality (any time)
 
@@ -379,12 +382,8 @@ websites. These changes let a library plug in without forking the template:
 
 ## Later, if users ask
 
-- [ ] **.NET Aspire option:** an app host that starts Postgres, the API and Vite together, in
-      place of Docker Compose.
 - [ ] **RS256 signing with a JWKS endpoint,** for when a separate service must verify tokens
       without sharing the signing secret. HS256 is enough for this API and its own client.
-- [ ] **`sessionStorage` token option,** so logins survive a page reload. Tokens are kept in
-      memory today, which is safer against injected scripts.
 - [ ] **Running more than one instance:** a SignalR backplane (Redis, MIT-licensed client) and
       rate limits shared between instances.
 - [ ] **API types only for the chosen options:** apps without Identity carry the account
