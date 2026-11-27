@@ -219,25 +219,14 @@ With `--IncludeTests true` (the default):
 - **Role changes apply at the next token refresh** (within the access token's lifetime), and an
   admin lock ends sessions the same way.
 
-## Releasing
+## Contributing and releasing
 
-Push a version tag; `.github/workflows/release.yml` runs the full CI matrix, then packs the
-template with that version, pushes it to nuget.org and creates a GitHub release:
-
-```bash
-git tag v0.1.0 && git push origin v0.1.0     # a tag with a hyphen (v0.2.0-beta.1) is a prerelease
-```
-
-One-time setup, so the workflow can publish without a stored API key (nuget.org Trusted
-Publishing):
-
-1. On nuget.org, under your account's **Trusted Publishing** settings, add a GitHub Actions
-   policy for owner `LibreSharp`, repository `WolverineFx-React`, workflow file `release.yml`.
-2. In this GitHub repository, add the **variable** (not secret) `NUGET_USER`, set to that
-   nuget.org account's username.
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md): how the template is laid out, conditional code,
+  testing a change, regenerating the client's API types, and EF Core migrations.
+- [docs/releasing.md](docs/releasing.md): publishing a version to nuget.org.
+- [docs/decisions.md](docs/decisions.md): why things are the way they are.
 
 The nuget.org page shows `nuget/README.md`; this README is for working on the template.
-
 
 CI generates all 8 parameter combinations on every push: it builds them, runs the integration
 tests against a real Postgres (Testcontainers) and the client's unit tests, builds the container

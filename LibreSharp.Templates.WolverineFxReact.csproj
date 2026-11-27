@@ -29,7 +29,7 @@
     <Content Include="src\**\*"
              Exclude="src\**\bin\**;src\**\obj\**;src\**\node_modules\**;src\**\dist\**;src\**\*.user" />
     <Content Include="tests\**\*"
-             Exclude="tests\**\bin\**;tests\**\obj\**;tests\**\*.user" />
+             Exclude="tests\**\bin\**;tests\**\obj\**;tests\**\*.user;tests\**\node_modules\**;tests\**\test-results\**;tests\**\playwright-report\**" />
     <Content Include="docker-compose.yml" />
     <Content Include="deploy\**\*" />
     <Content Include="ApiHost.slnx" />
@@ -42,6 +42,8 @@
     <Content Include=".gitignore" />
     <!-- Becomes README.md in the generated app (see template.json); README.md here is the template's. -->
     <Content Include="README.app.md" />
+    <!-- Becomes docs/ in the generated app (see template.json). -->
+    <Content Include="docs.app\**\*" />
     <Content Include=".gitattributes" />
   </ItemGroup>
 

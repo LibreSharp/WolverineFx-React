@@ -158,6 +158,10 @@ billing records but no payment provider (see the
 - [x] **A `docs/` folder in generated apps:** the README slimmed to an overview, with
       architecture, accounts, security, testing, observability and deployment pages and how-to
       guides, each included only when it matches the app's options.
+- [x] **Contributor docs** in this repository's `docs/`: `CONTRIBUTING.md` (layout, conditional
+      code, testing a change with `scripts/test-combination.sh`, regenerating the API types,
+      EF Core migrations), `releasing.md` and `decisions.md`. CI now also checks that the
+      packed template generates the same projects as this folder.
 
 ### v0.4: SaaS option
 
