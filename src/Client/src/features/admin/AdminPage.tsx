@@ -131,7 +131,7 @@ function UserRow({ user, allRoles, isSelf }: { user: AdminUser; allRoles: string
 }
 
 // /admin: users, their roles and locks, and invitations. Only for the Admin role (RequireAdmin
-// in App.tsx); the API checks the role on every request too.
+// in routes.ts); the API checks the role on every request too.
 export function AdminPage() {
   const me = useMe()
   const [search, setSearch] = useState('')

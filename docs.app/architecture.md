@@ -38,15 +38,24 @@ The Todo feature is a working example of each pattern. Copy it when you add your
 
 ## Frontend
 
-- **Routes** are in `src/Client/src/router.tsx` (React Router), with a shared layout (header,
-  navigation, footer) in `components/Layout.tsx`. Pages other than the home page load when first
-  visited (`lazy`), so the first page view downloads less JavaScript.
-- **Page titles and search engines.** Each route's `handle` sets its page title and whether search
-  engines may index it (`components/PageMeta.tsx`); only the home page may by default, and every
-  other page gets `noindex`. `src/routes.ts` lists every page's path: the build writes it into
-  `client-routes.json`, from which the API answers 404 for other paths and builds `sitemap.xml`.
-  A unit test checks it matches the router. The default description and link-preview tags are in
-  `index.html`: describe your product there.
+- **Routes.** React Router in framework mode, as a single-page app with no rendering server.
+  `src/Client/src/routes.ts` maps each URL to a route module in `routes/`, which default-exports
+  the page. `root.tsx` is the HTML document, and `App.tsx` the frame around every page (header,
+  navigation, footer, in `components/Layout.tsx`). Each page's code loads when it's first visited,
+  so the first page view downloads less JavaScript.
+- **Pre-rendered public pages.** The build renders the public pages (the home page, by default)
+  into real HTML, so search engines and link previews see their content without running
+  JavaScript, and a CDN can cache them. The app then takes over in the browser (hydration). Every
+  other page starts from a fallback page. Code that runs while a public page renders must not use
+  `window` or `document`, since pre-rendering runs it in Node; use them in effects and event
+  handlers.
+- **Page titles and search engines.** Each route module's `handle` sets its page title and whether
+  search engines may index it (`components/PageMeta.tsx`); only the home page may by default, and
+  every other page gets `noindex`. `src/pages.ts` lists every page's path and which are public:
+  the build pre-renders those and writes the list into `client-routes.json`, from which the API
+  answers 404 for other paths and builds `sitemap.xml`. A unit test checks it matches
+  `routes.ts`. The default description and link-preview tags are in `root.tsx`: describe your
+  product there.
 - **Server data.** TanStack Query caches the Todo list (`features/todos/todoQueries.ts`).
   Changes and SignalR messages invalidate it, which refetches it.
 - **The API client** (`lib/api/client.ts`) is typed from the API's OpenAPI document

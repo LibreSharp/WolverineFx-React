@@ -7,8 +7,10 @@ What the app does to protect its users and data, and what's left to you when you
 - **Browser security headers** on every response: a Content-Security-Policy that only allows
   scripts, styles and connections from the app's own origin, plus protections against MIME
   sniffing, framing (clickjacking) and leaking URLs in the Referer header
-  (`src/ApiHost/Security/SecurityHeaders.cs`). If you add a third-party script, font or analytics
-  service, add its origin there.
+  (`src/ApiHost/Security/SecurityHeaders.cs`). The app's pages start with a few inline scripts
+  that the build writes; the policy allows exactly those, by their hashes, and no others
+  (`src/ApiHost/ClientApp/ClientAppHosting.cs`). If you add a third-party script, font or
+  analytics service, add its origin to the policy.
 - **HTTPS only in production:** requests are redirected to HTTPS and browsers are told to keep
   using it (HSTS).
 - **Development-only tools stay out of production:** the OpenAPI document and the API reference

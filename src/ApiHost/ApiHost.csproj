@@ -89,7 +89,8 @@
     <Exec Command="npm run build" WorkingDirectory="$(ClientDir)" />
 
     <ItemGroup>
-      <ClientDistFiles Include="$(ClientDir)dist\**" />
+      <!-- The browser's files; the build's dist\server is only used to pre-render pages. -->
+      <ClientDistFiles Include="$(ClientDir)dist\client\**" />
       <ResolvedFileToPublish Include="@(ClientDistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
         <RelativePath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

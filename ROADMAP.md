@@ -201,16 +201,18 @@ From an architecture and SEO review after v0.3.0 (November 2026).
 
 First the groundwork, while there are few pages and 8 combinations, not 12:
 
-- [ ] **Persistence code in separate files per option,** not inline `#if (IsMarten)` blocks
-      (`CreateTodo.cs` has four variants), so features stay readable at 12 combinations.
-- [ ] **Account endpoints as features:** `Features/Account` and `Features/Admin` (and later
-      `Features/Organisations`), keeping `Identity/` for infrastructure, to match the vertical
-      slices the template teaches.
-- [ ] **Pre-render the public pages** with React Router's framework mode (`ssr: false` and a
+- [x] **Persistence code in separate files per option,** not inline `#if (IsMarten)` blocks
+      (`CreateTodo.cs` had four variants), so features stay readable at 12 combinations:
+      `<Name>.Marten.cs` and `<Name>.EfCore.cs`, renamed to `<Name>.cs` in generated apps.
+- [x] **Account endpoints as features:** `Features/Auth`, `Features/Account` and
+      `Features/Admin` (and later `Features/Organisations`), keeping `Identity/` for what they
+      share, to match the vertical slices the template teaches and the client's features.
+- [x] **Pre-render the public pages** with React Router's framework mode (`ssr: false` and a
       `prerender` list): real HTML at build time for `/` (and later the SaaS landing and pricing
       pages), served as static files by the API and cacheable by a CDN such as Cloudflare; the
       signed-in app stays a single-page app. Still one deployable, with no Node server. See
-      "Rendering" under Open decisions.
+      "Rendering" under Open decisions. The Content-Security-Policy allows the build's inline
+      start-up scripts by their hashes, not with `'unsafe-inline'`.
 
 Then the option:
 

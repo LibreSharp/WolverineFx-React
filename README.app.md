@@ -73,8 +73,9 @@ src/ApiHost/
   Identity/Passkeys/      Passkey set-up (Identity's WebAuthn support)
 <!--#endif -->
 src/Client/src/
-  router.tsx              Routes (React Router), with each page's title
-  routes.ts               Every page's path, for the API's 404s and sitemap.xml
+  root.tsx, App.tsx       The HTML document (with the description and link-preview tags), and the page frame
+  routes.ts, routes/      Each URL and the route module for its page, with the page's title
+  pages.ts                Every page's path, and which are public: pre-rendered, and in sitemap.xml
   components/             Layout (header, navigation, footer), home page, not-found page
   features/todos/         Todo page, TanStack Query hooks, SignalR hook (useTodoRealtime)
 <!--#if (Identity) -->

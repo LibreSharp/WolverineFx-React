@@ -12,6 +12,15 @@ public static class SecurityHeaders
         "font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; " +
         "form-action 'self'; frame-ancestors 'none'";
 
+    // The same policy, also allowing the given inline scripts (by the base64 SHA-256 hash of their
+    // text) and no others. The React app's HTML starts itself with a few inline scripts that the
+    // build writes, so ClientAppHosting allows exactly those; 'unsafe-inline' would allow any.
+    public static string ContentSecurityPolicyAllowing(IEnumerable<string> scriptHashes)
+        => ContentSecurityPolicy.Replace(
+            "script-src 'self'",
+            string.Join(' ', ["script-src 'self'", .. scriptHashes.Select(hash => $"'sha256-{hash}'")]),
+            StringComparison.Ordinal);
+
     public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app)
     {
         return app.Use(async (context, next) =>

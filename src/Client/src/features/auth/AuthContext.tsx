@@ -6,8 +6,12 @@ import { problemMessage } from '../../lib/api/problemDetails'
 import { authOptionsKey } from './authQueries'
 import { AuthContext, type LoginRefusal, type LoginResult } from './useAuth'
 
+const signedOut = () => null
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const tokens = useSyncExternalStore(subscribeTokens, getTokens)
+  // Signed out while the build pre-renders public pages, and when the app first starts (tokens
+  // are kept in memory only).
+  const tokens = useSyncExternalStore(subscribeTokens, getTokens, signedOut)
   const queryClient = useQueryClient()
 
   // Just signed out (logout, or a refresh token that was rejected): drop the user's cached data,

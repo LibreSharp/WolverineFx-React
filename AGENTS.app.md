@@ -83,9 +83,12 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
 
 ## Client conventions
 
-- Features live in `src/Client/src/features/<name>/`; routes are in `src/Client/src/router.tsx`.
-  A new route needs a `handle` with its title, and its path in `src/Client/src/routes.ts` (a unit
-  test checks they match). Load new pages with `lazy`, like the existing ones.
+- Features live in `src/Client/src/features/<name>/`. Pages are React Router routes (framework
+  mode, single-page app): a URL in `src/Client/src/routes.ts`, pointing to a route module in
+  `src/Client/src/routes/` that default-exports the page and has a `handle` with its title. Add
+  the path to `src/Client/src/pages.ts` too (a unit test checks they match); `index: true` there
+  and in the handle makes a page public: indexed by search engines and pre-rendered to HTML.
+  Pre-rendered pages run in Node at build time, so they must not touch `window` while rendering.
 - Server data goes through TanStack Query hooks (see `features/todos/todoQueries.ts`). After a
   change, invalidate the affected query keys.
 - Call the API with the typed client in `lib/api/client.ts`. Never edit `lib/api/schema.d.ts` by

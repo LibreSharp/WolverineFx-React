@@ -23,6 +23,9 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # React Router's packages must stay on the same version, majors included.
+      react-router:
+        patterns: ["react-router", "@react-router/*"]
       minor-and-patch:
         update-types: [minor, patch]
     ignore:

@@ -59,7 +59,7 @@ change can start from the reasons rather than rediscovering them.
 - **One instance by default.** SignalR and the sign-in rate limits are per instance; scaling out
   needs a backplane and a shared store, which waits for demand. A CDN in front carries most of
   the load for static files.
-- **Real 404s and `noindex` by default.** The API knows the client's pages (`routes.ts`, built
+- **Real 404s and `noindex` by default.** The API knows the client's pages (`pages.ts`, built
   into `client-routes.json`), so unknown paths answer 404 instead of a soft 404. Only pages that
   opt in may be indexed. `robots.txt` blocks only `/api/`, so crawlers can see `noindex`.
 - **Pre-rendering before server-side rendering.** Static HTML for public pages, cached by a CDN,

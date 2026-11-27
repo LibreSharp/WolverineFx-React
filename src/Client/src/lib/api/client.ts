@@ -3,10 +3,11 @@ import type { paths } from './schema'
 import { getTokens, setTokens } from './authTokens'
 
 // The page's own origin: the same as a relative URL in the browser, and resolvable in tests.
+// (Empty when the build pre-renders a page in Node, which makes no requests.)
 // fetch is looked up on each call (openapi-fetch would otherwise keep the one that existed when
 // this module loaded), so the unit tests' fake API (MSW) sees the requests.
 export const api = createClient<paths>({
-  baseUrl: window.location.origin,
+  baseUrl: typeof window === 'undefined' ? '' : window.location.origin,
   fetch: (request) => globalThis.fetch(request),
 })
 

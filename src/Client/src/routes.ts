@@ -1,13 +1,11 @@
-// Every page's path. The API reads this list (built into client-routes.json) to answer 404 for
-// any other path, and lists the `index` ones in sitemap.xml. Keep it in step with the routes in
-// router.tsx; routes.test.ts checks that they match.
-export interface ClientRoute {
-  path: string
-  // Listed in the sitemap for search engines (the route's handle should say index: true too).
-  index: boolean
-}
+import { index, route, type RouteConfig } from '@react-router/dev/routes'
 
-export const clientRoutes: ClientRoute[] = [
-  { path: '/', index: true },
-  { path: '/todos', index: false },
-]
+// The app's pages: each URL and the route module (in routes/) that renders it. A route module
+// default-exports the page's component, and its `handle` gives the page title and whether search
+// engines may index it (components/PageMeta.tsx). Each page's code loads when it's first visited.
+// When you add a page, add its path to pages.ts too.
+export default [
+  index('routes/home.tsx'),
+  route('todos', 'routes/todos.tsx'),
+  route('*', 'routes/not-found.tsx'),
+] satisfies RouteConfig

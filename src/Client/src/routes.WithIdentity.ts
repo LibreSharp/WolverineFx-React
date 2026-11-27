@@ -1,23 +1,28 @@
-// Every page's path. The API reads this list (built into client-routes.json) to answer 404 for
-// any other path, and lists the `index` ones in sitemap.xml. Keep it in step with the routes in
-// router.tsx; routes.test.ts checks that they match.
-export interface ClientRoute {
-  path: string
-  // Listed in the sitemap for search engines (the route's handle should say index: true too).
-  index: boolean
-}
+import { index, layout, route, type RouteConfig } from '@react-router/dev/routes'
 
-export const clientRoutes: ClientRoute[] = [
-  { path: '/', index: true },
-  { path: '/todos', index: false },
-  { path: '/login', index: false },
-  { path: '/register', index: false },
-  { path: '/forgot-password', index: false },
-  { path: '/reset-password', index: false },
-  { path: '/confirm-email', index: false },
-  { path: '/confirm-email-change', index: false },
-  { path: '/accept-invitation', index: false },
-  { path: '/external-login', index: false },
-  { path: '/settings', index: false },
-  { path: '/admin', index: false },
-]
+// The app's pages: each URL and the route module (in routes/) that renders it. A route module
+// default-exports the page's component, and its `handle` gives the page title and whether search
+// engines may index it (components/PageMeta.tsx). Each page's code loads when it's first visited.
+// When you add a page, add its path to pages.ts too.
+export default [
+  index('routes/home.tsx'),
+  // Opened from links in emails, signed in or not.
+  route('confirm-email', 'routes/confirm-email.tsx'),
+  route('confirm-email-change', 'routes/confirm-email-change.tsx'),
+  route('accept-invitation', 'routes/accept-invitation.tsx'),
+  route('external-login', 'routes/external-login.tsx'),
+  // Signed-out pages; a signed-in user is sent on to the Todos.
+  layout('routes/guest-only.tsx', [
+    route('login', 'routes/login.tsx'),
+    route('register', 'routes/register.tsx'),
+    route('forgot-password', 'routes/forgot-password.tsx'),
+    route('reset-password', 'routes/reset-password.tsx'),
+  ]),
+  // Pages that need a login; a signed-out user is sent to /login and brought back.
+  layout('routes/require-auth.tsx', [
+    route('todos', 'routes/todos.tsx'),
+    route('settings', 'routes/settings.tsx'),
+    layout('routes/require-admin.tsx', [route('admin', 'routes/admin.tsx')]),
+  ]),
+  route('*', 'routes/not-found.tsx'),
+] satisfies RouteConfig

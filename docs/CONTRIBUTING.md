@@ -40,7 +40,8 @@ computed symbols `IsMarten` and `IsEfCore`. Code differs between options in two 
 | YAML, `env.example` | `#if (Identity)` ... `#endif` |
 
 The client's TypeScript has no conditionals: files that only some options need are excluded
-whole, and `App.WithIdentity.tsx` replaces `App.tsx` with Identity. Because of the conditionals,
+whole, and `App.WithIdentity.tsx`, `routes.WithIdentity.ts` and `pages.WithIdentity.ts` replace
+`App.tsx`, `routes.ts` and `pages.ts` with Identity. Because of the conditionals,
 the template's own sources don't build as they are: always work through a generated app.
 
 Adding an option doubles the combinations CI builds and tests, so new options need real demand;

@@ -18,7 +18,7 @@ describe('PageMeta', () => {
   it('lets search engines index pages that opt in, with a canonical URL', async () => {
     renderRoutes(routes, '/')
     await waitFor(() => expect(document.title).toBe(appName))
-    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', `${window.location.origin}/`)
+    expect(document.head.querySelector('link[rel="canonical"]')).toHaveAttribute('href', '/')
     expect(document.head.querySelector('meta[name="robots"]')).toBeNull()
   })
 
