@@ -23,11 +23,11 @@ public static class OrganisationInvitationEmailHandler
     }
 
     public static async Task Handle(
-        SendOrganisationInvitation message, IOrganisationStore store, IEmailSender emailSender, CancellationToken cancellationToken)
+        SendOrganisationInvitation message, IOrganisationStore store, IEmailSender emailSender, TimeProvider clock, CancellationToken cancellationToken)
     {
         var invitation = await store.FindInvitationAsync(message.InvitationId, cancellationToken);
         var organisation = invitation is null ? null : await store.FindAsync(invitation.OrganisationId, cancellationToken);
-        if (invitation is null || organisation is null || invitation.ExpiresAt <= DateTimeOffset.UtcNow)
+        if (invitation is null || organisation is null || invitation.ExpiresAt <= clock.GetUtcNow())
         {
             return;
         }

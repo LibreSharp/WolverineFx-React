@@ -1,5 +1,7 @@
+using System.Threading.RateLimiting;
 using ApiHost.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Wolverine;
 
@@ -7,9 +9,23 @@ namespace ApiHost.Organisations;
 
 public static class OrganisationSetup
 {
-    public static void AddOrganisations(this IServiceCollection services)
+    // The rate limit on sending invitations (OrganisationOptions.InvitationsPerHour), per user.
+    public const string InvitationsPolicy = "invitations";
+
+    public static void AddOrganisations(this IServiceCollection services, IConfiguration configuration)
     {
         services.TryAddSingleton(TimeProvider.System);
+        services.Configure<OrganisationOptions>(configuration.GetSection(OrganisationOptions.SectionName));
+
+        // Per user (the rate limiter runs after authentication), so it can't be dodged by
+        // switching organisation or address.
+        var invitationsPerHour = configuration.GetValue($"{OrganisationOptions.SectionName}:{nameof(OrganisationOptions.InvitationsPerHour)}", new OrganisationOptions().InvitationsPerHour);
+        services.Configure<RateLimiterOptions>(options => options.AddPolicy(InvitationsPolicy, context =>
+            RateLimitPartition.GetFixedWindowLimiter(context.User.Identity?.IsAuthenticated == true ? context.User.GetUserId() : "anonymous", _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = invitationsPerHour,
+                Window = TimeSpan.FromHours(1),
+            })));
         services.AddScoped<IOrganisationStore, OrganisationStore>();
         services.AddScoped<OrganisationAccess>();
         services.ConfigureWolverine(opts =>

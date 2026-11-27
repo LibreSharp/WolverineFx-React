@@ -5,7 +5,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Wolverine;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using Wolverine.Http;
 
 namespace ApiHost.Features.Organisations;
@@ -23,16 +24,19 @@ public class InviteMemberRequestValidator : AbstractValidator<InviteMemberReques
 }
 
 // Owners and admins invite people to the current organisation by email; only owners can invite
-// an owner. Accepting is in JoinOrganisationEndpoints.
+// an owner. Each user can send OrganisationOptions.InvitationsPerHour, and an organisation can
+// have MaxPendingInvitations waiting. Accepting is in JoinOrganisationEndpoints.
 public static class InvitationEndpoints
 {
     [Authorize]
+    [EnableRateLimiting(OrganisationSetup.InvitationsPolicy)]
     [WolverinePost("/api/organisation/invitations")]
-    public static async Task<(Results<Accepted, ValidationProblem>, OutgoingMessages)> Invite(
+    public static async Task<Results<Accepted, ValidationProblem>> Invite(
         InviteMemberRequest request,
         ClaimsPrincipal principal,
         IOrganisationStore store,
         UserManager<ApplicationUser> userManager,
+        IOptions<OrganisationOptions> options,
         IConfiguration configuration,
         HttpContext httpContext,
         TimeProvider clock,
@@ -47,13 +51,22 @@ public static class InvitationEndpoints
                 : null;
         if (refusal is not null)
         {
-            return (IdentityResultExtensions.ValidationProblem("Role", refusal), []);
+            return IdentityResultExtensions.ValidationProblem("Role", refusal);
         }
 
         var existing = await userManager.FindByEmailAsync(request.Email);
         if (existing is not null && await store.FindMembershipAsync(organisationId, existing.Id, cancellationToken) is not null)
         {
-            return (IdentityResultExtensions.ValidationProblem("Email", "They're already a member."), []);
+            return IdentityResultExtensions.ValidationProblem("Email", "They're already a member.");
+        }
+
+        // A new invitation to someone already invited replaces theirs, so it doesn't count.
+        var pending = (await store.InvitationsAsync(organisationId, cancellationToken))
+            .Count(i => !string.Equals(i.Email, request.Email.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (pending >= options.Value.MaxPendingInvitations)
+        {
+            return IdentityResultExtensions.ValidationProblem("Email",
+                $"This organisation already has {pending} invitations waiting: revoke some, or wait for them to be accepted or expire.");
         }
 
         var now = clock.GetUtcNow();
@@ -68,12 +81,10 @@ public static class InvitationEndpoints
             CreatedAt = now,
             ExpiresAt = now + OrganisationInvitation.Lifetime,
         };
-        await store.AddInvitationAsync(invitation, cancellationToken);
-
         var inviter = await userManager.FindByIdAsync(actor.UserId);
         var invitedBy = inviter?.DisplayName ?? inviter?.Email ?? "Someone";
-        return (TypedResults.Accepted((string?)null),
-            [new SendOrganisationInvitation(invitation.Id, invitedBy, ClientUrl.For(configuration, httpContext))]);
+        await store.AddInvitationAsync(invitation, new SendOrganisationInvitation(invitation.Id, invitedBy, ClientUrl.For(configuration, httpContext)), cancellationToken);
+        return TypedResults.Accepted((string?)null);
     }
 
     [Authorize]

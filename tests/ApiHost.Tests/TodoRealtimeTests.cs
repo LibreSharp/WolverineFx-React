@@ -9,6 +9,12 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 #endif
+#if (Saas)
+using ApiHost.Features.Auth;
+using ApiHost.Identity;
+using ApiHost.Organisations;
+using Microsoft.IdentityModel.JsonWebTokens;
+#endif
 using Microsoft.AspNetCore.SignalR.Client;
 using Wolverine.Tracking;
 
@@ -180,6 +186,61 @@ public class TodoRealtimeTests
         Assert.Equal(HttpStatusCode.Unauthorized, exception.StatusCode);
     }
 
+#if (Saas)
+    private async Task<string> LogInAsync(string email, string password)
+        => (await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new LoginRequest(email, password)).ToUrl("/api/auth/login");
+            s.StatusCodeShouldBeOk();
+        })).ReadAsJson<LoginResponse>()!.AccessToken;
+
+    [Fact]
+    public async Task a_reminder_reaches_only_the_member_who_asked_for_it()
+    {
+        var asker = (await GetTokenAsync())!;
+        var organisationId = Guid.Parse(new JsonWebToken(asker).GetClaim(OrganisationClaims.OrganisationId).Value);
+
+        // A teammate working in the same organisation (a new session starts in the one used last).
+        const string password = "P@ssword123!";
+        var email = $"{Guid.NewGuid():N}@example.com";
+        await _fixture.RegisterConfirmedUserAsync(email, password);
+        var teammateId = new JsonWebToken(await LogInAsync(email, password)).Subject;
+        using (var scope = _fixture.Host.Services.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<IOrganisationStore>().AddMembershipAsync(new Membership
+            {
+                Id = Guid.CreateVersion7(),
+                OrganisationId = organisationId,
+                UserId = teammateId,
+                Role = OrganisationRoles.Member,
+                JoinedAt = DateTimeOffset.UtcNow,
+                LastUsedAt = DateTimeOffset.UtcNow.AddMinutes(1),
+            }, CancellationToken.None);
+        }
+        var teammate = await LogInAsync(email, password);
+        Assert.Equal(organisationId.ToString(), new JsonWebToken(teammate).GetClaim(OrganisationClaims.OrganisationId).Value);
+
+        await using var askersTab = await ConnectAsync(asker);
+        await using var teammatesTab = await ConnectAsync(teammate);
+        var id = await CreateTodoAsync(asker, $"Personal reminder {Guid.NewGuid()}");
+        // Both see the change: the Todo belongs to the organisation.
+        await teammatesTab.NextChangeForAsync(id, Timeout);
+
+        var scheduling = await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            s.WithBearerToken(asker);
+            s.Post.Json(new RemindTodo(1)).ToUrl($"/api/todos/{id}/remind");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        }));
+        var due = scheduling.Scheduled.Envelopes().Single(e => e.Message is TodoReminderDue);
+        await _fixture.Host.ExecuteAndWaitAsync(c => c.InvokeForTenantAsync(due.TenantId!, due.Message!), (int)Timeout.TotalMilliseconds);
+
+        await askersTab.NextAsync("todo-reminder", id, Timeout);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => teammatesTab.NextAsync("todo-reminder", id, TimeSpan.FromSeconds(2)));
+    }
+
+#endif
     // Authentication only runs when a connection opens: the hub must close connections whose
     // access token has expired, or a removed member would keep receiving live updates.
     [Fact]

@@ -200,20 +200,20 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/join/{token}": {
+    "/api/join/details": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * GET_api_join_token
-         * @description GET_api_join_token
-         */
-        get: operations["GET_api_join_token"];
+        get?: never;
         put?: never;
-        post?: never;
+        /**
+         * POST_api_join_details
+         * @description POST_api_join_details
+         */
+        post: operations["POST_api_join_details"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1006,6 +1006,9 @@ export interface components {
             role: string;
             accountExists: boolean;
         };
+        InvitationDetailsRequest: {
+            token: string;
+        };
         InviteMemberRequest: {
             email: string;
             role: string;
@@ -1567,16 +1570,18 @@ export interface operations {
             };
         };
     };
-    GET_api_join_token: {
+    POST_api_join_details: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                token: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationDetailsRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {

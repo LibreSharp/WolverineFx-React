@@ -170,7 +170,8 @@ export function useInvitation(token: string) {
     enabled: token !== '',
     retry: false,
     queryFn: async () => {
-      const { data, response } = await api.GET('/api/join/{token}', { params: { path: { token } } })
+      // POST, with the token in the body: a URL would be recorded in traces and logs.
+      const { data, response } = await api.POST('/api/join/details', { body: { token } })
       if (response.status === 404) return null
       if (!response.ok || !data) throw new Error('Could not load the invitation.')
       return data

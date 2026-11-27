@@ -21,7 +21,12 @@ public class RemindTodoValidator : AbstractValidator<RemindTodo>
 public record TodoReminderScheduled(DateTimeOffset RemindAt);
 
 // Scheduled for later; handled by TodoReminderDueHandler when it's due.
+#if (Saas)
+// UserId: the member who asked to be reminded; only they get the reminder.
+public record TodoReminderDue(Guid TodoId, string UserId);
+#else
 public record TodoReminderDue(Guid TodoId);
+#endif
 
 // Pushed to the browser over SignalR when a reminder is due; the client matches on the
 // stable "todo-reminder" name.

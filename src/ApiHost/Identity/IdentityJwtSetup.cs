@@ -49,7 +49,7 @@ public static class IdentityJwtSetup
 #if (Saas)
 
         // Organisations: each user's data belongs to the organisation they work in (Organisations/).
-        services.AddOrganisations();
+        services.AddOrganisations(configuration);
 #endif
 
         // Limits login, registration and password attempts per client IP (see AuthRateLimiting).

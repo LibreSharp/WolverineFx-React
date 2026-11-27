@@ -25,8 +25,10 @@ public class AppHub(SignalRTransport endpoint) : WolverineHub(endpoint)
     public override async Task OnConnectedAsync()
     {
 #if (Saas)
-        // The organisation in the access token; the browser reconnects when it switches.
+        // The organisation in the access token (the browser reconnects when it switches), for
+        // changes; and the user, for their own reminders.
         await Groups.AddToGroupAsync(Context.ConnectionId, TodoNotifications.OrganisationGroup(Context.User!.GetOrganisationId().ToString()));
+        await Groups.AddToGroupAsync(Context.ConnectionId, TodoNotifications.UserGroup(Context.User!.GetUserId()));
 #else
         await Groups.AddToGroupAsync(Context.ConnectionId, TodoNotifications.UserGroup(Context.User!.GetUserId()));
 #endif

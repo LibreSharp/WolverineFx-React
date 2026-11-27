@@ -84,7 +84,7 @@ describe('OrganisationPage', () => {
 
 describe('JoinPage', () => {
   const details = (accountExists: boolean) =>
-    http.get('*/api/join/:token', () => HttpResponse.json({ organisationName: 'Team', email: 'new@example.com', role: 'Member', accountExists }))
+    http.post('*/api/join/details', () => HttpResponse.json({ organisationName: 'Team', email: 'new@example.com', role: 'Member', accountExists }))
 
   it('creates an account from the invitation and signs in', async () => {
     server.use(
@@ -109,7 +109,7 @@ describe('JoinPage', () => {
 
   it('says when the link is no longer valid', async () => {
     setTokens(null)
-    server.use(http.get('*/api/join/:token', () => new HttpResponse(null, { status: 404 })))
+    server.use(http.post('*/api/join/details', () => new HttpResponse(null, { status: 404 })))
     renderWithAuth([{ path: '/join', element: <JoinPage /> }], '/join?token=old')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('invalid or has expired')

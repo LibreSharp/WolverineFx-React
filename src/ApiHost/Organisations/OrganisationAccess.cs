@@ -49,8 +49,8 @@ public class OrganisationAccess(IOrganisationStore store, TimeProvider clock)
         var names = new List<string>();
         foreach (var membership in (await store.MembershipsOfUserAsync(userId, cancellationToken)).Where(m => m.Role == OrganisationRoles.Owner))
         {
-            if (await store.CountOwnersAsync(membership.OrganisationId, cancellationToken) == 1
-                && (await store.MembersAsync(membership.OrganisationId, cancellationToken)).Count > 1)
+            var memberships = await store.MembershipsOfOrganisationAsync(membership.OrganisationId, cancellationToken);
+            if (memberships.Count(m => m.Role == OrganisationRoles.Owner) == 1 && memberships.Count > 1)
             {
                 names.Add((await store.FindAsync(membership.OrganisationId, cancellationToken))?.Name ?? string.Empty);
             }

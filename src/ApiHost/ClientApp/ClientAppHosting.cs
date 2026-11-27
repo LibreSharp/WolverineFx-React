@@ -84,9 +84,13 @@ public static partial class ClientAppHosting
         return JsonSerializer.Deserialize<List<ClientRoute>>(stream, JsonSerializerOptions.Web) ?? [];
     }
 
-    // robots.txt and sitemap.xml, using the address the visitor used.
+    // robots.txt and sitemap.xml, with the app's public address (App:ClientUrl) if it's set,
+    // otherwise the address the visitor used.
     private static void MapSearchEngineFiles(this WebApplication app, List<ClientRoute> routes)
     {
+        var configured = app.Configuration["App:ClientUrl"]?.TrimEnd('/');
+        string BaseUrl(HttpContext context) => configured ?? RequestBaseUrl(context);
+
         // For search engines: everything may be crawled except the API, so crawlers can see the
         // noindex tag on private pages (a page blocked here could still be listed, without it).
         app.MapGet("/robots.txt", (HttpContext context) => Results.Text(
@@ -147,6 +151,7 @@ public static partial class ClientAppHosting
     }
 
     // The address the visitor used (behind a proxy, with ASPNETCORE_FORWARDEDHEADERS_ENABLED).
-    private static string BaseUrl(HttpContext context)
+    // Its host comes from the request, so it's only used when App:ClientUrl isn't set.
+    private static string RequestBaseUrl(HttpContext context)
         => $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}";
 }

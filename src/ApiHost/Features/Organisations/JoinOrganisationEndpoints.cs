@@ -14,6 +14,9 @@ namespace ApiHost.Features.Organisations;
 // password.
 public record InvitationDetails(string OrganisationName, string Email, string Role, bool AccountExists);
 
+// The token goes in the body, not the URL, so it isn't recorded in traces or logs.
+public record InvitationDetailsRequest(string Token);
+
 public record JoinOrganisationRequest(string Token);
 
 public record JoinOrganisationResponse(Guid OrganisationId);
@@ -29,17 +32,17 @@ public class JoinWithNewAccountRequestValidator : AbstractValidator<JoinWithNewA
     }
 }
 
-// The invitation link (/join?token=...). A signed-in user whose email matches accepts it; someone
+// The invitation link (/join?token=...); the page sends the token to these endpoints in request bodies. A signed-in user whose email matches accepts it; someone
 // without an account creates one from it: the link proves they own the email, so it's confirmed
 // at once. Invitations work even when registration is closed (Accounts:AllowRegistration).
 public static class JoinOrganisationEndpoints
 {
     [EnableRateLimiting(AuthRateLimiting.Policy)]
-    [WolverineGet("/api/join/{token}")]
+    [WolverinePost("/api/join/details")]
     public static async Task<Results<Ok<InvitationDetails>, NotFound>> Details(
-        string token, IOrganisationStore store, UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
+        InvitationDetailsRequest request, IOrganisationStore store, UserManager<ApplicationUser> userManager, TimeProvider clock, CancellationToken cancellationToken)
     {
-        var invitation = await FindAsync(store, token, cancellationToken);
+        var invitation = await FindAsync(store, request.Token, clock, cancellationToken);
         var organisation = invitation is null ? null : await store.FindAsync(invitation.OrganisationId, cancellationToken);
         if (invitation is null || organisation is null)
         {
@@ -59,9 +62,10 @@ public static class JoinOrganisationEndpoints
         IOrganisationStore store,
         OrganisationAccess organisations,
         UserManager<ApplicationUser> userManager,
+        TimeProvider clock,
         CancellationToken cancellationToken)
     {
-        var invitation = await FindAsync(store, request.Token, cancellationToken);
+        var invitation = await FindAsync(store, request.Token, clock, cancellationToken);
         var user = await userManager.FindByIdAsync(principal.GetUserId());
         if (invitation is null || user is null)
         {
@@ -86,9 +90,10 @@ public static class JoinOrganisationEndpoints
         OrganisationAccess organisations,
         UserManager<ApplicationUser> userManager,
         TokenIssuer tokenIssuer,
+        TimeProvider clock,
         CancellationToken cancellationToken)
     {
-        var invitation = await FindAsync(store, request.Token, cancellationToken);
+        var invitation = await FindAsync(store, request.Token, clock, cancellationToken);
         if (invitation is null)
         {
             return TypedResults.NotFound();
@@ -111,9 +116,9 @@ public static class JoinOrganisationEndpoints
     }
 
     // A valid, unexpired invitation for the link's token.
-    private static async Task<OrganisationInvitation?> FindAsync(IOrganisationStore store, string token, CancellationToken cancellationToken)
+    private static async Task<OrganisationInvitation?> FindAsync(IOrganisationStore store, string token, TimeProvider clock, CancellationToken cancellationToken)
     {
         var invitation = string.IsNullOrEmpty(token) ? null : await store.FindInvitationByTokenHashAsync(JwtTokenService.HashToken(token), cancellationToken);
-        return invitation?.ExpiresAt > DateTimeOffset.UtcNow ? invitation : null;
+        return invitation?.ExpiresAt > clock.GetUtcNow() ? invitation : null;
     }
 }

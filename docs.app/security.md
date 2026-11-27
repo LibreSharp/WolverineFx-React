@@ -56,7 +56,8 @@ What the app does to protect its users and data, and what's left to you when you
   organisations the user was alone in.
 - **Organisation roles** are checked on every change (only owners make owners or delete the
   organisation), and invitation links are single-use, expire after a week, and are stored only
-  as a hash.
+  as a hash. Invitations are limited per user per hour and per organisation, so the app can't be
+  used to send spam.
 <!--#else -->
 - **Each user sees only their own data:** another user's records answer 404, so their existence
   isn't revealed. Deleting an account (which needs the password again) deletes the user's data

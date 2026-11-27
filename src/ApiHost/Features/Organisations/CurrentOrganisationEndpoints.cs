@@ -4,7 +4,6 @@ using ApiHost.Organisations;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Wolverine;
 using Wolverine.Http;
 
 namespace ApiHost.Features.Organisations;
@@ -116,8 +115,20 @@ public static class CurrentOrganisationEndpoints
             return IdentityResultExtensions.ValidationProblem("Role", refusal);
         }
 
+        var previousRole = target.Role;
         target.Role = request.Role;
         await store.SaveMembershipAsync(target, cancellationToken);
+
+        // Another change at the same moment (two owners stepping down together) could have passed
+        // the same check: if no owner is left now, undo this one.
+        if (previousRole == OrganisationRoles.Owner && request.Role != OrganisationRoles.Owner
+            && await store.CountOwnersAsync(organisationId, cancellationToken) == 0)
+        {
+            target.Role = previousRole;
+            await store.SaveMembershipAsync(target, cancellationToken);
+            return IdentityResultExtensions.ValidationProblem("Role", OrganisationRules.NeedsAnOwner);
+        }
+
         return TypedResults.NoContent();
     }
 
@@ -142,6 +153,14 @@ public static class CurrentOrganisationEndpoints
         }
 
         await store.RemoveMembershipAsync(target, cancellationToken);
+
+        // As in ChangeRole: if a change at the same moment left no owner, put this one back.
+        if (target.Role == OrganisationRoles.Owner && await store.CountOwnersAsync(organisationId, cancellationToken) == 0)
+        {
+            await store.AddMembershipAsync(target, cancellationToken);
+            return IdentityResultExtensions.ValidationProblem("UserId", OrganisationRules.NeedsAnOwner);
+        }
+
         return TypedResults.NoContent();
     }
 

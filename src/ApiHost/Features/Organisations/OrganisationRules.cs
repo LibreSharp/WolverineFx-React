@@ -6,6 +6,8 @@ namespace ApiHost.Features.Organisations;
 // change isn't allowed, or null if it is. ownerCount: the organisation's owners now.
 public static class OrganisationRules
 {
+    public const string NeedsAnOwner = "An organisation needs an owner: make someone else an owner first.";
+
     public static string? CanChangeRole(Membership actor, Membership target, string newRole, int ownerCount)
     {
         if (!OrganisationRoles.CanManageMembers(actor.Role))
@@ -19,7 +21,7 @@ public static class OrganisationRules
         }
 
         return LeavesNoOwner(target, ownerCount) && newRole != OrganisationRoles.Owner
-            ? "An organisation needs an owner: make someone else an owner first."
+            ? NeedsAnOwner
             : null;
     }
 

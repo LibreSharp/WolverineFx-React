@@ -7,7 +7,7 @@ namespace ApiHost.Organisations;
 
 // Organisations and memberships are ordinary (not tenanted) Marten documents; see
 // Data/Marten/MartenPersistence.cs for their indexes.
-public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox) : IOrganisationStore
+public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox, TimeProvider clock) : IOrganisationStore
 {
     public Task<Organisation?> FindAsync(Guid organisationId, CancellationToken cancellationToken)
         => session.LoadAsync<Organisation>(organisationId, cancellationToken);
@@ -29,9 +29,12 @@ public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox) :
     public Task<Membership?> FindMembershipAsync(Guid organisationId, string userId, CancellationToken cancellationToken)
         => session.Query<Membership>().FirstOrDefaultAsync(m => m.OrganisationId == organisationId && m.UserId == userId, cancellationToken);
 
+    public Task<IReadOnlyList<Membership>> MembershipsOfOrganisationAsync(Guid organisationId, CancellationToken cancellationToken)
+        => session.Query<Membership>().Where(m => m.OrganisationId == organisationId).ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyList<OrganisationMember>> MembersAsync(Guid organisationId, CancellationToken cancellationToken)
     {
-        var memberships = await session.Query<Membership>().Where(m => m.OrganisationId == organisationId).ToListAsync(cancellationToken);
+        var memberships = await MembershipsOfOrganisationAsync(organisationId, cancellationToken);
         var users = (await session.LoadManyAsync<ApplicationUser>(cancellationToken, memberships.Select(m => m.UserId)))
             .ToDictionary(u => u.Id, StringComparer.Ordinal);
         return [.. memberships
@@ -73,7 +76,7 @@ public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox) :
 
     public async Task<IReadOnlyList<PendingInvitation>> InvitationsAsync(Guid organisationId, CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetUtcNow();
         var invitations = await session.Query<OrganisationInvitation>()
             .Where(i => i.OrganisationId == organisationId && i.ExpiresAt > now)
             .OrderBy(i => i.Email)
@@ -87,11 +90,13 @@ public class OrganisationStore(IDocumentSession session, IMartenOutbox outbox) :
     public Task<OrganisationInvitation?> FindInvitationByTokenHashAsync(string tokenHash, CancellationToken cancellationToken)
         => session.Query<OrganisationInvitation>().FirstOrDefaultAsync(i => i.TokenHash == tokenHash, cancellationToken);
 
-    public Task AddInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken)
+    public async Task AddInvitationAsync(OrganisationInvitation invitation, SendOrganisationInvitation email, CancellationToken cancellationToken)
     {
         session.DeleteWhere<OrganisationInvitation>(i => i.OrganisationId == invitation.OrganisationId && i.NormalizedEmail == invitation.NormalizedEmail);
         session.Store(invitation);
-        return session.SaveChangesAsync(cancellationToken);
+        outbox.Enroll(session);
+        await outbox.PublishAsync(email);
+        await session.SaveChangesAsync(cancellationToken);
     }
 
     public Task SaveInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken)

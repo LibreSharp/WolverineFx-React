@@ -45,7 +45,16 @@ out their other sessions), add, rename and remove passkeys, link and unlink Goog
 delete their account (password required). Settings won't remove the last way a user can sign in.
 
 Deleting an account publishes an `AccountDeleted` message; each feature that stores user data
+<!--#if (Saas) -->
+handles it to delete that data. The user leaves each of their organisations, and one they were
+the only member of is deleted with its data (`Organisations/LeaveOrganisationsOfDeletedAccountHandler.cs`).
+Todos in organisations that others are still in stay: they belong to the organisation, not the
+user, and keep the deleted user's id as their `OwnerId`, in the Todo and in its event history.
+Nothing else about the user (email, name) is kept with them. If your data needs to forget its
+authors too, clear or replace those ids in an `AccountDeleted` handler.
+<!--#else -->
 handles it to delete that data (see `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`).
+<!--#endif -->
 
 ## Lockout
 
@@ -114,15 +123,25 @@ Data belongs to organisations, the app's tenants. The code is in `src/ApiHost/Or
 - **Roles:** Owner, Admin and Member. Owners and admins invite and remove members and change
   roles, but only owners make owners, change an owner's role, rename or delete the organisation.
   There's always an owner: the last one can't leave or step down, and can't delete their account
-  while others are members (`Features/Organisations/OrganisationRules.cs`).
+  while others are members (`Features/Organisations/OrganisationRules.cs`). Each change checks
+  again after saving and undoes itself if a change at the same moment left no owner; and if an
+  owner's account is deleted after someone joined, their longest-standing admin (or member)
+  becomes the owner.
 - **Invitations** go by email, with a link to `/join` that works for a week. Someone with an
   account logs in with the invited email and accepts; someone without one chooses a password,
-  and the link confirms their email. Only a hash of the link's token is stored.
+  and the link confirms their email. Only a hash of the link's token is stored, and the page
+  sends the token in request bodies, never in a URL the API would log. Each user can send 20
+  invitations an hour and an organisation can have 100 waiting (`Organisations__InvitationsPerHour`,
+  `Organisations__MaxPendingInvitations`; see `Organisations/OrganisationOptions.cs`), so the app
+  can't be used to send spam.
 - **Deleting an organisation** deletes it for everyone. Its data is deleted in the background:
   each feature handles `OrganisationDeleted`, which runs for that organisation's tenant (see
-  `Features/Todos/DeleteTodosOfDeletedOrganisationHandler.cs`).
+  `Features/Todos/DeleteTodosOfDeletedOrganisationHandler.cs`). The message is published in the
+  same transaction as the deletion, so the data is never left behind.
 - **Realtime updates** go to everyone working in the organisation; the browser reconnects when it
-  switches.
+  switches. Reminders go only to the member who set them, while they're still a member. A
+  connection is closed when its access token expires, so someone removed from an organisation
+  stops getting its updates within one token lifetime.
 
 <!--#endif -->
 ## Development

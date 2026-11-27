@@ -38,6 +38,10 @@ public class AppFixture : IAsyncLifetime
             builder.UseSetting("Authentication:Google:ClientId", "test-client-id");
             builder.UseSetting("Authentication:Google:ClientSecret", "test-client-secret");
 #endif
+#if (Saas)
+            // Few enough pending invitations to reach the limit in a test (OrganisationTests).
+            builder.UseSetting("Organisations:MaxPendingInvitations", "3");
+#endif
 #if (IsMarten)
             builder.UseSetting("ConnectionStrings:Marten", _postgres.GetConnectionString());
 #elif (IsEfCore)

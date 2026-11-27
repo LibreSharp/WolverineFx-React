@@ -13,6 +13,9 @@ public interface IOrganisationStore
 
     Task<Membership?> FindMembershipAsync(Guid organisationId, string userId, CancellationToken cancellationToken);
 
+    // Every membership of the organisation, including any whose account was just deleted.
+    Task<IReadOnlyList<Membership>> MembershipsOfOrganisationAsync(Guid organisationId, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<OrganisationMember>> MembersAsync(Guid organisationId, CancellationToken cancellationToken);
 
     Task<int> CountOwnersAsync(Guid organisationId, CancellationToken cancellationToken);
@@ -33,8 +36,10 @@ public interface IOrganisationStore
 
     Task<OrganisationInvitation?> FindInvitationByTokenHashAsync(string tokenHash, CancellationToken cancellationToken);
 
-    // Adds the invitation, replacing any earlier one to the same email for the organisation.
-    Task AddInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken);
+    // Adds the invitation, replacing any earlier one to the same email for the organisation, and
+    // publishes the message that emails it in the same transaction (Wolverine's outbox), so an
+    // invitation is never saved without its email being sent.
+    Task AddInvitationAsync(OrganisationInvitation invitation, SendOrganisationInvitation email, CancellationToken cancellationToken);
 
     Task SaveInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken);
 

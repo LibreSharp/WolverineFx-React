@@ -7,7 +7,7 @@ namespace ApiHost.Organisations;
 
 // Organisations and memberships are ordinary (not tenanted) tables; see
 // Data/EfCore/AppDbContext.cs for their keys and indexes.
-public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox) : IOrganisationStore
+public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox, TimeProvider clock) : IOrganisationStore
 {
     public Task<Organisation?> FindAsync(Guid organisationId, CancellationToken cancellationToken)
         => db.Organisations.FirstOrDefaultAsync(o => o.Id == organisationId, cancellationToken);
@@ -30,6 +30,9 @@ public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox) : IOrga
 
     public Task<Membership?> FindMembershipAsync(Guid organisationId, string userId, CancellationToken cancellationToken)
         => db.Memberships.FirstOrDefaultAsync(m => m.OrganisationId == organisationId && m.UserId == userId, cancellationToken);
+
+    public async Task<IReadOnlyList<Membership>> MembershipsOfOrganisationAsync(Guid organisationId, CancellationToken cancellationToken)
+        => await db.Memberships.Where(m => m.OrganisationId == organisationId).ToListAsync(cancellationToken);
 
     public async Task<IReadOnlyList<OrganisationMember>> MembersAsync(Guid organisationId, CancellationToken cancellationToken)
     {
@@ -72,7 +75,7 @@ public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox) : IOrga
 
     public async Task<IReadOnlyList<PendingInvitation>> InvitationsAsync(Guid organisationId, CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = clock.GetUtcNow();
         return await db.OrganisationInvitations.AsNoTracking()
             .Where(i => i.OrganisationId == organisationId && i.ExpiresAt > now)
             .OrderBy(i => i.Email)
@@ -86,13 +89,19 @@ public class OrganisationStore(AppDbContext db, IDbContextOutbox outbox) : IOrga
     public Task<OrganisationInvitation?> FindInvitationByTokenHashAsync(string tokenHash, CancellationToken cancellationToken)
         => db.OrganisationInvitations.FirstOrDefaultAsync(i => i.TokenHash == tokenHash, cancellationToken);
 
-    public async Task AddInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken)
+    public async Task AddInvitationAsync(OrganisationInvitation invitation, SendOrganisationInvitation email, CancellationToken cancellationToken)
     {
-        await db.OrganisationInvitations
+        // Loaded and removed (not ExecuteDeleteAsync, which would run at once, outside the
+        // transaction below).
+        db.OrganisationInvitations.RemoveRange(await db.OrganisationInvitations
             .Where(i => i.OrganisationId == invitation.OrganisationId && i.NormalizedEmail == invitation.NormalizedEmail)
-            .ExecuteDeleteAsync(cancellationToken);
+            .ToListAsync(cancellationToken));
         db.OrganisationInvitations.Add(invitation);
-        await db.SaveChangesAsync(cancellationToken);
+
+        // Saves the invitation and the email message in one transaction, then sends the message.
+        outbox.Enroll(db);
+        await outbox.PublishAsync(email);
+        await outbox.SaveChangesAndFlushMessagesAsync(cancellationToken);
     }
 
     public async Task SaveInvitationAsync(OrganisationInvitation invitation, CancellationToken cancellationToken)

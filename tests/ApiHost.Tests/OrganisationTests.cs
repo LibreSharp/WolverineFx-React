@@ -363,7 +363,7 @@ public class OrganisationTests(AppFixture fixture)
         owner = await SwitchAsync(owner, team);
 
         var token = await InviteAsync(owner, invitee.Email, OrganisationRoles.Admin);
-        var details = (await fixture.Host.Scenario(s => s.Get.Url($"/api/join/{token}"))).ReadAsJson<InvitationDetails>()!;
+        var details = (await fixture.Host.Scenario(s => s.Post.Json(new InvitationDetailsRequest(token)).ToUrl("/api/join/details"))).ReadAsJson<InvitationDetails>()!;
         Assert.Equal("Invites", details.OrganisationName);
         Assert.True(details.AccountExists);
 
@@ -427,7 +427,7 @@ public class OrganisationTests(AppFixture fixture)
         });
         await fixture.Host.Scenario(s =>
         {
-            s.Get.Url($"/api/join/{token}");
+            s.Post.Json(new InvitationDetailsRequest(token)).ToUrl("/api/join/details");
             s.StatusCodeShouldBe(HttpStatusCode.NotFound);
         });
     }
@@ -487,5 +487,103 @@ public class OrganisationTests(AppFixture fixture)
             s.WithBearerToken(member.AccessToken);
         })).ReadAsJson<List<OrganisationMember>>()!;
         Assert.Equal(member.UserId, Assert.Single(members).UserId);
+    }
+
+    private Task<IScenarioResult> PostInvitationAsync(Session actor, string email, HttpStatusCode expected)
+        => fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new InviteMemberRequest(email, OrganisationRoles.Member)).ToUrl("/api/organisation/invitations");
+            s.WithBearerToken(actor.AccessToken);
+            s.StatusCodeShouldBe(expected);
+        });
+
+    [Fact]
+    public async Task an_organisation_has_a_limit_on_pending_invitations()
+    {
+        var owner = await SignUpAsync();
+        var team = await CreateOrganisationAsync(owner, "Popular");
+        owner = await SwitchAsync(owner, team);
+
+        // The tests allow 3 (AppFixture).
+        var emails = Enumerable.Range(0, 3).Select(_ => $"{Guid.NewGuid():N}@example.com").ToList();
+        foreach (var email in emails)
+        {
+            await PostInvitationAsync(owner, email, HttpStatusCode.Accepted);
+        }
+
+        await PostInvitationAsync(owner, $"{Guid.NewGuid():N}@example.com", HttpStatusCode.BadRequest);
+        // Inviting someone again replaces their invitation, so it's allowed.
+        await PostInvitationAsync(owner, emails[0], HttpStatusCode.Accepted);
+    }
+
+    [Fact]
+    public async Task each_user_can_send_a_limited_number_of_invitations_an_hour()
+    {
+        var owner = await SignUpAsync();
+        owner = await SwitchAsync(owner, await CreateOrganisationAsync(owner, "Busy"));
+
+        // 20 an hour by default (Organisations:InvitationsPerHour). Most are refused by the
+        // pending-invitation limit, but every attempt counts.
+        for (var i = 0; i < new OrganisationOptions().InvitationsPerHour; i++)
+        {
+            var result = await fixture.Host.Scenario(s =>
+            {
+                s.Post.Json(new InviteMemberRequest($"{Guid.NewGuid():N}@example.com", OrganisationRoles.Member)).ToUrl("/api/organisation/invitations");
+                s.WithBearerToken(owner.AccessToken);
+                s.IgnoreStatusCode();
+            });
+            Assert.NotEqual(HttpStatusCode.TooManyRequests, (HttpStatusCode)result.Context.Response.StatusCode);
+        }
+
+        await PostInvitationAsync(owner, $"{Guid.NewGuid():N}@example.com", HttpStatusCode.TooManyRequests);
+    }
+
+    [Fact]
+    public async Task two_owners_stepping_down_at_once_leave_at_least_one_owner()
+    {
+        var first = await SignUpAsync();
+        var second = await SignUpAsync();
+        var team = await CreateOrganisationAsync(first, "Two owners");
+        await AddMemberAsync(team, second, OrganisationRoles.Owner);
+        first = await SwitchAsync(first, team);
+        second = await SwitchAsync(second, team);
+
+        await Task.WhenAll(
+            fixture.Host.Scenario(s =>
+            {
+                s.Put.Json(new ChangeMemberRoleRequest(OrganisationRoles.Member)).ToUrl($"/api/organisation/members/{first.UserId}/role");
+                s.WithBearerToken(first.AccessToken);
+                s.IgnoreStatusCode();
+            }),
+            fixture.Host.Scenario(s =>
+            {
+                s.Put.Json(new ChangeMemberRoleRequest(OrganisationRoles.Member)).ToUrl($"/api/organisation/members/{second.UserId}/role");
+                s.WithBearerToken(second.AccessToken);
+                s.IgnoreStatusCode();
+            }));
+
+        using var scope = fixture.Host.Services.CreateScope();
+        Assert.True(await scope.ServiceProvider.GetRequiredService<IOrganisationStore>().CountOwnersAsync(team, CancellationToken.None) >= 1);
+    }
+
+    [Fact]
+    public async Task an_organisation_whose_only_owner_deletes_their_account_gets_a_new_owner()
+    {
+        // The account endpoint refuses this, but someone can join between its check and the
+        // background handler: run the handler for an owner who has a member.
+        var owner = await SignUpAsync();
+        var admin = await SignUpAsync();
+        var member = await SignUpAsync();
+        var team = await CreateOrganisationAsync(owner, "Succession");
+        await AddMemberAsync(team, member, OrganisationRoles.Member);
+        await AddMemberAsync(team, admin, OrganisationRoles.Admin);
+
+        await fixture.Host.InvokeMessageAndWaitAsync(new AccountDeleted(owner.UserId));
+
+        using var scope = fixture.Host.Services.CreateScope();
+        var store = scope.ServiceProvider.GetRequiredService<IOrganisationStore>();
+        Assert.Null(await store.FindMembershipAsync(team, owner.UserId, CancellationToken.None));
+        Assert.Equal(OrganisationRoles.Owner, (await store.FindMembershipAsync(team, admin.UserId, CancellationToken.None))!.Role);
+        Assert.Equal(OrganisationRoles.Member, (await store.FindMembershipAsync(team, member.UserId, CancellationToken.None))!.Role);
     }
 }
