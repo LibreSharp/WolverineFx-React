@@ -35,7 +35,7 @@ dotnet new install LibreSharp.Templates.WolverineFxReact
 | To | Run |
 |---|---|
 | Update to the latest version | `dotnet new update` |
-| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.3.0` |
+| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.3.1` |
 | See the template's options | `dotnet new wolverine-react --help` |
 | Uninstall | `dotnet new uninstall LibreSharp.Templates.WolverineFxReact` |
 

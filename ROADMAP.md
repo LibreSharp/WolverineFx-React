@@ -163,7 +163,7 @@ billing records but no payment provider (see the
       EF Core migrations), `releasing.md` and `decisions.md`. CI now also checks that the
       packed template generates the same projects as this folder.
 
-### v0.3.1: quick wins (no new options)
+### v0.3.1: quick wins (no new options), released 27 November 2026
 
 From an architecture and SEO review after v0.3.0 (November 2026).
 
@@ -226,6 +226,16 @@ The SaaS option:
       Squeezy, which handle sales tax and VAT.
 - [ ] **Plan limits** enforced per organisation.
 - [ ] **Admin back office:** organisations, users and subscriptions.
+
+### Later: .NET Aspire for local development (an opt-in option)
+
+- [ ] **`--aspire`**, off by default: adds an Aspire AppHost and ServiceDefaults project, so one
+      command starts PostgreSQL, Mailpit, the API and the Vite dev server, with the Aspire
+      dashboard showing logs, traces and metrics (Wolverine and Marten emit OpenTelemetry data).
+      Aspire is MIT licensed. Docker Compose stays the default for local development, and
+      production stays Docker Compose with Caddy, whichever option is chosen. Another yes/no
+      option doubles the CI combinations, so consider it after `--Auth` lands, and test
+      `--aspire` builds without rerunning every combination's full test suite.
 
 ### Frontend quality (any time)
 
