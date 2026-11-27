@@ -2,7 +2,9 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using ApiHost.Identity.Email;
 using Microsoft.AspNetCore.Identity;
+using Wolverine;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -18,28 +20,49 @@ public class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequ
     }
 }
 
+// ConfirmationSentTo is set when the email is changing: it changes only once the link sent to the
+// new address is opened (see ConfirmEmailChangeEndpoint), so Profile still has the old one.
+public record UpdateProfileResponse(MeResponse Profile, string? ConfirmationSentTo);
+
 public static class UpdateProfileEndpoint
 {
-    // The email is also the user name used to log in. It changes straight away: there's no
-    // confirmation email, since the template doesn't send email outside password reset.
     [Authorize]
     [WolverinePut("/api/account/profile")]
-    public static async Task<Results<Ok<MeResponse>, ValidationProblem, UnauthorizedHttpResult>> Put(
-        UpdateProfileRequest request, ClaimsPrincipal principal, UserManager<ApplicationUser> userManager)
+    public static async Task<(Results<Ok<UpdateProfileResponse>, ValidationProblem, UnauthorizedHttpResult>, OutgoingMessages)> Put(
+        UpdateProfileRequest request,
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration,
+        HttpContext httpContext)
     {
         var user = await userManager.FindByIdAsync(principal.GetUserId());
         if (user is null)
         {
-            return TypedResults.Unauthorized();
+            return (TypedResults.Unauthorized(), []);
         }
 
-        user.Email = request.Email;
-        user.UserName = request.Email;
-        user.DisplayName = string.IsNullOrWhiteSpace(request.DisplayName) ? null : request.DisplayName.Trim();
+        var messages = new OutgoingMessages();
+        string? confirmationSentTo = null;
+        if (!string.Equals(request.Email, user.Email, StringComparison.Ordinal))
+        {
+            var owner = await userManager.FindByEmailAsync(request.Email);
+            if (owner is not null && owner.Id != user.Id)
+            {
+                var error = new IdentityErrorDescriber().DuplicateEmail(request.Email);
+                return (IdentityResultExtensions.ValidationProblem(error.Code, error.Description), []);
+            }
 
-        // UpdateAsync validates the user (for example, the email must not belong to another
-        // account) and updates the normalized email and user name used for lookups.
+            messages.Add(new SendEmailChangeConfirmation(user.Id, request.Email, ClientUrl.For(configuration, httpContext)));
+            confirmationSentTo = request.Email;
+        }
+
+        user.DisplayName = string.IsNullOrWhiteSpace(request.DisplayName) ? null : request.DisplayName.Trim();
         var result = await userManager.UpdateAsync(user);
-        return result.Succeeded ? TypedResults.Ok(MeResponse.From(user)) : result.ToValidationProblem();
+        if (!result.Succeeded)
+        {
+            return (result.ToValidationProblem(), []);
+        }
+
+        return (TypedResults.Ok(new UpdateProfileResponse(MeResponse.From(user), confirmationSentTo)), messages);
     }
 }

@@ -34,8 +34,10 @@ Log in as **demo@example.com** / **Demo123!**. This user is created at startup i
 only, and the dev server pre-fills the login form with it. Change it under `DevelopmentUser` in
 `src/ApiHost/appsettings.Development.json` and in `src/Client/.env.development`.
 
-In Development, emails aren't sent: "Forgot your password?" writes the reset link to the API's
-console output, where you can open it.
+`docker compose up -d` also starts [Mailpit](https://mailpit.axllent.org/), which catches every
+email the app sends in Development (confirmation, password reset): read them at
+http://localhost:8025. New accounts must confirm their email before they can log in; the demo
+user is already confirmed.
 <!--#endif -->
 
 To try the API without the UI, open `src/ApiHost/ApiHost.http` in Visual Studio, Rider, or VS Code
@@ -61,14 +63,14 @@ src/ApiHost/
 <!--#endif -->
 <!--#if (Identity) -->
   Identity/               Users, JWT tokens, refresh tokens, auth and account endpoints
-  Identity/Email/         Account emails (password reset): SMTP, or the log in Development
+  Identity/Email/         Account emails: messages, their handler, and the SMTP sender (MailKit)
 <!--#endif -->
 src/Client/src/
   App.tsx                 Routes (React Router)
   components/             Layout (header, navigation, footer), home page, not-found page
   features/todos/         Todo page, TanStack Query hooks, SignalR hook (useTodoRealtime)
 <!--#if (Identity) -->
-  features/auth/          Login, register and password reset pages, route guards
+  features/auth/          Login, register, email confirmation and password reset pages, route guards
   features/account/       Settings page and the header's user menu
 <!--#endif -->
   lib/api/                Typed API client generated from the OpenAPI document
@@ -111,13 +113,20 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   client refreshes automatically when a request gets a 401, each refresh replaces the refresh
   token, and reusing an old one revokes the user's tokens. Tokens are kept in memory, not in
   browser storage, so reloading the page logs you out. Each user sees only their own Todos.
-- **Account settings** (`/settings`). Users can change their email and display name, change
-  their password (which signs out their other sessions), and delete their account (password
-  required). Deleting publishes an `AccountDeleted` message; each feature that stores user data
+- **Account emails.** Registering emails a link to `/confirm-email`, and login is refused (403,
+  with a "send it again" button) until it's opened. Changing the email in Settings emails a link
+  to the new address, and the email only changes when it's opened. Endpoints don't send email
+  themselves: they return a message (`SendEmailConfirmation`, `SendPasswordReset`, ...) that
+  Wolverine stores in its durable inbox, and `AccountEmailHandler` sends it in the background,
+  retrying if the mail server is down, so no email is lost on a restart. The handler creates the
+  one-time token when it sends, so tokens are never stored in the message tables.
+- **Account settings** (`/settings`). Users can change their email (after confirming the new
+  one) and display name, change their password (which signs out their other sessions), and
+  delete their account (password required). Deleting publishes an `AccountDeleted` message; each feature that stores user data
   handles it to delete that data (see `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`).
 - **Forgot password.** `/forgot-password` emails a link to `/reset-password` with a one-time
   token valid for an hour. The API answers the same whether or not the email has an account, so
-  it can't be used to find out who is registered.
+  it can't be used to find out who is registered. Resetting also confirms the email.
 <!--#endif -->
 
 ## Adding a feature
@@ -238,14 +247,16 @@ Configure it with environment variables (or any ASP.NET Core configuration sourc
 | `ASPNETCORE_URLS` | `http://+:8080` |
 <!--#if (Identity) -->
 | `Jwt__SigningKey` | A random secret of at least 32 bytes |
-| `Email__Smtp__Host`, `Email__Smtp__Port`, `Email__Smtp__UserName`, `Email__Smtp__Password`, `Email__Smtp__From` | Your email service's SMTP settings, for password reset emails |
+| `Email__Smtp__Host`, `Email__Smtp__Port`, `Email__Smtp__UserName`, `Email__Smtp__Password`, `Email__Smtp__From` | Your email service's SMTP settings, for account emails |
+| `Email__Smtp__Security` | `Auto` (default: TLS when the server offers it), `StartTls`, `SslOnConnect` (port 465) or `None` |
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still
 the development key. The demo user is never created outside Development. Without
-`Email:Smtp:Host`, password reset emails can't be sent; the app logs a warning instead (never the
-link).
+`Email:Smtp:Host`, no emails are sent and the app logs a warning instead (never the link). Since
+new accounts must confirm their email, configure SMTP before people register. Emails that still
+fail after Wolverine's retries end up in the `wolverine_dead_letters` table.
 
-ASP.NET Core Data Protection keys, which protect password reset tokens, are stored in PostgreSQL,
+ASP.NET Core Data Protection keys, which protect the tokens in account emails, are stored in PostgreSQL,
 so reset links keep working across restarts and on every instance of the app. They're stored
 unencrypted, like the rest of your data: protect database access and backups accordingly.
 <!--#endif -->
@@ -257,7 +268,7 @@ unencrypted, like the rest of your data: protect database access and backups acc
   (`src/ApiHost/Security/SecurityHeaders.cs`). If you add a third-party script, font or analytics
   service, add its origin there. Production also sends HSTS.
 <!--#if (Identity) -->
-- Login, registration, password reset and change, and account deletion allow 10 attempts a minute
+- Login, registration, email confirmation, password reset and change, and account deletion allow 10 attempts a minute
   per client IP, then answer 429 (`src/ApiHost/Identity/AuthRateLimiting.cs`). Behind a reverse
   proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so the app sees each client's real
   address, and only expose the app through the proxy.

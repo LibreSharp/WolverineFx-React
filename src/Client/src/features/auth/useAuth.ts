@@ -1,8 +1,13 @@
 import { createContext, useContext } from 'react'
 
+// Why the API refused a login with 403 (see LoginProblems in the API).
+export type LoginRefusal = 'EmailNotConfirmed'
+
+export type LoginResult = { ok: true } | { ok: false; error: string; reason?: LoginRefusal }
+
 export interface AuthContextValue {
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<{ ok: true } | { ok: false; error: string }>
+  login: (email: string, password: string) => Promise<LoginResult>
   register: (email: string, password: string) => Promise<{ ok: true } | { ok: false; error: string }>
   logout: () => Promise<void>
 }

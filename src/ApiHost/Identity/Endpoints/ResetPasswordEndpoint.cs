@@ -21,6 +21,8 @@ public class ResetPasswordRequestValidator : AbstractValidator<ResetPasswordRequ
 public static class ResetPasswordEndpoint
 {
     // Sets a new password using the token from the reset email, and signs out every session.
+    // Opening the emailed link proves the user owns the address, so it also confirms the email
+    // (someone who lost the confirmation email can get in this way).
     [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/reset-password")]
     public static async Task<Results<NoContent, ValidationProblem>> Post(
@@ -42,6 +44,12 @@ public static class ResetPasswordEndpoint
             return result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.InvalidToken))
                 ? IdentityResultExtensions.ValidationProblem("Token", "This reset link is invalid or has expired.")
                 : result.ToValidationProblem();
+        }
+
+        if (!user.EmailConfirmed)
+        {
+            user.EmailConfirmed = true;
+            await userManager.UpdateAsync(user);
         }
 
         await refreshTokenStore.RevokeAllForUserAsync(user.Id, cancellationToken);

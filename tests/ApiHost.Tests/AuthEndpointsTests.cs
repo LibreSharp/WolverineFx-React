@@ -3,6 +3,7 @@ using Alba;
 using ApiHost.Identity.Endpoints;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Wolverine.Tracking;
 
 namespace ApiHost.Tests;
 
@@ -19,14 +20,21 @@ public class AuthEndpointsTests
     private static (string Email, string Password) NewCredentials() =>
         ($"{Guid.NewGuid():N}@example.com", "P@ssword123!");
 
-    private async Task RegisterAsync(string email, string password)
-    {
-        await _fixture.Host.Scenario(s =>
+    private Task RegisterAsync(string email, string password) => _fixture.RegisterConfirmedUserAsync(email, password);
+
+    private async Task RegisterUnconfirmedAsync(string email, string password) =>
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
         {
             s.Post.Json(new RegisterRequest(email, password)).ToUrl("/api/auth/register");
             s.StatusCodeShouldBe(HttpStatusCode.Created);
+        }));
+
+    private Task<IScenarioResult> LoginAsync(string email, string password, HttpStatusCode expected) =>
+        _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new LoginRequest(email, password)).ToUrl("/api/auth/login");
+            s.StatusCodeShouldBe(expected);
         });
-    }
 
     [Fact]
     public async Task the_development_user_is_created_at_startup_and_can_log_in()
@@ -160,5 +168,81 @@ public class AuthEndpointsTests
             s.Post.Json(new RefreshRequest(tokens!.RefreshToken)).ToUrl("/api/auth/refresh");
             s.StatusCodeShouldBe(HttpStatusCode.Unauthorized);
         });
+    }
+
+    [Fact]
+    public async Task registering_emails_a_link_that_confirms_the_email_and_allows_login()
+    {
+        var (email, password) = NewCredentials();
+        await RegisterUnconfirmedAsync(email, password);
+
+        // Refused until the email is confirmed, with a reason the client can show.
+        var refused = await LoginAsync(email, password, HttpStatusCode.Forbidden);
+        Assert.Contains("EmailNotConfirmed", await refused.ReadAsTextAsync(), StringComparison.Ordinal);
+
+        var link = _fixture.Emails.LinkFor(email, "/confirm-email")!;
+        Assert.Equal("http://localhost:5173", link.GetLeftPart(UriPartial.Authority));
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(link.Query);
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ConfirmEmailRequest(query["userId"]!, query["token"]!)).ToUrl("/api/auth/confirm-email");
+            s.StatusCodeShouldBe(HttpStatusCode.NoContent);
+        });
+
+        await LoginAsync(email, password, HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task an_unconfirmed_account_only_says_so_to_someone_who_knows_the_password()
+    {
+        var (email, password) = NewCredentials();
+        await RegisterUnconfirmedAsync(email, password);
+
+        await LoginAsync(email, "not-the-password", HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task an_invalid_confirmation_token_is_rejected()
+    {
+        var (email, password) = NewCredentials();
+        await RegisterUnconfirmedAsync(email, password);
+        var query = _fixture.Emails.LinkQuery(email, "/confirm-email");
+
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ConfirmEmailRequest(query["userId"]!, "not-a-real-token")).ToUrl("/api/auth/confirm-email");
+            s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+        });
+
+        await LoginAsync(email, password, HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task the_confirmation_email_can_be_sent_again()
+    {
+        var (email, password) = NewCredentials();
+        await RegisterUnconfirmedAsync(email, password);
+
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ResendConfirmationRequest(email)).ToUrl("/api/auth/resend-confirmation");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        }));
+
+        Assert.Equal(2, _fixture.Emails.SentTo(email).Count);
+    }
+
+    [Fact]
+    public async Task resending_a_confirmation_does_not_reveal_whether_an_email_is_registered()
+    {
+        var unknownEmail = NewCredentials().Email;
+
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ResendConfirmationRequest(unknownEmail)).ToUrl("/api/auth/resend-confirmation");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        }));
+
+        Assert.Empty(_fixture.Emails.SentTo(unknownEmail));
     }
 }

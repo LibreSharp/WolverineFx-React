@@ -48,8 +48,15 @@ function ProfileSection() {
 
   function save(event: FormEvent) {
     event.preventDefault()
-    update.mutate({ email: emailValue, displayName: displayNameValue || null })
+    // Back to the saved email: a new one only applies once it's confirmed.
+    update.mutate({ email: emailValue, displayName: displayNameValue || null }, { onSuccess: () => setEmail(null) })
   }
+
+  const sentTo = update.data?.confirmationSentTo
+  const saved = sentTo
+    ? `Profile saved. To change your email, open the link we've sent to ${sentTo}.`
+    : 'Profile saved.'
+
 
   return (
     <Section title="Profile">
@@ -60,7 +67,7 @@ function ProfileSection() {
         <Field label="Display name (optional)">
           <input value={displayNameValue} maxLength={100} onChange={(e) => setDisplayName(e.target.value)} className={inputClass} />
         </Field>
-        <Result error={update.error} success={update.isSuccess && 'Profile saved.'} />
+        <Result error={update.error} success={update.isSuccess && saved} />
         <button type="submit" disabled={update.isPending} className={buttonClass}>
           Save profile
         </button>

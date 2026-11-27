@@ -45,14 +45,15 @@ Content-Type: application/json
 
 { "title": "" }
 
-### Update your profile (email is also the login name)
+### Update your profile. A new email (also the login name) is used only after the link
+### emailed to it is opened (in Development, see Mailpit: http://localhost:8025)
 PUT {{baseUrl}}/api/account/profile
 Authorization: Bearer {{login.response.body.$.accessToken}}
 Content-Type: application/json
 
 { "email": "demo@example.com", "displayName": "Demo User" }
 
-### Ask for a password reset email (in Development the link is written to the API's console)
+### Ask for a password reset email (in Development, read it in Mailpit: http://localhost:8025)
 POST {{baseUrl}}/api/auth/forgot-password
 Content-Type: application/json
 

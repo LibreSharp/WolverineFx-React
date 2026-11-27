@@ -34,11 +34,7 @@ public class AccountEndpointsTests
 
     private async Task<LoginResponse> RegisterAndLoginAsync(string email)
     {
-        await _fixture.Host.Scenario(s =>
-        {
-            s.Post.Json(new RegisterRequest(email, Password)).ToUrl("/api/auth/register");
-            s.StatusCodeShouldBe(HttpStatusCode.Created);
-        });
+        await _fixture.RegisterConfirmedUserAsync(email, Password);
         return (await LoginAsync(email, Password, HttpStatusCode.OK))!;
     }
 
@@ -68,25 +64,57 @@ public class AccountEndpointsTests
         })).ReadAsJson<MeResponse>()!;
 
     [Fact]
-    public async Task updating_the_profile_changes_the_email_used_to_log_in_and_the_display_name()
+    public async Task updating_the_profile_changes_the_display_name()
     {
         var email = NewEmail();
         var tokens = await RegisterAndLoginAsync(email);
-        Assert.Equal(email, (await MeAsync(tokens.AccessToken)).Email);
 
-        var newEmail = NewEmail();
-        await _fixture.Host.Scenario(s =>
+        var result = await _fixture.Host.Scenario(s =>
         {
-            s.Put.Json(new UpdateProfileRequest(newEmail, "  Ada Lovelace ")).ToUrl("/api/account/profile");
+            s.Put.Json(new UpdateProfileRequest(email, "  Ada Lovelace ")).ToUrl("/api/account/profile");
             s.WithBearerToken(tokens.AccessToken);
             s.StatusCodeShouldBeOk();
         });
 
-        var me = await MeAsync(tokens.AccessToken);
-        Assert.Equal(newEmail, me.Email);
-        Assert.Equal("Ada Lovelace", me.DisplayName);
+        Assert.Null(result.ReadAsJson<UpdateProfileResponse>()!.ConfirmationSentTo);
+        Assert.Equal("Ada Lovelace", (await MeAsync(tokens.AccessToken)).DisplayName);
+    }
+
+    [Fact]
+    public async Task a_new_email_is_used_only_after_the_link_sent_to_it_is_opened()
+    {
+        var email = NewEmail();
+        var tokens = await RegisterAndLoginAsync(email);
+
+        var newEmail = NewEmail();
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            s.Put.Json(new UpdateProfileRequest(newEmail, null)).ToUrl("/api/account/profile");
+            s.WithBearerToken(tokens.AccessToken);
+            s.StatusCodeShouldBeOk();
+        }));
+
+        // Nothing changes until the new address is confirmed.
+        Assert.Equal(email, (await MeAsync(tokens.AccessToken)).Email);
+        await LoginAsync(email, Password, HttpStatusCode.OK);
+
+        var query = _fixture.Emails.LinkQuery(newEmail, "/confirm-email-change");
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ConfirmEmailChangeRequest(query["userId"]!, query["email"]!, query["token"]!)).ToUrl("/api/auth/confirm-email-change");
+            s.StatusCodeShouldBe(HttpStatusCode.NoContent);
+        });
+
+        Assert.Equal(newEmail, (await MeAsync(tokens.AccessToken)).Email);
         await LoginAsync(newEmail, Password, HttpStatusCode.OK);
         await LoginAsync(email, Password, HttpStatusCode.Unauthorized);
+
+        // The link works once.
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ConfirmEmailChangeRequest(query["userId"]!, query["email"]!, query["token"]!)).ToUrl("/api/auth/confirm-email-change");
+            s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+        });
     }
 
     [Fact]
@@ -202,16 +230,15 @@ public class AccountEndpointsTests
         var email = NewEmail();
         var session = await RegisterAndLoginAsync(email);
 
-        await _fixture.Host.Scenario(s =>
+        // Waits for the email, which is sent in the background.
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
         {
             s.Post.Json(new ForgotPasswordRequest(email)).ToUrl("/api/auth/forgot-password");
             s.StatusCodeShouldBe(HttpStatusCode.Accepted);
-        });
+        }));
 
         // The emailed link points at the client's /reset-password page with the email and token.
-        var link = new Uri(_fixture.Emails.ResetLinkFor(email)!);
-        Assert.Equal("/reset-password", link.AbsolutePath);
-        var query = QueryHelpers.ParseQuery(link.Query);
+        var query = _fixture.Emails.LinkQuery(email, "/reset-password");
 
         await _fixture.Host.Scenario(s =>
         {
@@ -222,6 +249,13 @@ public class AccountEndpointsTests
         await LoginAsync(email, NewPassword, HttpStatusCode.OK);
         await LoginAsync(email, Password, HttpStatusCode.Unauthorized);
         await RefreshAsync(session.RefreshToken, HttpStatusCode.Unauthorized);
+
+        // The link works once.
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ResetPasswordRequest(query["email"]!, query["token"]!, "An0ther-P@ssword!")).ToUrl("/api/auth/reset-password");
+            s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+        });
     }
 
     [Fact]
@@ -229,13 +263,13 @@ public class AccountEndpointsTests
     {
         var unknownEmail = NewEmail();
 
-        await _fixture.Host.Scenario(s =>
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
         {
             s.Post.Json(new ForgotPasswordRequest(unknownEmail)).ToUrl("/api/auth/forgot-password");
             s.StatusCodeShouldBe(HttpStatusCode.Accepted);
-        });
+        }));
 
-        Assert.Null(_fixture.Emails.ResetLinkFor(unknownEmail));
+        Assert.Empty(_fixture.Emails.SentTo(unknownEmail));
     }
 
     [Fact]

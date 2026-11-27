@@ -19,6 +19,8 @@ export function useMe() {
   })
 }
 
+// Saves the display name straight away. A new email is only used once the link sent to it is
+// opened, so the result says where that link went (confirmationSentTo).
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -27,7 +29,7 @@ export function useUpdateProfile() {
       if (!response.ok || !data) throw new Error(problemMessage(error, 'Could not save your profile.'))
       return data
     },
-    onSuccess: (me) => queryClient.setQueryData(accountKeys.me, me),
+    onSuccess: ({ profile }) => queryClient.setQueryData(accountKeys.me, profile),
   })
 }
 

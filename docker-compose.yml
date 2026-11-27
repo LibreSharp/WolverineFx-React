@@ -1,4 +1,4 @@
-# Local development services. `docker compose up -d` starts PostgreSQL only.
+# Local development services. `docker compose up -d` starts PostgreSQL (and Mailpit, with Identity).
 services:
   postgres:
     image: postgres:18-alpine
@@ -12,6 +12,16 @@ services:
       # Postgres 18+ keeps its data in a version-named folder under /var/lib/postgresql.
       - postgres-data:/var/lib/postgresql
 
+#if (Identity)
+  # Catches every email the app sends in Development (see Email:Smtp in
+  # appsettings.Development.json); read them at http://localhost:8025.
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    ports:
+      - "8025:8025"   # web interface
+      - "1025:1025"   # SMTP
+
+#endif
   # Optional: see the app's traces, metrics and logs at http://localhost:18888.
   #   docker compose --profile observability up -d
   # then run the API with OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 (see README.md).

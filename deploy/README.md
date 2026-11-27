@@ -57,7 +57,7 @@ cd ~/apihost
 cp env.example .env
 nano .env            # set DOMAIN and POSTGRES_PASSWORD (generate it with: openssl rand -base64 32)
 <!--#if (Identity) -->
-                     # and JWT_SIGNING_KEY (openssl rand -base64 48), plus SMTP_* for reset emails
+                     # and JWT_SIGNING_KEY (openssl rand -base64 48), plus SMTP_* for account emails
 <!--#endif -->
 docker compose up -d
 ```

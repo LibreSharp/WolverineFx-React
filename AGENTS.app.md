@@ -63,6 +63,11 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   endpoints that check passwords or create accounts.
 - **User data:** a feature that stores data about a user must handle `AccountDeleted` and delete
   it, like `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`.
+- **Email:** never call `IEmailSender` from an endpoint. Return a message and send it from a
+  handler, as `Identity/Email/AccountEmails.cs` does, so it goes through the durable outbox and
+  is retried. Create one-time tokens in the handler, not the endpoint, so they aren't stored.
+- **Identity:** use `UserManager`/`SignInManager` for account rules (password checks, lockout,
+  tokens) rather than reimplementing them.
 <!--#endif -->
 - **Packages:** versions live in `Directory.Packages.props` (central package management); project
   files reference packages by name only. Keep everything free and open source.

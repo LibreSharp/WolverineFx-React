@@ -24,7 +24,15 @@ public static class IdentityJwtSetup
             ?? throw new InvalidOperationException("Missing 'Jwt' configuration section");
         ValidateSigningKey(jwtOptions.SigningKey, environment);
 
-        services.AddApplicationIdentity();
+        services.AddApplicationIdentity().AddAppTokenProviders();
+        services.Configure<IdentityOptions>(options =>
+        {
+            options.User.RequireUniqueEmail = true;
+
+            // Login is refused until the user opens the link in the confirmation email sent when
+            // they register (see LoginEndpoint and RegisterEndpoint).
+            options.SignIn.RequireConfirmedEmail = true;
+        });
 
         services.AddJwtBearerAuthentication(jwtOptions);
 
@@ -37,7 +45,10 @@ public static class IdentityJwtSetup
         // in generated endpoint code, and its default ServiceLocationPolicy.NotAllowed then fails the
         // request. Explicitly allow resolving it from the container.
         services.ConfigureWolverine(opts =>
-            opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>());
+        {
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<UserManager<ApplicationUser>>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<SignInManager<ApplicationUser>>();
+        });
 
         // A ready-made login for local development only.
         if (environment.IsDevelopment())
@@ -45,10 +56,7 @@ public static class IdentityJwtSetup
             services.AddHostedService<DevelopmentUserSeeder>();
         }
 
-        // Password reset links are valid for an hour (the Identity default is a day).
-        services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(1));
-
-        services.AddAccountEmail(configuration, environment);
+        services.AddAccountEmail(configuration);
     }
 
     private static void AddJwtBearerAuthentication(this IServiceCollection services, JwtOptions jwtOptions)
@@ -95,22 +103,18 @@ public static class IdentityJwtSetup
             });
     }
 
-    private static void AddAccountEmail(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    private static void AddAccountEmail(this IServiceCollection services, IConfiguration configuration)
     {
-        // Account email (password reset): SMTP when configured; otherwise the log in
-        // Development, and a warning without the link elsewhere. See Identity/Email/.
+        // Account emails go through SMTP when it's configured (Development uses Mailpit, from
+        // docker-compose.yml); otherwise nothing is sent and a warning is logged. See Identity/Email/.
         services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
         if (!string.IsNullOrWhiteSpace(configuration[$"{SmtpOptions.SectionName}:Host"]))
         {
-            services.AddSingleton<IAccountEmailSender, SmtpAccountEmailSender>();
-        }
-        else if (environment.IsDevelopment())
-        {
-            services.AddSingleton<IAccountEmailSender, LoggingAccountEmailSender>();
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
         }
         else
         {
-            services.AddSingleton<IAccountEmailSender, NotConfiguredAccountEmailSender>();
+            services.AddSingleton<IEmailSender, NotConfiguredEmailSender>();
         }
     }
 

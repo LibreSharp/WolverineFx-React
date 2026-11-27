@@ -46,6 +46,7 @@
 <!--#endif -->
 <!--#if (Identity) -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />
+    <PackageVersion Include="MailKit" Version="5.0.0" />
 <!--#endif -->
 <!--#if (Identity && IsEfCore) -->
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="11.0.0" />

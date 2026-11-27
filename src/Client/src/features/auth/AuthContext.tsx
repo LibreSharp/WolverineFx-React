@@ -2,7 +2,8 @@ import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from 're
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../lib/api/client'
 import { getTokens, setTokens, subscribeTokens } from '../../lib/api/authTokens'
-import { AuthContext } from './useAuth'
+import { problemMessage } from '../../lib/api/problemDetails'
+import { AuthContext, type LoginRefusal, type LoginResult } from './useAuth'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const tokens = useSyncExternalStore(subscribeTokens, getTokens)
@@ -14,19 +15,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!tokens) queryClient.clear()
   }, [tokens, queryClient])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const { data, response } = await api.POST('/api/auth/login', { body: { email, password } })
+  const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
+    const { data, error, response } = await api.POST('/api/auth/login', { body: { email, password } })
     if (!data) {
-      return { ok: false as const, error: response.status === 401 ? 'Invalid email or password' : 'Login failed' }
+      if (response.status === 401) return { ok: false, error: 'Invalid email or password' }
+      // 403: the password was right, but the account can't log in yet; the API says why.
+      const reason = (error as { reason?: LoginRefusal } | undefined)?.reason
+      return { ok: false, error: problemMessage(error, 'Login failed'), reason }
     }
     setTokens(data)
-    return { ok: true as const }
+    return { ok: true }
   }, [])
 
   const register = useCallback(async (email: string, password: string) => {
-    const { response } = await api.POST('/api/auth/register', { body: { email, password } })
+    const { error, response } = await api.POST('/api/auth/register', { body: { email, password } })
     if (!response.ok) {
-      return { ok: false as const, error: 'Registration failed' }
+      return { ok: false as const, error: problemMessage(error, 'Registration failed') }
     }
     return { ok: true as const }
   }, [])

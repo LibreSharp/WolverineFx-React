@@ -108,10 +108,12 @@ billing records but no payment provider (see the
 
 ### v0.3: better accounts (inside `--Identity true`; still 8 combinations)
 
-- [ ] **Email:** confirmation, password reset and invitations, sent through the Wolverine outbox
-      so no email is lost on a restart. [MailKit](https://github.com/jstedfast/MailKit) (MIT) to
-      send, and [Mailpit](https://github.com/axllent/mailpit) (MIT) in `docker-compose` to catch
-      emails in development.
+- [x] **Email:** confirmation (required to log in), confirmed email changes and password reset,
+      sent through the Wolverine outbox so no email is lost on a restart, with the one-time
+      token created when the email is sent so it's never stored.
+      [MailKit](https://github.com/jstedfast/MailKit) (MIT) to send, and
+      [Mailpit](https://github.com/axllent/mailpit) (MIT) in `docker-compose` to catch emails in
+      development. Invitations come with the admin page.
 - [ ] **Roles and a small admin page:** list users, lock and unlock accounts, change roles.
 - [ ] **External sign-in** with Google and GitHub.
 - [ ] **Passkeys** with ASP.NET Core Identity (added in .NET 10; confirm the API first).
@@ -150,8 +152,8 @@ billing records but no payment provider (see the
 
 - [ ] Should the `saas` option support both Marten and EF Core, or start Marten-only (simpler
       tenancy, fewer CI combinations)?
-- [ ] Should email be on by default whenever Identity is on (Mailpit in development, SMTP
-      settings in production)?
+- [x] Should email be on by default whenever Identity is on (Mailpit in development, SMTP
+      settings in production)? Yes (v0.3).
 - [ ] Which cheap host should the deployment guide target first: a VPS with Docker Compose and
       Caddy, or Fly.io or Railway?
 

@@ -112,8 +112,11 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   home page, a footer, and a not-found page.
 - **Account settings** (`--Identity true`): change email and display name, change password
   (signs out other sessions), delete account (deletes the user's data through an
-  `AccountDeleted` message each feature handles), and forgot/reset password by email (SMTP when
-  configured; the reset link is logged in Development).
+  `AccountDeleted` message each feature handles), and forgot/reset password by email.
+- **Account emails** (`--Identity true`): email confirmation (required to log in), confirmed
+  email changes and password reset, sent with [MailKit](https://github.com/jstedfast/MailKit)
+  from a Wolverine handler, so they go through the durable outbox and are retried. In
+  Development, [Mailpit](https://github.com/axllent/mailpit) in `docker-compose` catches them.
 - **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With
   `--Identity true`, `/login` and `/register` are real routes, signed-out users are redirected
   to `/login` and returned to the page they wanted afterwards. In production, unknown paths serve

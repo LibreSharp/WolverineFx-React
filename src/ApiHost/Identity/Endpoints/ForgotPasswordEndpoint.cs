@@ -2,8 +2,8 @@ using FluentValidation;
 using ApiHost.Identity.Email;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.RateLimiting;
+using Wolverine;
 using Wolverine.Http;
 
 namespace ApiHost.Identity.Endpoints;
@@ -22,33 +22,22 @@ public static class ForgotPasswordEndpoint
 {
     // Always answers 202, whether or not the email has an account, so the endpoint can't be
     // used to find out who is registered. If it does, emails a link to the client's
-    // /reset-password page carrying a one-time token (valid for an hour; see IdentityJwtSetup).
+    // /reset-password page carrying a one-time token (valid for an hour; see TokenProviders).
     [EnableRateLimiting(AuthRateLimiting.Policy)]
     [WolverinePost("/api/auth/forgot-password")]
-    public static async Task<Accepted> Post(
+    public static async Task<(Accepted, OutgoingMessages)> Post(
         ForgotPasswordRequest request,
         UserManager<ApplicationUser> userManager,
-        IAccountEmailSender emailSender,
         IConfiguration configuration,
-        HttpContext httpContext,
-        CancellationToken cancellationToken)
+        HttpContext httpContext)
     {
         var user = await userManager.FindByEmailAsync(request.Email);
-        if (user?.Email is not null)
+        var messages = new OutgoingMessages();
+        if (user is not null)
         {
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            var link = QueryHelpers.AddQueryString($"{ClientUrl(configuration, httpContext)}/reset-password",
-                new Dictionary<string, string?>(StringComparer.Ordinal) { ["email"] = user.Email, ["token"] = token });
-            await emailSender.SendPasswordResetAsync(user.Email, link, cancellationToken);
+            messages.Add(new SendPasswordReset(user.Id, ClientUrl.For(configuration, httpContext)));
         }
 
-        return TypedResults.Accepted((string?)null);
+        return (TypedResults.Accepted((string?)null), messages);
     }
-
-    // Where the React app is served: App:ClientUrl if set (Development, where the Vite dev
-    // server runs on another port), otherwise this API's own address (production, where the
-    // API serves the app).
-    private static string ClientUrl(IConfiguration configuration, HttpContext httpContext)
-        => configuration["App:ClientUrl"]?.TrimEnd('/')
-           ?? $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{httpContext.Request.PathBase}";
 }

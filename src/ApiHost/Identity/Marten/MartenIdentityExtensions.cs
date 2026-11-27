@@ -9,11 +9,12 @@ namespace ApiHost.Identity.Marten;
 
 public static class MartenIdentityExtensions
 {
-    public static void AddApplicationIdentity(this IServiceCollection services)
+    public static IdentityBuilder AddApplicationIdentity(this IServiceCollection services)
     {
-        services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddMartenStores<ApplicationUser, IdentityRole>()
-            .AddDefaultTokenProviders();
+        // Marten.AspNetIdentity's stores, with the user store extended (see ApplicationUserStore).
+        var identity = services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddUserStore<ApplicationUserStore>()
+            .AddRoleStore<MartenRoleStore<IdentityRole>>();
 
         services.AddScoped<IRefreshTokenStore, MartenRefreshTokenStore>();
 
@@ -23,5 +24,7 @@ public static class MartenIdentityExtensions
         services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(sp =>
             new ConfigureOptions<KeyManagementOptions>(options =>
                 options.XmlRepository = new MartenDataProtectionKeyRepository(sp.GetRequiredService<IDocumentStore>())));
+
+        return identity;
     }
 }

@@ -5,6 +5,7 @@ import { NotFound } from './components/NotFound'
 import { SettingsPage } from './features/account/SettingsPage'
 import { UserMenu } from './features/account/UserMenu'
 import { AuthProvider } from './features/auth/AuthContext'
+import { ConfirmEmailChangePage, ConfirmEmailPage } from './features/auth/ConfirmEmailPage'
 import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { RegisterPage } from './features/auth/RegisterPage'
@@ -18,6 +19,9 @@ const router = createBrowserRouter([
     element: <Layout nav={<Navigation />} actions={<AccountActions />} />,
     children: [
       { index: true, element: <HomePage /> },
+      // Opened from links in emails, signed in or not.
+      { path: 'confirm-email', element: <ConfirmEmailPage /> },
+      { path: 'confirm-email-change', element: <ConfirmEmailChangePage /> },
       {
         // Signed-out pages; a signed-in user is sent on to the Todos.
         element: <GuestOnly />,

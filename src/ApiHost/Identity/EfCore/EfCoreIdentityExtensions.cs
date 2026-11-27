@@ -6,11 +6,10 @@ namespace ApiHost.Identity.EfCore;
 
 public static class EfCoreIdentityExtensions
 {
-    public static void AddApplicationIdentity(this IServiceCollection services)
+    public static IdentityBuilder AddApplicationIdentity(this IServiceCollection services)
     {
-        services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+        var identity = services.AddIdentity<ApplicationUser, IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>();
 
         services.AddScoped<IRefreshTokenStore, EfCoreRefreshTokenStore>();
 
@@ -19,5 +18,7 @@ public static class EfCoreIdentityExtensions
         services.AddDataProtection()
             .SetApplicationName("ApiHost")
             .PersistKeysToDbContext<AppDbContext>();
+
+        return identity;
     }
 }

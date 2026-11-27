@@ -45,6 +45,7 @@
 <!--#endif -->
 <!--#if (Identity) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="MailKit" />
 <!--#endif -->
 <!--#if (Identity && IsEfCore) -->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />

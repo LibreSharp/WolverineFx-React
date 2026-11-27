@@ -24,12 +24,21 @@ public class DevelopmentUserSeeder(
         using var scope = services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        if (await userManager.FindByEmailAsync(email) is not null)
+        var existing = await userManager.FindByEmailAsync(email);
+        if (existing is not null)
         {
+            // Created before email confirmation was required: confirm it so it can still log in.
+            if (!existing.EmailConfirmed)
+            {
+                existing.EmailConfirmed = true;
+                await userManager.UpdateAsync(existing);
+            }
+
             return;
         }
 
-        var result = await userManager.CreateAsync(new ApplicationUser { UserName = email, Email = email }, password);
+        // Already confirmed, so it can log in without opening a confirmation email.
+        var result = await userManager.CreateAsync(new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true }, password);
         if (!result.Succeeded)
         {
             throw new InvalidOperationException(

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from './useAuth'
 
-export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
+export function RegisterForm({ onSuccess }: { onSuccess?: (email: string) => void }) {
   const { register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +21,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       return
     }
 
-    onSuccess?.()
+    onSuccess?.(email)
   }
 
   return (
@@ -45,7 +45,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         className="rounded border border-gray-300 px-3 py-2"
       />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       <button
         type="submit"
