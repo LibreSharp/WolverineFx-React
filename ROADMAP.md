@@ -197,7 +197,7 @@ From an architecture and SEO review after v0.3.0 (November 2026).
       one transaction: a crash in between leaves an account without the email, which the user
       recovers with "Send the confirmation email again".
 
-### v0.4: SaaS option
+### v0.4.0: groundwork for the SaaS option (no new options; still 8 combinations)
 
 Before the SaaS work, while there are few pages and 8 combinations, not 12:
 
@@ -211,8 +211,7 @@ Before the SaaS work, while there are few pages and 8 combinations, not 12:
       `Features/Organisations`), keeping `Identity/` for infrastructure, to match the vertical
       slices the template teaches.
 
-The SaaS option:
-
+### v0.4.1: the SaaS option
 
 - [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
       2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option.
