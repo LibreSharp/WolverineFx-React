@@ -6,14 +6,15 @@ using ApiHost.Features.Todos;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Http.Connections;
 #if (Identity)
+using ApiHost.Notifications;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.JsonWebTokens;
 #endif
 #if (Saas)
 using ApiHost.Features.Auth;
 using ApiHost.Identity;
 using ApiHost.Organisations;
-using Microsoft.IdentityModel.JsonWebTokens;
 #endif
 using Microsoft.AspNetCore.SignalR.Client;
 using Wolverine.Tracking;
@@ -51,6 +52,20 @@ public class TodoRealtimeTests
                 var message = await messages.Reader.ReadAsync(cts.Token);
                 if (message.GetProperty("type").GetString() == type
                     && message.GetProperty("data").GetProperty("todoId").GetGuid() == todoId)
+                {
+                    return message;
+                }
+            }
+        }
+
+        // Waits for the next CloudEvent of this type.
+        public async Task<JsonElement> NextOfTypeAsync(string type, TimeSpan timeout)
+        {
+            using var cts = new CancellationTokenSource(timeout);
+            while (true)
+            {
+                var message = await messages.Reader.ReadAsync(cts.Token);
+                if (message.GetProperty("type").GetString() == type)
                 {
                     return message;
                 }
@@ -177,6 +192,17 @@ public class TodoRealtimeTests
         await ownerTab2.NextChangeForAsync(id, Timeout);
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
             () => otherUsersTab.NextChangeForAsync(id, TimeSpan.FromSeconds(2)));
+    }
+
+    [Fact]
+    public async Task a_notification_reaches_the_users_open_tabs()
+    {
+        var token = await GetTokenAsync();
+        await using var tab = await ConnectAsync(token);
+
+        await _fixture.Host.SendMessageAndWaitAsync(new SendNotification(new JsonWebToken(token).Subject, NotificationCategories.Reminders, "Live"));
+
+        await tab.NextOfTypeAsync("notification-added", Timeout);
     }
 
     [Fact]

@@ -19,7 +19,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" data-menu="account">
           {me.data?.displayName || me.data?.email || 'Account'}
           <ChevronDownIcon aria-hidden="true" />
         </Button>

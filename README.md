@@ -8,7 +8,7 @@ ASP.NET Core host. `--Auth identity` or `--Auth none` give smaller apps without 
 accounts.
 
 It was called the LibreSharp WolverineFx + React template (`LibreSharp.Templates.WolverineFxReact`,
-`dotnet new wolverine-react`) until 0.4.1.
+`dotnet new wolverine-react`) up to 0.4.0.
 
 Part of [LibreSharp](https://libresharp.github.io), which collects free alternatives to .NET
 packages that went commercial. This template does the jobs often given to MediatR (in-process
@@ -41,7 +41,7 @@ dotnet new install LibreSharp.Templates.SaasStarter
 | To | Run |
 |---|---|
 | Update to the latest version | `dotnet new update` |
-| Install a specific version | `dotnet new install LibreSharp.Templates.SaasStarter@0.4.1` |
+| Install a specific version | `dotnet new install LibreSharp.Templates.SaasStarter@0.5.0` |
 | See the template's options | `dotnet new saas-starter --help` |
 | Uninstall | `dotnet new uninstall LibreSharp.Templates.SaasStarter` |
 
@@ -49,6 +49,18 @@ Updating the template only affects projects you create afterwards.
 
 To try unreleased changes, install from a clone of this repository instead:
 `dotnet new install ./` (run `dotnet new uninstall ./` to remove it).
+
+### Changes in 0.5.0
+
+- **Integrations** with `--Auth saas`: API keys per organisation, an MCP endpoint so AI
+  assistants can use the app, outgoing webhooks (signed, retried and logged), encrypted secrets
+  per organisation, and receiving Standard Webhooks.
+- **Notifications** with accounts: a list under a bell in the header, pushed live and emailed,
+  with email choices in Settings and one-click unsubscribe. **Download your data** in Settings,
+  and organisation data for owners.
+- **The realtime connection is shared** by the whole page (`lib/realtime.ts`, `useRealtime`)
+  instead of belonging to the Todos page. EF Core: new migrations add notifications (with
+  accounts) and integrations (`saas`).
 
 ### Changes in 0.4.1
 
@@ -176,6 +188,11 @@ dotnet new saas-starter -n MyApp --Persistence efcore --Auth identity
 - **Account settings:** display name, email (after confirming the new one), password, passkeys,
   linked Google/GitHub accounts, and account deletion (which deletes the user's data through an
   `AccountDeleted` message each feature handles).
+- **Notifications:** a list under a bell in the header (Todo reminders, and with `saas` people
+  joining an organisation you manage), pushed live over SignalR and emailed through the outbox,
+  with email choices in Settings and a one-click unsubscribe link (RFC 8058) that needs no login.
+- **Download your data:** everything stored about the user as one JSON file, to go with account
+  deletion (GDPR, PDPA); each feature adds its own section.
 - **Roles and a back office** (`/admin`): search users, change roles, lock and unlock accounts,
   end a user's sessions, resend confirmation emails, and invite people by email; an **audit log**
   of every admin action; and **failed messages** (Wolverine's dead-letter queue) to replay or
@@ -222,6 +239,23 @@ dotnet new saas-starter -n MyApp --Persistence efcore --Auth identity
   trials ending, failed payments), organisations (members, plan, usage, invoices with Stripe
   links; give a plan until a date or extend a trial, suspend, notes, delete) and feature flags
   for everyone, a plan or one organisation.
+
+### Integrations (`--Auth saas`)
+
+- **API keys per organisation:** created, named, rotated (with a grace period) and revoked by
+  owners and admins; stored hashed; read or write scope; rate limited per key; kept to the paths
+  they're for. A key acts as its creator, so tenancy, plan limits and realtime updates just work.
+- **An MCP endpoint** (`/mcp`, the official C# MCP SDK, Apache-2.0): the Todos as tools that AI
+  assistants such as Claude can call with an API key, following the same rules as the API.
+- **Outgoing webhooks:** organisations subscribe URLs to events; each delivery is signed the
+  [Standard Webhooks](https://www.standardwebhooks.com/) way, sent from a durable Wolverine queue
+  with retries, and logged with the receiver's answer, so owners can see failures, resend and
+  send test events. Never to private networks in production (checked after DNS).
+- **Encrypted secrets per organisation:** customers' own API keys and OAuth tokens, encrypted with
+  ASP.NET Core Data Protection and never shown again.
+- **Receiving webhooks:** a signed endpoint for any Standard Webhooks provider that stores each
+  event once and hands it to a durable message, the way billing receives Stripe's.
+- **Organisation data download** for owners: Todos, members, billing and integrations.
 
 ### Security
 

@@ -11,6 +11,9 @@ export const todoKeys = {
 export function useTodos() {
   return useQuery({
     queryKey: todoKeys.all,
+    // Fetched again whenever the page opens: while it's closed nothing listens for changes, and
+    // Todos also change elsewhere (other members, API keys, AI assistants).
+    refetchOnMount: 'always',
     queryFn: async () => {
       const { data, response } = await api.GET('/api/todos')
       if (!response.ok || !data) throw new Error('Could not load your todos.')

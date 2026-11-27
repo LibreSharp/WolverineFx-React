@@ -12,6 +12,8 @@ export default [
   route('confirm-email-change', 'routes/confirm-email-change.tsx'),
   route('accept-invitation', 'routes/accept-invitation.tsx'),
   route('external-login', 'routes/external-login.tsx'),
+  // A notification email's unsubscribe link; works signed in or not.
+  route('unsubscribe', 'routes/unsubscribe.tsx'),
   // An organisation invitation's link: accept it, or create an account from it.
   route('join', 'routes/join.tsx'),
   // Signed-out pages; a signed-in user is sent on to the Todos.
@@ -26,6 +28,7 @@ export default [
     route('todos', 'routes/todos.tsx'),
     route('settings', 'routes/settings.tsx'),
     route('organisation', 'routes/organisation.tsx'),
+    route('organisation/integrations', 'routes/organisation-integrations.tsx'),
     // The back office: its sections, inside its frame (tabs).
     layout('routes/require-admin.tsx', [
       layout('routes/admin.tsx', [

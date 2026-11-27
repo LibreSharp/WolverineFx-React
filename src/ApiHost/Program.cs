@@ -24,6 +24,7 @@ using ApiHost.Organisations;
 using ApiHost.Security;
 #if (Identity)
 using ApiHost.Identity;
+using ApiHost.Notifications;
 #endif
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,10 +55,13 @@ builder.Host.UseWolverine(opts =>
     opts.UseFluentValidation();
 
     // Realtime updates: AppHub is a SignalR hub that is also a Wolverine transport, and
-    // TodoChanged and TodoReminder messages are pushed to connected browsers through it.
+    // TodoChanged, TodoReminder (and, with accounts, NotificationAdded) messages are pushed to connected browsers through it.
     opts.UseSignalR<AppHub>();
     opts.PublishMessage<TodoChanged>().ToSignalR();
     opts.PublishMessage<TodoReminder>().ToSignalR();
+#if (Identity)
+    opts.PublishMessage<NotificationAdded>().ToSignalR();
+#endif
 });
 
 #if (IsEfCore)

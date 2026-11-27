@@ -13,6 +13,8 @@ How ApiHost works, how to change it, and how to run it in production. Start with
 <!--#if (Saas) -->
 - [Plans, trials and limits](billing.md): the plan catalogue, the reverse trial, feature flags,
   and checking features and limits.
+- [Integrations](integrations.md): API keys, the MCP endpoint for AI assistants, webhooks (sent
+  and received) and encrypted secrets.
 <!--#endif -->
 - [Security](security.md): what the app does to protect users and data, and what's left to you.
 - [Testing](testing.md): the test suites, how to run them, and how to add tests.

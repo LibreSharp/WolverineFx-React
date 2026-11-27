@@ -58,6 +58,15 @@ What the app does to protect its users and data, and what's left to you when you
   organisation), and invitation links are single-use, expire after a week, and are stored only
   as a hash. Invitations are limited per user per hour and per organisation, so the app can't be
   used to send spam.
+- **API keys** are stored only as a hash, shown once, scoped (read or write), rate limited per key,
+  and refused everywhere but the paths they're for (no account, organisation, billing or admin
+  endpoints). They stop at once when revoked, when their creator leaves, or when the
+  organisation is suspended ([integrations](integrations.md#api-keys)).
+- **Webhooks can't reach your network:** in production the sender refuses localhost, private and
+  link-local addresses (including cloud metadata services), checked after DNS, and never follows
+  redirects. Deliveries are signed, so receivers can check them.
+- **Customers' secrets** (and webhook signing secrets) are encrypted with Data Protection and
+  never sent back by the API. Back up the Data Protection keys with the database.
 <!--#else -->
 - **Each user sees only their own data:** another user's records answer 404, so their existence
   isn't revealed. Deleting an account (which needs the password again) deletes the user's data

@@ -27,6 +27,11 @@ test('a teammate joins from the invitation email and shares the organisation’s
   await guest.getByRole('button', { name: 'Create account and join' }).click()
   await expect(guest.getByRole('heading', { name: 'Todos' })).toBeVisible()
 
+  // The owner is told, under the bell in the header (pushed live).
+  await owner.getByRole('button', { name: 'Notifications, 1 unread' }).click()
+  await expect(owner.getByRole('menuitem', { name: new RegExp(`${teammate} joined ${team}`) })).toBeVisible()
+  await owner.keyboard.press('Escape')
+
   await openFromNav(owner, 'Todos')
   const title = `Shared todo ${Date.now()}`
   await guest.getByPlaceholder('What needs doing?').fill(title)
@@ -58,4 +63,26 @@ test('an admin finds an organisation in the back office and gives it a plan', as
   await admin.getByRole('button', { name: 'Change the trial' }).click()
   await expect(admin.getByText(/Done: Pro until/)).toBeVisible()
   await expect(admin.getByRole('cell', { name: 'organisation.grant-plan' })).toBeVisible()
+})
+
+test('an owner creates an API key that a script then uses', async ({ browser, request }) => {
+  const owner = await (await browser.newContext()).newPage()
+  await signUp(owner)
+
+  await owner.getByRole('link', { name: 'Manage' }).click()
+  await owner.getByRole('link', { name: 'Manage integrations' }).click()
+  await owner.getByLabel('Key name').fill('Nightly import')
+  await owner.getByLabel('Scope').selectOption('write')
+  await owner.getByRole('button', { name: 'Create key' }).click()
+  const key = (await owner.getByLabel(/Your new key/).textContent())!
+
+  const title = `From a script ${Date.now()}`
+  const created = await request.post('/api/todos', { headers: { Authorization: `Bearer ${key}` }, data: { title } })
+  expect(created.status()).toBe(201)
+
+  await openFromNav(owner, 'Todos')
+  await expect(owner.getByText(title)).toBeVisible()
+
+  // A key can't reach the account or organisation endpoints.
+  expect((await request.get('/api/organisation', { headers: { Authorization: `Bearer ${key}` } })).status()).toBe(403)
 })

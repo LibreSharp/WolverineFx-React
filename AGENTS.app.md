@@ -83,6 +83,13 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   version. A downgrade never deletes data. Billing state comes from the local `BillingAccount`,
   kept in step by the payment provider's webhooks: never call Stripe to decide what a plan
   allows. See `docs/billing.md`.
+- **Integrations:** a program's API key acts as its creator in its organisation and only reaches
+  `ApiKeys:AllowedPaths`: add a new API's path there if keys should use it. When something
+  happens that customers may want to hear about, add a `WebhookEvents` constant and return
+  `WebhookEvents.Raise(...)` with the endpoint's or handler's messages. Store customers' keys and
+  tokens with `OrganisationSecrets`, never in plain columns. New organisation data: register an
+  `IOrganisationDataSource` (its owners' download) and delete it in an `OrganisationDeleted`
+  handler. See `docs/integrations.md`.
 <!--#endif -->
 - **Auth:** protect endpoints with `[Authorize]` (or `[Authorize(Roles = AppRoles.Admin)]`; roles
   are constants in `Identity/AppRoles.cs`) and scope a user's own data to `user.GetUserId()`.
@@ -90,11 +97,14 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   endpoints that check passwords or create accounts.
 <!--#if (Saas) -->
 - **User data:** a feature that stores data about a user (not their organisation) must handle
-  `AccountDeleted` and delete it.
+  `AccountDeleted` and delete it, and register an `IPersonalDataSource` for "Download your data".
 <!--#else -->
 - **User data:** a feature that stores data about a user must handle `AccountDeleted` and delete
-  it, like `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`.
+  it, like `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`, and register an
+  `IPersonalDataSource` for "Download your data", like `Features/Todos/TodosPersonalData.cs`.
 <!--#endif -->
+- **Notifications:** tell a user something by publishing `SendNotification` (with a category from
+  `NotificationCategories`); it's listed, pushed live and emailed unless they turned it off.
 - **Email:** never call `IEmailSender` from an endpoint. Return a message and send it from a
   handler, as `Identity/Email/AccountEmails.cs` does, so it goes through the durable outbox and
   is retried. Create one-time tokens in the handler, not the endpoint, so they aren't stored.

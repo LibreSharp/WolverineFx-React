@@ -20,6 +20,7 @@ export const pages: Page[] = [
   { path: '/confirm-email-change', index: false },
   { path: '/accept-invitation', index: false },
   { path: '/external-login', index: false },
+  { path: '/unsubscribe', index: false },
   { path: '/settings', index: false },
   { path: '/admin', index: false },
   { path: '/admin/audit', index: false },

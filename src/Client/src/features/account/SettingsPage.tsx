@@ -20,6 +20,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Section } from '../../components/Section'
+import { DownloadDataSection } from '../notifications/DownloadDataSection'
+import { EmailPreferencesSection } from '../notifications/EmailPreferencesSection'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -313,6 +315,8 @@ export function SettingsPage() {
       <PasswordSection />
       <PasskeysSection />
       <SignInMethodsSection />
+      <EmailPreferencesSection />
+      <DownloadDataSection />
       <DeleteAccountSection />
     </div>
   )

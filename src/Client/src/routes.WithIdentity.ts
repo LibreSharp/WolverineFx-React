@@ -11,6 +11,8 @@ export default [
   route('confirm-email-change', 'routes/confirm-email-change.tsx'),
   route('accept-invitation', 'routes/accept-invitation.tsx'),
   route('external-login', 'routes/external-login.tsx'),
+  // A notification email's unsubscribe link; works signed in or not.
+  route('unsubscribe', 'routes/unsubscribe.tsx'),
   // Signed-out pages; a signed-in user is sent on to the Todos.
   layout('routes/guest-only.tsx', [
     route('login', 'routes/login.tsx'),

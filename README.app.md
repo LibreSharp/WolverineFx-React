@@ -110,6 +110,8 @@ The [docs](docs/README.md) folder explains how the app works and how to change i
   Google/GitHub and passkeys.
 <!--#if (Saas) -->
   Organisations, their members and invitations are there too.
+- [Integrations](docs/integrations.md): API keys, the MCP endpoint for AI assistants, webhooks and
+  secrets.
 <!--#endif -->
 <!--#endif -->
 - [Security](docs/security.md): every protection the app has, and a checklist for deploying.

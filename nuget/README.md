@@ -65,6 +65,12 @@ and read the app's emails in Mailpit at http://localhost:8025.
   checked in one place (402 Payment Required), a pre-rendered pricing page, Stripe Checkout,
   the customer portal and webhooks through Wolverine's durable queues, and a back office with a
   revenue dashboard, organisations (give a plan, suspend, notes) and feature flags.
+- **Integrations** (`--Auth saas`): API keys per organisation (hashed, scoped, rate limited,
+  rotated), an MCP endpoint so AI assistants can use the app, outgoing webhooks signed the
+  Standard Webhooks way with retries and a delivery log, encrypted secrets per organisation, and
+  receiving webhooks.
+- **Notifications and your data** (with accounts): a live notifications list, emailed with
+  one-click unsubscribe, and "Download your data" (GDPR, PDPA).
 - **UI:** shadcn/ui components on every page, with dark mode that follows the operating system.
 - **Pre-rendered public pages** (React Router's framework mode): the home page is real HTML for
   search engines and link previews, with real 404s, `robots.txt` and `sitemap.xml`.
@@ -81,6 +87,13 @@ and read the app's emails in Mailpit at http://localhost:8025.
   including passkeys; and end-to-end tests with Playwright.
 
 Every option combination is built, tested and published in CI on each change.
+
+## Changes in 0.5.0
+
+- **Integrations** with `--Auth saas`: API keys, an MCP endpoint for AI assistants, outgoing and
+  incoming webhooks, and encrypted secrets.
+- **Notifications** and **Download your data** with accounts. The realtime connection is now
+  shared by the whole page (`lib/realtime.ts`). EF Core: new migrations.
 
 ## Changes in 0.4.1
 

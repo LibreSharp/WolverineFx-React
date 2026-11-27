@@ -21,6 +21,7 @@ export const pages: Page[] = [
   { path: '/confirm-email-change', index: false },
   { path: '/accept-invitation', index: false },
   { path: '/external-login', index: false },
+  { path: '/unsubscribe', index: false },
   { path: '/settings', index: false },
   { path: '/admin', index: false },
   { path: '/admin/organisations', index: false },
@@ -30,5 +31,6 @@ export const pages: Page[] = [
   { path: '/admin/audit', index: false },
   { path: '/admin/failed-messages', index: false },
   { path: '/organisation', index: false },
+  { path: '/organisation/integrations', index: false },
   { path: '/join', index: false },
 ]

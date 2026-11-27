@@ -284,31 +284,39 @@ revenue, accounts, users, invoices and feature flags):
       failed or a Stripe webhook that errored. JasperFx sells monitoring tooling for this; a small
       free page fits this template's purpose.
 
-### v0.5 onwards: building blocks most SaaS apps need
+### v0.5.0: building blocks most SaaS apps need (done, not yet released)
+
+No new options: each goes inside `--Auth identity` or `saas`, wherever it makes sense.
+
+- [x] **API keys per organisation** (`saas`): create, name, revoke and rotate (the old key works
+      for a day); stored hashed; read or read-and-write scope; rate limited per key; kept to the
+      paths they're for (`ApiKeys:AllowedPaths`).
+- [x] **Outgoing webhooks** (`saas`): organisations subscribe URLs to events. Each delivery is
+      signed the Standard Webhooks way, sent from a durable Wolverine queue with retries, and
+      logged with its response, so owners see failures, resend and send test events. Never to
+      private networks in production.
+- [x] **Notifications** (accounts): a list under a bell in the header, pushed through the SignalR
+      transport (now one connection per tab, shared by the whole page), and emailed, with email
+      choices in Settings and a one-click unsubscribe link (RFC 8058).
+- [x] **An MCP endpoint** (`saas`): the Todos as MCP tools with the official C# MCP SDK
+      (Apache-2.0), authenticated with an API key and scoped to its organisation.
+- [x] **Encrypted secrets per organisation** (`saas`), for customers' own API keys and OAuth
+      tokens, encrypted with ASP.NET Core Data Protection.
+- [x] **Personal data export** (accounts): "Download your data" in Settings, and organisation
+      data for owners (`saas`), each feature adding its section.
+- [x] **Incoming webhooks, as a pattern** (`saas`): a signed endpoint for any Standard Webhooks
+      provider that stores each event once and hands it to a durable message; Stripe's billing
+      webhooks remain the worked example for providers that sign differently.
+
+### Later building blocks
 
 Added one at a time, in the order that real apps built on the template need them, and taken
-from that real use rather than designed in advance. No new options: each goes inside
-`--Auth identity` or `saas`, wherever it makes sense.
+from that real use rather than designed in advance.
 
-- [ ] **API keys per organisation:** create, name, revoke and rotate; stored hashed; scopes (read,
-      or read and write); rate limits per key.
-- [ ] **Outgoing webhooks:** organisations register URLs for events. Each delivery is signed
-      (HMAC), sent from a durable Wolverine queue with retries, and logged with its response, so
-      owners can see failures and resend.
-- [ ] **Notifications:** an in-app list delivered through the existing SignalR transport, and
-      email preferences with a one-click unsubscribe link.
-- [ ] **An MCP endpoint example:** the Todos exposed as MCP tools with the official C# MCP SDK,
-      authenticated with an API key and scoped to the organisation, so AI assistants can use the
-      app. Check the SDK's licence first.
-- [ ] **Encrypted secrets per organisation,** for storing customers' own API keys and OAuth
-      tokens, encrypted with ASP.NET Core Data Protection (whose keys the app already keeps in
-      PostgreSQL).
-- [ ] **Personal data export:** download everything stored about the signed-in user (and, for
-      owners, the organisation) as JSON, to go with account deletion. Privacy laws such as GDPR
-      and Thailand's PDPA give people this right.
-- [ ] **Incoming webhooks, as a pattern:** check the signature, store the event, hand it to a
-      durable message and answer quickly. Billing builds this for Stripe; turn it into a reusable
-      helper with a worked example for other providers, such as chat platforms.
+- [ ] **Audit log for organisations:** what members did (keys created, webhooks changed, members
+      removed), for owners, alongside the back office's audit log.
+- [ ] **Webhooks that switch themselves off** after failing for days, with an email to owners.
+- [ ] **API keys for `--Auth identity`**, belonging to a user rather than an organisation.
 
 ### v0.6
 

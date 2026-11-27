@@ -56,6 +56,40 @@ authors too, clear or replace those ids in an `AccountDeleted` handler.
 handles it to delete that data (see `Features/Todos/DeleteTodosOfDeletedAccountHandler.cs`).
 <!--#endif -->
 
+## Notifications
+
+The bell in the header lists the user's latest notifications, such as a Todo reminder that came
+due, with the number unread. They arrive live (over the realtime connection) and are kept per
+user (`Notifications:KeepPerUser`, 100). Each one is also emailed, unless the user turned that
+kind off in Settings ("Email notifications") or with the link at the bottom of the email. The link
+needs no login, and mail apps show a one-click "Unsubscribe" button for it (the
+`List-Unsubscribe` headers). Account emails, such as password resets, can't be turned off.
+
+To notify someone, publish `SendNotification(userId, category, title, body, link)` from an
+endpoint or handler (it goes through the outbox). Add new kinds to `NotificationCategories` in
+`Notifications/Notification.cs`, with the description users see in Settings. The reminder handler
+(`Features/Todos/RemindTodoEndpoint.cs`) is an example.
+
+## Download your data
+
+Settings has "Download your data": everything the app stores about the user as one JSON file
+(their account, sign-ins and passkeys, notifications and email choices,
+<!--#if (Saas) -->
+and the organisations they belong to). Organisation owners download the organisation's data
+from the organisation page: its Todos, members, billing and integrations.
+<!--#else -->
+and their Todos).
+<!--#endif -->
+Privacy laws such as the GDPR and Thailand's PDPA give people this right. Never the password hash
+or other secrets.
+
+A feature that stores data about users adds its section by registering an `IPersonalDataSource`
+(`DataExport/DataExport.cs`), like `NotificationsPersonalData`.
+<!--#if (Saas) -->
+A feature that stores organisation data registers an `IOrganisationDataSource`, like
+`TodosOrganisationData`.
+<!--#endif -->
+
 ## Lockout
 
 Repeated wrong passwords lock the account for a while (ASP.NET Core Identity's lockout,

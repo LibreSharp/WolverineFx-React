@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { useMutation } from '@tanstack/react-query'
+import { downloadFile } from '../../lib/download'
 import { useMe } from '../account/accountQueries'
 import { BillingSection } from '../billing/BillingSection'
 import {
@@ -43,9 +45,30 @@ export function OrganisationPage() {
       <BillingSection />
       <MembersSection myRole={role} />
       {canManageMembers(role) && <InvitationsSection myRole={role} />}
+      {canManageMembers(role) && (
+        <Section title="Integrations" description="API keys, webhooks, AI assistants (MCP) and secrets, for other programs to work with this organisation's data.">
+          <Button asChild variant="outline">
+            <Link to="/organisation/integrations">Manage integrations</Link>
+          </Button>
+        </Section>
+      )}
+      {role === 'Owner' && <OrganisationDataSection />}
       <CreateSection />
       <LeaveOrDeleteSection isOwner={role === 'Owner'} name={organisation.data.name} />
     </div>
+  )
+}
+
+// Owners: everything stored for the organisation, as a JSON file (for a customer moving elsewhere).
+function OrganisationDataSection() {
+  const download = useMutation({ mutationFn: () => downloadFile('/api/organisation/export', 'organisation-data.json') })
+  return (
+    <Section title="Organisation data" description="Download everything stored for this organisation: its Todos, members, billing and integrations (never keys or secrets).">
+      <Problem error={download.error} />
+      <Button variant="outline" disabled={download.isPending} onClick={() => download.mutate()}>
+        Download organisation data
+      </Button>
+    </Section>
   )
 }
 
