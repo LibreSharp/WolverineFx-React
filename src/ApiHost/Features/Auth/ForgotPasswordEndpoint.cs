@@ -1,3 +1,4 @@
+using ApiHost.Identity;
 using FluentValidation;
 using ApiHost.Identity.Email;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Wolverine;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Auth;
 
 public record ForgotPasswordRequest(string Email);
 

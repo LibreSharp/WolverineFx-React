@@ -129,6 +129,9 @@
           "condition": "(!Identity)",
           "exclude": [
             "src/ApiHost/Identity/**",
+            "src/ApiHost/Features/Auth/**",
+            "src/ApiHost/Features/Account/**",
+            "src/ApiHost/Features/Admin/**",
             "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.*.cs",
             "src/Client/src/features/auth/**",
             "src/Client/src/features/account/**",

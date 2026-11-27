@@ -1,3 +1,5 @@
+using ApiHost.Identity;
+using ApiHost.Identity.Passkeys;
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +9,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Passkeys;
+namespace ApiHost.Features.Account;
 
 // Id is the credential ID in base64url, as used in the URLs below.
 public record PasskeySummary(string Id, string Name, DateTimeOffset CreatedAt);

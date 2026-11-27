@@ -1,10 +1,11 @@
+using ApiHost.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Account;
 
 public record MeResponse(string UserId, string Email, string? DisplayName, IReadOnlyList<string> Roles)
 {

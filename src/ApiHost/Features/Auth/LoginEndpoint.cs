@@ -1,14 +1,13 @@
+using ApiHost.Identity;
 using System.Globalization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Auth;
 
 public record LoginRequest(string Email, string Password);
-
-public record LoginResponse(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAtUtc);
 
 public static class LoginEndpoint
 {

@@ -1,3 +1,4 @@
+using ApiHost.Identity;
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Account;
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 

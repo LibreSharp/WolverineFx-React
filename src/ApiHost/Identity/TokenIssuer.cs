@@ -1,8 +1,10 @@
-using ApiHost.Identity.Endpoints;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 namespace ApiHost.Identity;
+
+// The tokens every way of logging in returns (LoginEndpoint, RefreshEndpoint, ...).
+public record LoginResponse(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAtUtc);
 
 // Signs a user in: creates a new access token and a new stored refresh token, a fresh session.
 // Used by every way of logging in, and by change password (which ends every other session first).

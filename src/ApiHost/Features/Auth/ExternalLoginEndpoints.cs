@@ -1,10 +1,12 @@
+using ApiHost.Identity;
+using ApiHost.Identity.External;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.External;
+namespace ApiHost.Features.Auth;
 
 // Sign-in with Google or GitHub for this single-page app:
 // 1. The browser navigates (a full page load, not fetch) to /api/auth/external/{provider}, which

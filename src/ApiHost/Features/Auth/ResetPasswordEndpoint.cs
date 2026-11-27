@@ -1,10 +1,11 @@
+using ApiHost.Identity;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Auth;
 
 public record ResetPasswordRequest(string Email, string Token, string NewPassword);
 

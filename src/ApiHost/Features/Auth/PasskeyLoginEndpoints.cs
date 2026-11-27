@@ -1,14 +1,12 @@
-using ApiHost.Identity.Endpoints;
+using ApiHost.Identity;
+using ApiHost.Identity.Passkeys;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Passkeys;
-
-// OptionsJson goes to the browser's WebAuthn API as-is; State comes back with the result.
-public record PasskeyOptionsResponse(string OptionsJson, string State);
+namespace ApiHost.Features.Auth;
 
 public record PasskeyLoginRequest(string CredentialJson, string State);
 

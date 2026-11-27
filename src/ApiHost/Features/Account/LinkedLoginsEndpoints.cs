@@ -1,10 +1,12 @@
+using ApiHost.Identity;
+using ApiHost.Identity.External;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.External;
+namespace ApiHost.Features.Account;
 
 public record LinkedLogin(string Provider, string DisplayName);
 

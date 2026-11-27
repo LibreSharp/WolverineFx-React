@@ -1,7 +1,8 @@
+using ApiHost.Identity;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Auth;
 
 public record LogoutRequest(string RefreshToken);
 

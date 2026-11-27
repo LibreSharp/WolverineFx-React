@@ -1,7 +1,7 @@
 using System.Net;
 using Alba;
 using ApiHost.Identity;
-using ApiHost.Identity.Endpoints;
+using ApiHost.Features.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine.Tracking;

@@ -1,8 +1,9 @@
+using ApiHost.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Auth;
 
 public record ExternalProvider(string Name, string DisplayName);
 

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ApiHost.Identity.Passkeys;
 
+// OptionsJson goes to the browser's WebAuthn API as-is; State comes back with the result.
+public record PasskeyOptionsResponse(string OptionsJson, string State);
+
 // Passkeys use ASP.NET Core Identity's own WebAuthn support (IPasskeyHandler, added in .NET 10).
 // Identity's SignInManager keeps a ceremony's state (its challenge) in a cookie; this API has no
 // cookies, so PasskeyStates encrypts the state and the client sends it back with the result.

@@ -55,6 +55,11 @@ src/ApiHost/
   Program.cs              All wiring: Wolverine, persistence, validation, SignalR
 <!--#endif -->
   Features/Todos/         The example feature: endpoints, messages, handler, model
+<!--#if (Identity) -->
+  Features/Auth/          Log in (password, Google/GitHub, passkey), register, confirm email, reset password
+  Features/Account/       The signed-in user: profile, password, sign-in methods, passkeys, delete account
+  Features/Admin/         Admin endpoints: users, roles, locks and invitations
+<!--#endif -->
   Realtime/AppHub.cs      SignalR hub that pushes messages to browsers
 <!--#if (IsMarten) -->
   Data/Marten/            Marten setup: event store, projections, indexes
@@ -62,11 +67,10 @@ src/ApiHost/
   Data/EfCore/            AppDbContext, migrations, and migrate-on-startup
 <!--#endif -->
 <!--#if (Identity) -->
-  Identity/               Users, JWT tokens, refresh tokens, auth and account endpoints
+  Identity/               Users, JWT and refresh tokens, roles, lockout, rate limits (used by the features)
   Identity/Email/         Account emails: messages, their handler, and the SMTP sender (MailKit)
-  Identity/Admin/         Admin endpoints: users, roles, locks and invitations
-  Identity/External/      Sign-in with Google and GitHub
-  Identity/Passkeys/      Passkeys: adding them in Settings, and logging in with one
+  Identity/External/      Google and GitHub set-up, and linking a provider's account to a user
+  Identity/Passkeys/      Passkey set-up (Identity's WebAuthn support)
 <!--#endif -->
 src/Client/src/
   router.tsx              Routes (React Router), with each page's title

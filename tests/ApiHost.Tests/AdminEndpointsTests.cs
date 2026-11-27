@@ -1,8 +1,9 @@
 using System.Net;
 using Alba;
 using ApiHost.Identity;
-using ApiHost.Identity.Admin;
-using ApiHost.Identity.Endpoints;
+using ApiHost.Features.Admin;
+using ApiHost.Features.Account;
+using ApiHost.Features.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Wolverine.Tracking;
@@ -397,7 +398,7 @@ public class AdminEndpointsTests
             s.WithBearerToken(admin.AccessToken);
             s.StatusCodeShouldBeOk();
         })).ReadAsJson<AdminUserList>()!;
-        Assert.Equal(ListUsersEndpoint.PageSize, first.PageSize);
+        Assert.Equal(AdminUsers.PageSize, first.PageSize);
         Assert.True(first.Users.Count <= first.PageSize);
         Assert.Equal(AppRoles.All, first.AllRoles);
 

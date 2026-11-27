@@ -1,3 +1,4 @@
+using ApiHost.Identity;
 using ApiHost.Identity.Email;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Wolverine;
 using Wolverine.Http;
 
-namespace ApiHost.Identity.Endpoints;
+namespace ApiHost.Features.Auth;
 
 public record RegisterRequest(string Email, string Password);
 

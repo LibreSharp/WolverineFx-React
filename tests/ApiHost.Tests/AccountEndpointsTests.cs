@@ -2,7 +2,8 @@ using System.Net;
 using Alba;
 using ApiHost.Features.Todos;
 using ApiHost.Identity;
-using ApiHost.Identity.Endpoints;
+using ApiHost.Features.Account;
+using ApiHost.Features.Auth;
 #if (IsMarten)
 using ApiHost.Identity.Marten;
 using Marten;

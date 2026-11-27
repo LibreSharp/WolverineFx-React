@@ -1,8 +1,11 @@
 # Accounts
 
 Accounts use ASP.NET Core Identity, with the app's own JSON Web Tokens instead of cookies. The
-code is in `src/ApiHost/Identity/` and the pages in `src/Client/src/features/auth/`,
-`features/account/` and `features/admin/`. For how each part protects users, see
+endpoints are features, like the Todos: `src/ApiHost/Features/Auth/` (signing in and
+registering), `Features/Account/` (the signed-in user's own account) and `Features/Admin/`. What
+they share (users, tokens, roles, lockout, emails, providers and passkey set-up) is in
+`src/ApiHost/Identity/`. The pages match: `src/Client/src/features/auth/`, `features/account/`
+and `features/admin/`. For how each part protects users, see
 [Security](security.md).
 
 ## Signing in
