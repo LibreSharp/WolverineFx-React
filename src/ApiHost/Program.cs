@@ -12,6 +12,7 @@ using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 using Wolverine.SignalR;
+using ApiHost.Errors;
 using ApiHost.Features.Todos;
 using ApiHost.Observability;
 using ApiHost.Realtime;
@@ -23,6 +24,7 @@ using ApiHost.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddErrorResponses();
 builder.AddAppOpenTelemetry();
 
 #if (IsMarten)
@@ -85,6 +87,9 @@ builder.Services.AddIdentityJwt(builder.Configuration, builder.Environment);
 #endif
 
 var app = builder.Build();
+
+// Errors are ProblemDetails JSON with a trace ID (see Errors/ErrorResponses.cs).
+app.UseErrorResponses();
 
 if (app.Environment.IsDevelopment())
 {
