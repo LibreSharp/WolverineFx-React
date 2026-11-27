@@ -202,7 +202,7 @@ From an architecture and SEO review after v0.3.0 (November 2026).
       one transaction: a crash in between leaves an account without the email, which the user
       recovers with "Send the confirmation email again".
 
-### v0.4.0: organisations (`--Auth none|identity|saas`)
+### v0.4.0: organisations (`--Auth none|identity|saas`), released 27 November 2026
 
 First the groundwork, while there are few pages and 8 combinations, not 12:
 
