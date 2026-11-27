@@ -13,7 +13,7 @@ for common changes.
 - API: ASP.NET Core (.NET 11) with Wolverine (HTTP endpoints and messaging), PostgreSQL through
   EF Core.
 <!--#endif -->
-- Client: React, TypeScript, Vite, Tailwind CSS, React Router, TanStack Query, SignalR.
+- Client: React, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router, TanStack Query, SignalR.
 <!--#if (Identity) -->
 - Auth: ASP.NET Core Identity with JWT access tokens and rotating refresh tokens.
 <!--#endif -->
@@ -115,6 +115,12 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   the path to `src/Client/src/pages.ts` too (a unit test checks they match); `index: true` there
   and in the handle makes a page public: indexed by search engines and pre-rendered to HTML.
   Pre-rendered pages run in Node at build time, so they must not touch `window` while rendering.
+- UI: build with the shadcn/ui components in `src/Client/src/components/ui/` (Button, Card,
+  Input, Table, Dialog...) and the theme's colours (`bg-card`, `text-muted-foreground`,
+  `text-destructive`), not fixed ones (`bg-white`, `text-gray-600`). Add a component with
+  `npx shadcn@latest add <name>` in `src/Client`; the files are the app's own, to edit. Import
+  with `@/` (`@/components/ui/button`). Pre-rendered pages mustn't set `style` attributes: the
+  Content-Security-Policy blocks inline styles in HTML.
 - Server data goes through TanStack Query hooks (see `features/todos/todoQueries.ts`). After a
   change, invalidate the affected query keys.
 - Call the API with the typed client in `lib/api/client.ts`. Never edit `lib/api/schema.d.ts` by

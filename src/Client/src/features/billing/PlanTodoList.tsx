@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { TodoList } from '../todos/TodoList'
 import { useTodos } from '../todos/todoQueries'
 import { billingKeys, useBilling } from './billingQueries'
@@ -22,7 +23,8 @@ export function PlanTodoList() {
   const open = plan?.limits.find((limit) => limit.name === 'OpenTodos')
   const notice =
     plan && open && (open.reached || open.nearLimit) ? (
-      <p role="status" className="mb-4 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+      <Alert role="status" className="mb-4 border-amber-200 bg-amber-50 text-amber-900">
+        <AlertDescription className="text-amber-900">
         {open.reached
           ? `You've reached the ${plan.planName} plan's ${open.limit} open Todos: complete some, or `
           : `${open.used} of the ${plan.planName} plan's ${open.limit} open Todos used. Need more? `}
@@ -30,7 +32,8 @@ export function PlanTodoList() {
           upgrade
         </Link>
         .
-      </p>
+        </AlertDescription>
+      </Alert>
     ) : undefined
 
   return (
@@ -38,7 +41,7 @@ export function PlanTodoList() {
       // Until the plan has loaded, offer reminders; the API refuses them if the plan doesn't include them.
       remindersEnabled={plan ? plan.features.includes('TodoReminders') : true}
       reminderUpsell={
-        <Link to="/pricing" className="text-sm text-gray-500 hover:underline">
+        <Link to="/pricing" className="text-sm text-muted-foreground hover:underline">
           Reminders: upgrade
         </Link>
       }

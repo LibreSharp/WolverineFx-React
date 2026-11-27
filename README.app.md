@@ -1,7 +1,7 @@
 # ApiHost
 
 A full-stack app: a [Wolverine](https://wolverinefx.net/) API on ASP.NET Core and a React frontend
-(Vite, TypeScript, Tailwind CSS).
+(Vite, TypeScript, Tailwind CSS and [shadcn/ui](https://ui.shadcn.com/) components).
 <!--#if (IsMarten) -->
 Data lives in PostgreSQL through [Marten](https://martendb.io/).
 <!--#else -->
