@@ -1,5 +1,6 @@
 #if (Saas)
 using ApiHost.Billing;
+using ApiHost.Integrations.Webhooks;
 using ApiHost.Organisations;
 using Microsoft.AspNetCore.Mvc;
 #endif
@@ -33,10 +34,15 @@ public static class CreateTodoEndpoint
     public static (TodoCreationResponse, IStartStream, OutgoingMessages) Post(CreateTodo command, ClaimsPrincipal user)
     {
         var id = Guid.CreateVersion7();
+        var organisationId = user.GetOrganisationId();
         return (
             new TodoCreationResponse(id),
             MartenOps.StartStream<Todo>(id, new TodoCreated(command.Title, user.GetUserId())),
-            [TodoNotifications.Changed(id, user.GetOrganisationId().ToString())]);
+            [
+                TodoNotifications.Changed(id, organisationId.ToString()),
+                // For the organisation's webhooks (Integrations/Webhooks).
+                WebhookEvents.Raise(organisationId, WebhookEvents.TodoCreated, new TodoWebhookData(id, command.Title, false)),
+            ]);
     }
 #elif (Identity)
     [Authorize]

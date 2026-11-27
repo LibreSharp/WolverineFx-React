@@ -157,6 +157,14 @@
           "condition": "(!Identity)",
           "exclude": [
             "src/ApiHost/Identity/**",
+            "src/ApiHost/Notifications/**",
+            "src/ApiHost/DataExport/**",
+            "src/ApiHost/Features/Account/ExportDataEndpoint.cs",
+            "src/ApiHost/Features/Todos/TodosPersonalData.*.cs",
+            "src/ApiHost/Features/Notifications/**",
+            "src/Client/src/features/notifications/**",
+            "src/Client/src/routes/unsubscribe.tsx",
+            "tests/ApiHost.Tests/NotificationTests.cs",
             "src/ApiHost/Features/Auth/**",
             "src/ApiHost/Features/Account/**",
             "src/ApiHost/Features/Admin/**",
@@ -235,11 +243,11 @@
         },
         {
           "condition": "(!Saas)",
-          "exclude": [ "src/ApiHost/Organisations/**", "src/ApiHost/Features/Organisations/**", "src/ApiHost/Billing/**", "src/ApiHost/Features/Billing/**", "src/ApiHost/Features/Admin/IBackOfficeQueries.cs", "src/ApiHost/Features/Admin/BackOfficeQueries.*.cs", "src/ApiHost/Features/Admin/AdminOrganisationEndpoints.cs", "src/ApiHost/Features/Admin/AdminDashboardEndpoint.cs", "src/ApiHost/Features/Admin/AdminFeatureEndpoints.cs", "src/ApiHost/Features/Todos/OpenTodosUsage.*.cs", "tests/ApiHost.Tests/BillingTests.cs", "tests/ApiHost.Tests/PaymentTests.cs", "tests/ApiHost.Tests/BackOfficeTests.cs", "tests/ApiHost.Tests/FakePaymentProvider.cs", "src/Client/src/features/billing/**", "src/Client/src/routes/pricing.tsx", "src/Client/src/routes/todos.Saas.tsx", "docs.app/billing.md", "src/Client/src/routes/admin-users.Saas.tsx", "src/Client/src/routes/admin-dashboard.tsx", "src/Client/src/routes/admin-organisations.tsx", "src/Client/src/routes/admin-organisation.tsx", "src/Client/src/routes/admin-features.tsx", "src/Client/src/features/admin/adminSections.Saas.ts", "src/Client/src/features/admin/DashboardPage.tsx", "src/Client/src/features/admin/OrganisationsPage.tsx", "src/Client/src/features/admin/OrganisationDetailPage.tsx", "src/Client/src/features/admin/FeatureFlagsPage.tsx", "src/Client/src/features/admin/UserOrganisations.tsx", "src/Client/src/features/admin/backOfficeQueries.ts", "src/Client/src/features/admin/OverrideSelect.tsx", "src/Client/src/features/admin/backOffice.test.tsx", "tests/ApiHost.Tests/OrganisationTests.cs", "src/Client/src/App.Saas.tsx", "src/Client/src/routes.Saas.ts", "src/Client/src/pages.Saas.ts", "src/Client/src/features/organisations/**", "src/Client/src/routes/organisation.tsx", "src/Client/src/routes/join.tsx", "tests/e2e/specs/organisations.spec.ts", "src/ApiHost/Data/EfCore/Migrations.WithSaas/**", "src/ApiHost/Features/Todos/DeleteTodosOfDeletedOrganisationHandler.*.cs" ]
+          "exclude": [ "src/ApiHost/Organisations/**", "src/ApiHost/Integrations/**", "src/ApiHost/Features/Integrations/**", "src/Client/src/features/integrations/**", "src/ApiHost/Features/Organisations/**", "src/ApiHost/Billing/**", "src/ApiHost/Features/Billing/**", "src/ApiHost/Features/Admin/IBackOfficeQueries.cs", "src/ApiHost/Features/Admin/BackOfficeQueries.*.cs", "src/ApiHost/Features/Admin/AdminOrganisationEndpoints.cs", "src/ApiHost/Features/Admin/AdminDashboardEndpoint.cs", "src/ApiHost/Features/Admin/AdminFeatureEndpoints.cs", "src/ApiHost/Features/Todos/OpenTodosUsage.*.cs", "src/ApiHost/Features/Todos/TodosOrganisationData.*.cs", "tests/ApiHost.Tests/BillingTests.cs", "tests/ApiHost.Tests/IntegrationTests.cs", "tests/ApiHost.Tests/WebhookTests.cs", "tests/ApiHost.Tests/FakeWebhookReceiver.cs", "tests/ApiHost.Tests/PaymentTests.cs", "tests/ApiHost.Tests/BackOfficeTests.cs", "tests/ApiHost.Tests/FakePaymentProvider.cs", "src/Client/src/features/billing/**", "src/Client/src/routes/pricing.tsx", "src/Client/src/routes/todos.Saas.tsx", "docs.app/billing.md", "src/Client/src/routes/admin-users.Saas.tsx", "src/Client/src/routes/admin-dashboard.tsx", "src/Client/src/routes/admin-organisations.tsx", "src/Client/src/routes/admin-organisation.tsx", "src/Client/src/routes/admin-features.tsx", "src/Client/src/features/admin/adminSections.Saas.ts", "src/Client/src/features/admin/DashboardPage.tsx", "src/Client/src/features/admin/OrganisationsPage.tsx", "src/Client/src/features/admin/OrganisationDetailPage.tsx", "src/Client/src/features/admin/FeatureFlagsPage.tsx", "src/Client/src/features/admin/UserOrganisations.tsx", "src/Client/src/features/admin/backOfficeQueries.ts", "src/Client/src/features/admin/OverrideSelect.tsx", "src/Client/src/features/admin/backOffice.test.tsx", "tests/ApiHost.Tests/OrganisationTests.cs", "src/Client/src/App.Saas.tsx", "src/Client/src/routes.Saas.ts", "src/Client/src/pages.Saas.ts", "src/Client/src/features/organisations/**", "src/Client/src/routes/organisation.tsx", "src/Client/src/routes/join.tsx", "tests/e2e/specs/organisations.spec.ts", "src/ApiHost/Data/EfCore/Migrations.WithSaas/**", "src/ApiHost/Features/Todos/DeleteTodosOfDeletedOrganisationHandler.*.cs" ]
         },
         {
           "condition": "(Saas)",
-          "exclude": [ "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.*.cs" ]
+          "exclude": [ "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.*.cs", "src/ApiHost/Features/Todos/TodosPersonalData.*.cs" ]
         },
         {
           "condition": "(!IncludeTests)",
@@ -274,6 +282,8 @@
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127142018_AddBilling.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127142018_AddBilling.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127144105_AddBackOffice.cs": "src/ApiHost/Data/EfCore/Migrations/20261127144105_AddBackOffice.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127144105_AddBackOffice.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127144105_AddBackOffice.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127191433_AddIntegrations.cs": "src/ApiHost/Data/EfCore/Migrations/20261127191433_AddIntegrations.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithSaas/20261127191433_AddIntegrations.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127191433_AddIntegrations.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithSaas/AppDbContextModelSnapshot.cs": "src/ApiHost/Data/EfCore/Migrations/AppDbContextModelSnapshot.cs"
           }
         },
@@ -286,7 +296,9 @@
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127034335_AddPasskeys.cs": "src/ApiHost/Data/EfCore/Migrations/20261127034335_AddPasskeys.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127034335_AddPasskeys.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127034335_AddPasskeys.Designer.cs",
             "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127144039_AddAuditLog.cs": "src/ApiHost/Data/EfCore/Migrations/20261127144039_AddAuditLog.cs",
-            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127144039_AddAuditLog.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127144039_AddAuditLog.Designer.cs"
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127144039_AddAuditLog.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127144039_AddAuditLog.Designer.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127191410_AddNotifications.cs": "src/ApiHost/Data/EfCore/Migrations/20261127191410_AddNotifications.cs",
+            "src/ApiHost/Data/EfCore/Migrations.WithIdentity/20261127191410_AddNotifications.Designer.cs": "src/ApiHost/Data/EfCore/Migrations/20261127191410_AddNotifications.Designer.cs"
           }
         }
       ]

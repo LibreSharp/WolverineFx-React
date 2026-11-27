@@ -44,6 +44,13 @@ public class AppFixture : IAsyncLifetime
 
             // A fake payment provider instead of Stripe (PaymentTests).
             builder.ConfigureServices(services => services.AddSingleton<ApiHost.Billing.Payments.IPaymentProvider>(Payments));
+
+            // A source of incoming webhooks, with a made-up signing secret (WebhookTests).
+            builder.UseSetting("Webhooks:Incoming:Secrets:example", IncomingWebhookSecret);
+
+            // A fake receiver instead of the internet for outgoing webhooks (WebhookTests).
+            builder.ConfigureServices(services => services.AddHttpClient(ApiHost.Integrations.Webhooks.WebhookSender.ClientName)
+                .ConfigurePrimaryHttpMessageHandler(Webhooks.CreateHandler));
 #endif
 #if (IsMarten)
             builder.UseSetting("ConnectionStrings:Marten", _postgres.GetConnectionString());
@@ -55,6 +62,10 @@ public class AppFixture : IAsyncLifetime
 
 #if (Saas)
     public FakePaymentProvider Payments { get; } = new();
+
+    public FakeWebhookReceiver Webhooks { get; } = new();
+
+    public const string IncomingWebhookSecret = "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw";
 
 #endif
 #if (Identity)

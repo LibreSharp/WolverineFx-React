@@ -17,7 +17,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261127144105_AddBackOffice";
+    public override string LastMigrationId => "20261127191433_AddIntegrations";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -399,6 +399,265 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("UserId");
 
                 b.ToTable("RefreshTokens");
+            });
+
+        modelBuilder.Entity("ApiHost.Integrations.ApiKeys.ApiKey", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("CreatedByUserId")
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.Property<DateTimeOffset?>("ExpiresAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Hint")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<DateTimeOffset?>("LastUsedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.Property<Guid>("OrganisationId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("Scope")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<string>("SecretHash")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("character varying(64)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OrganisationId");
+
+                b.HasIndex("SecretHash")
+                    .IsUnique();
+
+                b.ToTable("ApiKeys");
+            });
+
+        modelBuilder.Entity("ApiHost.Integrations.Secrets.OrganisationSecret", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(110)
+                    .HasColumnType("character varying(110)");
+
+                b.Property<string>("Hint")
+                    .IsRequired()
+                    .HasMaxLength(4)
+                    .HasColumnType("character varying(4)");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("character varying(64)");
+
+                b.Property<Guid>("OrganisationId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("ProtectedValue")
+                    .IsRequired()
+                    .HasColumnType("text");
+
+                b.Property<DateTimeOffset>("UpdatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("UpdatedByUserId")
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OrganisationId");
+
+                b.ToTable("OrganisationSecrets");
+            });
+
+        modelBuilder.Entity("ApiHost.Integrations.Webhooks.IncomingWebhookRecord", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(300)
+                    .HasColumnType("character varying(300)");
+
+                b.Property<DateTimeOffset>("ReceivedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Source")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.HasKey("Id");
+
+                b.ToTable("IncomingWebhooks");
+            });
+
+        modelBuilder.Entity("ApiHost.Integrations.Webhooks.WebhookDelivery", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<int>("Attempts")
+                    .HasColumnType("integer");
+
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<DateTimeOffset?>("DeliveredAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<Guid>("EventId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("EventType")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.Property<DateTimeOffset?>("LastAttemptAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<Guid>("OrganisationId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("Payload")
+                    .IsRequired()
+                    .HasColumnType("text");
+
+                b.Property<string>("Response")
+                    .HasMaxLength(1000)
+                    .HasColumnType("character varying(1000)");
+
+                b.Property<int?>("StatusCode")
+                    .HasColumnType("integer");
+
+                b.Property<Guid>("SubscriptionId")
+                    .HasColumnType("uuid");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OrganisationId", "CreatedAt");
+
+                b.HasIndex("SubscriptionId", "CreatedAt");
+
+                b.ToTable("WebhookDeliveries");
+            });
+
+        modelBuilder.Entity("ApiHost.Integrations.Webhooks.WebhookSubscription", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnType("character varying(200)");
+
+                b.Property<bool>("Enabled")
+                    .HasColumnType("boolean");
+
+                b.PrimitiveCollection<string[]>("Events")
+                    .IsRequired()
+                    .HasColumnType("text[]");
+
+                b.Property<Guid>("OrganisationId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("ProtectedSecret")
+                    .IsRequired()
+                    .HasColumnType("text");
+
+                b.Property<string>("Url")
+                    .IsRequired()
+                    .HasMaxLength(2000)
+                    .HasColumnType("character varying(2000)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OrganisationId");
+
+                b.ToTable("WebhookSubscriptions");
+            });
+
+        modelBuilder.Entity("ApiHost.Notifications.Notification", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<string>("Body")
+                    .HasMaxLength(2000)
+                    .HasColumnType("character varying(2000)");
+
+                b.Property<string>("Category")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Link")
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
+
+                b.Property<DateTimeOffset?>("ReadAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(300)
+                    .HasColumnType("character varying(300)");
+
+                b.Property<string>("UserId")
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId", "CreatedAt");
+
+                b.ToTable("Notifications");
+            });
+
+        modelBuilder.Entity("ApiHost.Notifications.NotificationPreferences", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.PrimitiveCollection<string[]>("EmailOff")
+                    .IsRequired()
+                    .HasColumnType("text[]");
+
+                b.HasKey("Id");
+
+                b.ToTable("NotificationPreferences");
             });
 
         modelBuilder.Entity("ApiHost.Organisations.Membership", b =>

@@ -2,9 +2,13 @@ using ApiHost.Features.Todos;
 #if (Identity)
 using ApiHost.Features.Admin;
 using ApiHost.Identity;
+using ApiHost.Notifications;
 #endif
 #if (Saas)
 using ApiHost.Billing;
+using ApiHost.Integrations.ApiKeys;
+using ApiHost.Integrations.Secrets;
+using ApiHost.Integrations.Webhooks;
 using ApiHost.Organisations;
 #endif
 #if (Identity)
@@ -36,6 +40,11 @@ public class AppDbContext : DbContext
 
     // The back office's audit log (Features/Admin/AuditLog.cs).
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+
+    // Notifications (Notifications/), and which ones each user wants emailed.
+    public DbSet<Notification> Notifications => Set<Notification>();
+
+    public DbSet<NotificationPreferences> NotificationPreferences => Set<NotificationPreferences>();
 #endif
 #if (Saas)
 
@@ -54,6 +63,16 @@ public class AppDbContext : DbContext
     public DbSet<PaymentEventRecord> PaymentEvents => Set<PaymentEventRecord>();
 
     public DbSet<FeatureOverride> FeatureOverrides => Set<FeatureOverride>();
+
+    public DbSet<ApiKey> ApiKeys => Set<ApiKey>();
+
+    public DbSet<WebhookSubscription> WebhookSubscriptions => Set<WebhookSubscription>();
+
+    public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
+
+    public DbSet<OrganisationSecret> OrganisationSecrets => Set<OrganisationSecret>();
+
+    public DbSet<IncomingWebhookRecord> IncomingWebhooks => Set<IncomingWebhookRecord>();
 #endif
 
 #if (Identity)
@@ -81,9 +100,21 @@ public class AppDbContext : DbContext
             entry.Property(e => e.TargetType).HasMaxLength(50);
             entry.Property(e => e.TargetId).HasMaxLength(4000);
         });
+
+        modelBuilder.Entity<Notification>(notification =>
+        {
+            notification.HasIndex(n => new { n.UserId, n.CreatedAt });
+            notification.Property(n => n.UserId).HasMaxLength(450);
+            notification.Property(n => n.Category).HasMaxLength(50);
+            notification.Property(n => n.Title).HasMaxLength(300);
+            notification.Property(n => n.Body).HasMaxLength(2000);
+            notification.Property(n => n.Link).HasMaxLength(500);
+        });
+        modelBuilder.Entity<NotificationPreferences>().Property(p => p.Id).HasMaxLength(450);
 #if (Saas)
 
         ConfigureOrganisationsAndBilling(modelBuilder);
+        ConfigureIntegrations(modelBuilder);
 #endif
     }
 #if (Saas)
@@ -141,6 +172,48 @@ public class AppDbContext : DbContext
             paymentEvent.ToTable("PaymentEvents");
             paymentEvent.Property(e => e.Id).HasMaxLength(300);
             paymentEvent.Property(e => e.Type).HasMaxLength(100);
+        });
+    }
+
+    // API keys, webhooks and secrets: each row names its organisation.
+    private static void ConfigureIntegrations(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ApiKey>(key =>
+        {
+            key.HasIndex(k => k.SecretHash).IsUnique();
+            key.HasIndex(k => k.OrganisationId);
+            key.Property(k => k.Name).HasMaxLength(100);
+            key.Property(k => k.Hint).HasMaxLength(20);
+            key.Property(k => k.SecretHash).HasMaxLength(64);
+            key.Property(k => k.Scope).HasMaxLength(20);
+            key.Property(k => k.CreatedByUserId).HasMaxLength(450);
+        });
+        modelBuilder.Entity<WebhookSubscription>(subscription =>
+        {
+            subscription.HasIndex(s => s.OrganisationId);
+            subscription.Property(s => s.Url).HasMaxLength(2000);
+            subscription.Property(s => s.Description).HasMaxLength(200);
+        });
+        modelBuilder.Entity<WebhookDelivery>(delivery =>
+        {
+            delivery.HasIndex(d => new { d.OrganisationId, d.CreatedAt });
+            delivery.HasIndex(d => new { d.SubscriptionId, d.CreatedAt });
+            delivery.Property(d => d.EventType).HasMaxLength(100);
+            delivery.Property(d => d.Response).HasMaxLength(1000);
+        });
+        modelBuilder.Entity<OrganisationSecret>(secret =>
+        {
+            secret.Property(s => s.Id).HasMaxLength(110);
+            secret.Property(s => s.Name).HasMaxLength(64);
+            secret.Property(s => s.Hint).HasMaxLength(4);
+            secret.Property(s => s.UpdatedByUserId).HasMaxLength(450);
+            secret.HasIndex(s => s.OrganisationId);
+        });
+        modelBuilder.Entity<IncomingWebhookRecord>(record =>
+        {
+            record.ToTable("IncomingWebhooks");
+            record.Property(r => r.Id).HasMaxLength(300);
+            record.Property(r => r.Source).HasMaxLength(50);
         });
     }
 #endif

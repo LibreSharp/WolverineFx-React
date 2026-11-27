@@ -17,6 +17,7 @@ public static class BillingSetup
         services.TryAddSingleton(TimeProvider.System);
         services.Configure<BillingOptions>(configuration.GetSection(BillingOptions.SectionName));
         services.AddScoped<IBillingStore, BillingStore>();
+        services.AddScoped<ApiHost.DataExport.IOrganisationDataSource, BillingExportData>();
 
         // Payments through Stripe, once its keys are set (Billing:Stripe; docs/billing.md). Until
         // then there are no paid plans: just the trial and the free plan. To use another

@@ -3,13 +3,16 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ApiHost.Identity.Email;
 using ApiHost.Identity.External;
+using ApiHost.DataExport;
 using ApiHost.Identity.Passkeys;
+using ApiHost.Notifications;
 using ApiHost.Realtime;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Wolverine;
 #if (Saas)
 using ApiHost.Billing;
+using ApiHost.Integrations;
 using ApiHost.Organisations;
 #endif
 #if (IsMarten)
@@ -50,13 +53,11 @@ public static class IdentityJwtSetup
         services.AddPasskeys(configuration);
 
         services.AddAuthorization();
+
+        services.AddAccountFeatures(configuration);
 #if (Saas)
 
-        // Organisations: each user's data belongs to the organisation they work in (Organisations/).
-        services.AddOrganisations(configuration);
-
-        // Plans, trials, feature flags and limits for each organisation (Billing/).
-        services.AddBilling(configuration);
+        services.AddSaas(configuration);
 #endif
 
         // Limits login, registration and password attempts per client IP (see AuthRateLimiting).
@@ -85,6 +86,34 @@ public static class IdentityJwtSetup
         services.AddHostedService<RoleSeeder>();
 
         services.AddAccountEmail(configuration);
+    }
+
+#if (Saas)
+
+    private static void AddSaas(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Organisations: each user's data belongs to the organisation they work in (Organisations/).
+        services.AddOrganisations(configuration);
+
+        // Plans, trials, feature flags and limits for each organisation (Billing/).
+        services.AddBilling(configuration);
+
+        // API keys and the MCP endpoint, for other programs and AI assistants (Integrations/).
+        services.AddIntegrations(configuration);
+    }
+#endif
+
+    // What every account has, beyond signing in.
+    private static void AddAccountFeatures(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Notifications in the header, emailed unless turned off (Notifications/).
+        services.AddNotifications(configuration);
+
+        // "Download your data" (DataExport/); each feature adds its section.
+        services.AddDataExport();
+#if (!Saas)
+        services.AddScoped<IPersonalDataSource, ApiHost.Features.Todos.TodosPersonalData>();
+#endif
     }
 
     // ASP.NET Core Identity's rules for accounts.

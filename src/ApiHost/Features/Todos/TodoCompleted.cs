@@ -1,5 +1,7 @@
 #if (Saas)
+using ApiHost.Integrations.Webhooks;
 using JasperFx.MultiTenancy;
+using Wolverine;
 
 #endif
 namespace ApiHost.Features.Todos;
@@ -27,14 +29,18 @@ public class TodoCompletedHandler
 {
 #if (Saas)
     // tenantId: the organisation the Todo belongs to; Wolverine carries it on every message.
-    public static object Handle(TodoCompleted message, TenantId tenantId, ILogger<TodoCompletedHandler> logger)
+    public static OutgoingMessages Handle(TodoCompleted message, TenantId tenantId, ILogger<TodoCompletedHandler> logger)
 #else
     public static object Handle(TodoCompleted message, ILogger<TodoCompletedHandler> logger)
 #endif
     {
         logger.LogInformation("Todo {TodoId} ('{Title}') was completed", message.TodoId, message.Title);
 #if (Saas)
-        return TodoNotifications.Changed(message.TodoId, tenantId.Value);
+        // A realtime update for open tabs, and an event for the organisation's webhooks.
+        return [
+            TodoNotifications.Changed(message.TodoId, tenantId.Value),
+            WebhookEvents.Raise(Guid.Parse(tenantId.Value), WebhookEvents.TodoCompleted, new TodoWebhookData(message.TodoId, message.Title, true)),
+        ];
 #elif (Identity)
         return TodoNotifications.Changed(message.TodoId, message.OwnerId);
 #else

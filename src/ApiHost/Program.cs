@@ -18,6 +18,7 @@ using ApiHost.Features.Todos;
 using ApiHost.Observability;
 using ApiHost.Realtime;
 #if (Saas)
+using ApiHost.Integrations;
 using ApiHost.Organisations;
 #endif
 using ApiHost.Security;
@@ -116,6 +117,10 @@ app.UseSecurityHeaders();
 
 #if (Identity)
 app.UseAuthentication();
+#if (Saas)
+// API keys only reach the paths they're for, and read-only keys only read.
+app.UseApiKeyRestrictions();
+#endif
 app.UseAuthorization();
 app.UseRateLimiter();
 #endif
@@ -143,6 +148,11 @@ app.MapHub<AppHub>(AppHub.Path, options => options.CloseOnAuthenticationExpirati
 app.MapWolverineSignalRHub<AppHub>(AppHub.Path);
 #endif
 
+#if (Saas)
+// The MCP endpoint (/mcp), for AI assistants with an API key.
+app.MapIntegrations();
+
+#endif
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 

@@ -37,6 +37,11 @@ public class SmtpEmailSender(IOptions<SmtpOptions> options) : IEmailSender
         mime.To.Add(MailboxAddress.Parse(message.To));
         mime.Subject = message.Subject;
         mime.Body = new TextPart("plain") { Text = message.TextBody };
+        if (message.UnsubscribeUrl is { } unsubscribe)
+        {
+            mime.Headers.Add("List-Unsubscribe", $"<{unsubscribe}>");
+            mime.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+        }
 
         using var client = new SmtpClient();
         await client.ConnectAsync(smtp.Host, smtp.Port, smtp.Security, cancellationToken);

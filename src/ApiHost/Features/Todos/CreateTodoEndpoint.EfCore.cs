@@ -1,5 +1,6 @@
 #if (Saas)
 using ApiHost.Billing;
+using ApiHost.Integrations.Webhooks;
 using ApiHost.Organisations;
 using Microsoft.AspNetCore.Mvc;
 #endif
@@ -48,8 +49,13 @@ public static class CreateTodoEndpoint
         db.Todos.Add(todo);
 
 #if (Saas)
-        // Wolverine stamps the new row with the request's organisation.
-        return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id, user.GetOrganisationId().ToString())]);
+        // Wolverine stamps the new row with the request's organisation. The webhook event is for the
+        // organisation's webhooks (Integrations/Webhooks).
+        var organisationId = user.GetOrganisationId();
+        return (new TodoCreationResponse(todo.Id), [
+            TodoNotifications.Changed(todo.Id, organisationId.ToString()),
+            WebhookEvents.Raise(organisationId, WebhookEvents.TodoCreated, new TodoWebhookData(todo.Id, todo.Title, false)),
+        ]);
 #elif (Identity)
         return (new TodoCreationResponse(todo.Id), [TodoNotifications.Changed(todo.Id, todo.OwnerId)]);
 #else

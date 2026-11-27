@@ -1,8 +1,10 @@
 using ApiHost.Identity;
+using ApiHost.Notifications;
+using Wolverine;
 
 namespace ApiHost.Organisations;
 
-public class OrganisationAccess(IOrganisationStore store, TimeProvider clock)
+public class OrganisationAccess(IOrganisationStore store, IMessageBus bus, TimeProvider clock)
 {
     // The organisation a new or refreshed session works in: the preferred one (the session's
     // current one, or the one being switched to) while the user is a member of it, otherwise the
@@ -70,7 +72,7 @@ public class OrganisationAccess(IOrganisationStore store, TimeProvider clock)
 
     // Accepting an invitation: the user joins with the invited role (or keeps their place if
     // they're already a member), the organisation becomes the one they use next, and the
-    // invitation is used up.
+    // invitation is used up. Its owners and admins are notified.
     public async Task JoinAsync(OrganisationInvitation invitation, string userId, CancellationToken cancellationToken)
     {
         if (await store.FindMembershipAsync(invitation.OrganisationId, userId, cancellationToken) is null)
@@ -85,9 +87,22 @@ public class OrganisationAccess(IOrganisationStore store, TimeProvider clock)
                 JoinedAt = now,
                 LastUsedAt = now,
             }, cancellationToken);
+            await NotifyManagersAsync(invitation, userId, cancellationToken);
         }
 
         await store.RemoveInvitationAsync(invitation, cancellationToken);
+    }
+
+    private async Task NotifyManagersAsync(OrganisationInvitation invitation, string userId, CancellationToken cancellationToken)
+    {
+        var name = (await store.FindAsync(invitation.OrganisationId, cancellationToken))?.Name ?? "your organisation";
+        var managers = (await store.MembershipsOfOrganisationAsync(invitation.OrganisationId, cancellationToken))
+            .Where(m => m.UserId != userId && OrganisationRoles.CanManageMembers(m.Role));
+        foreach (var manager in managers)
+        {
+            await bus.PublishAsync(new SendNotification(
+                manager.UserId, NotificationCategories.Members, $"{invitation.Email} joined {name}", $"They joined as {invitation.Role}.", "/organisation"));
+        }
     }
 
     // Switching to an organisation makes it the one a new session starts in.

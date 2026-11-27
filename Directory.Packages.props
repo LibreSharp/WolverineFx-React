@@ -59,6 +59,7 @@
     <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.8.0" />
     <!-- Stripe's .NET library (Apache-2.0), for subscriptions. Stripe itself charges fees. -->
     <PackageVersion Include="Stripe.net" Version="53.2.0" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.4.0" />
 <!--#endif -->
   </ItemGroup>
 <!--#if (IncludeTests) -->

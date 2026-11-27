@@ -17,7 +17,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261127144039_AddAuditLog";
+    public override string LastMigrationId => "20261127191410_AddNotifications";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -202,6 +202,63 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("UserId");
 
                 b.ToTable("RefreshTokens");
+            });
+
+        modelBuilder.Entity("ApiHost.Notifications.Notification", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uuid");
+
+                b.Property<string>("Body")
+                    .HasMaxLength(2000)
+                    .HasColumnType("character varying(2000)");
+
+                b.Property<string>("Category")
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("character varying(50)");
+
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Link")
+                    .HasMaxLength(500)
+                    .HasColumnType("character varying(500)");
+
+                b.Property<DateTimeOffset?>("ReadAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Title")
+                    .IsRequired()
+                    .HasMaxLength(300)
+                    .HasColumnType("character varying(300)");
+
+                b.Property<string>("UserId")
+                    .IsRequired()
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.HasKey("Id");
+
+                b.HasIndex("UserId", "CreatedAt");
+
+                b.ToTable("Notifications");
+            });
+
+        modelBuilder.Entity("ApiHost.Notifications.NotificationPreferences", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(450)
+                    .HasColumnType("character varying(450)");
+
+                b.PrimitiveCollection<string[]>("EmailOff")
+                    .IsRequired()
+                    .HasColumnType("text[]");
+
+                b.HasKey("Id");
+
+                b.ToTable("NotificationPreferences");
             });
 
         modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>

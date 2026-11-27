@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 #if (Identity)
 using System.Security.Claims;
 using ApiHost.Identity;
+using ApiHost.Notifications;
 using Microsoft.AspNetCore.Authorization;
 #endif
 using Marten;
@@ -80,18 +81,18 @@ public static class TodoReminderDueHandler
     // meantime, the member who asked for it has left the organisation, or the organisation's plan
     // no longer includes reminders (it was downgraded); otherwise their open tabs show the reminder.
     // tenantId: the organisation the reminder was scheduled in; Wolverine keeps it on the message.
-    public static async Task<object?> Handle(
+    public static async Task<OutgoingMessages> Handle(
         TodoReminderDue message, IQuerySession session, IOrganisationStore organisations, Entitlements entitlements, TenantId tenantId, CancellationToken cancellationToken)
 #else
     // Runs when the reminder is due. Nothing happens if the Todo was completed or deleted in
     // the meantime; otherwise the owner's open tabs show the reminder.
-    public static async Task<object?> Handle(TodoReminderDue message, IQuerySession session, CancellationToken cancellationToken)
+    public static async Task<OutgoingMessages> Handle(TodoReminderDue message, IQuerySession session, CancellationToken cancellationToken)
 #endif
     {
         var todo = await session.LoadAsync<Todo>(message.TodoId, cancellationToken);
         if (todo is null || todo.IsComplete)
         {
-            return null;
+            return [];
         }
 
 #if (Saas)
@@ -99,12 +100,20 @@ public static class TodoReminderDueHandler
         if (await organisations.FindMembershipAsync(organisationId, message.UserId, cancellationToken) is null
             || !await entitlements.IsEnabledAsync(organisationId, PlanFeatures.TodoReminders, cancellationToken))
         {
-            return null;
+            return [];
         }
 
-        return TodoNotifications.Reminder(todo, message.UserId);
+        // The reminder in their open tabs, and a notification (listed in the header, and emailed).
+        return [TodoNotifications.Reminder(todo, message.UserId), Notify(todo, message.UserId)];
+#elif (Identity)
+        return [TodoNotifications.Reminder(todo), Notify(todo, todo.OwnerId)];
 #else
-        return TodoNotifications.Reminder(todo);
+        return [TodoNotifications.Reminder(todo)];
 #endif
     }
+#if (Identity)
+
+    private static SendNotification Notify(Todo todo, string userId)
+        => new(userId, NotificationCategories.Reminders, $"Reminder: {todo.Title}", "You asked to be reminded about this Todo.", "/todos");
+#endif
 }

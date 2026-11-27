@@ -28,6 +28,9 @@ public static class OrganisationSetup
             })));
         services.AddScoped<IOrganisationStore, OrganisationStore>();
         services.AddScoped<OrganisationAccess>();
+        services.AddScoped<ApiHost.DataExport.IPersonalDataSource, MembershipsPersonalData>();
+        services.AddScoped<ApiHost.DataExport.IOrganisationDataSource, OrganisationDetailsData>();
+        services.AddScoped<ApiHost.DataExport.IOrganisationDataSource, ApiHost.Features.Todos.TodosOrganisationData>();
         services.ConfigureWolverine(opts =>
         {
             opts.CodeGeneration.AlwaysUseServiceLocationFor<OrganisationAccess>();
