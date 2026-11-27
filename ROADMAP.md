@@ -142,9 +142,12 @@ billing records but no payment provider (see the
       details that would help an attacker, such as exact thresholds that aren't configurable.
 - [x] **Template README brought fully up to date** with v0.3 (features, options, configuration,
       known limitations), and the NuGet readme to match.
-- [ ] **Backend test audit:** a test for every endpoint and every rule (success, validation,
+- [x] **Backend test audit:** a test for every endpoint and every rule (success, validation,
       401/403/404, rate limiting, emails sent, lockout, roles, external sign-in, passkeys),
-      in both persistence options; fill the gaps found.
+      in both persistence options; fill the gaps found. `EndpointSecurityTests` also checks
+      every endpoint's metadata, so a new one that forgets `[Authorize]`, the Admin role or rate
+      limiting fails. Not covered: the SMTP sender against a real server (checked by hand with
+      Mailpit) and the provider round trip for Google/GitHub (needs real accounts).
 - [ ] **Frontend unit tests:** Vitest and React Testing Library for the auth, account, admin and
       Todo components and hooks (forms, error and notice messages, route guards, passkey and
       external sign-in pages), run in CI for every combination.
@@ -169,14 +172,13 @@ billing records but no payment provider (see the
 
 ### Frontend quality (any time)
 
-- [ ] **Frontend tests:** moved into the v0.3 wrap-up above.
 - [ ] **UI components:** [shadcn/ui](https://ui.shadcn.com/) (MIT) with dark mode, so admin and
       billing screens look finished.
 - [ ] **Translations** with react-i18next (MIT), if users ask.
 
 ### Keep out
 
-- JasperFx's paid tooling (for example CritterWatch) and commercial UI kits. Everything stays
+- Paid tooling and commercial UI kits. Everything stays
   free and open source.
 
 ### Open decisions

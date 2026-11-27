@@ -125,6 +125,7 @@
             "tests/ApiHost.Tests/AccountLockoutTests.cs",
             "tests/ApiHost.Tests/AdminEndpointsTests.cs",
             "tests/ApiHost.Tests/ExternalLoginTests.cs",
+            "tests/ApiHost.Tests/EndpointSecurityTests.cs",
             "tests/ApiHost.Tests/PasskeyTests.cs",
             "tests/ApiHost.Tests/SoftwarePasskey.cs",
             "tests/ApiHost.Tests/AuthRateLimitingTests.cs",

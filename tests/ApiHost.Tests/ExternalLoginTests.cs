@@ -200,20 +200,69 @@ public class ExternalLoginTests
     }
 
     [Fact]
-    public async Task without_configured_providers_none_are_offered_or_reachable()
+    public async Task only_configured_providers_are_offered_and_reachable()
     {
+        // The fixture configures Google (with made-up credentials) but not GitHub.
         var options = (await _fixture.Host.Scenario(s =>
         {
             s.Get.Url("/api/auth/options");
             s.StatusCodeShouldBeOk();
         })).ReadAsJson<AuthOptionsResponse>()!;
-        Assert.Empty(options.ExternalProviders);
+        Assert.Equal("Google", Assert.Single(options.ExternalProviders).Name);
 
         await _fixture.Host.Scenario(s =>
         {
-            s.Get.Url("/api/auth/external/Google");
+            s.Get.Url("/api/auth/external/GitHub");
             s.StatusCodeShouldBe(HttpStatusCode.NotFound);
         });
+    }
+
+    [Fact]
+    public async Task starting_sign_in_redirects_to_the_provider_with_the_api_callback()
+    {
+        var result = await _fixture.Host.Scenario(s =>
+        {
+            s.Get.Url("/api/auth/external/google");
+            s.StatusCodeShouldBe(HttpStatusCode.Redirect);
+        });
+
+        var location = new Uri(result.Context.Response.Headers.Location.ToString());
+        Assert.Equal("accounts.google.com", location.Host);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(location.Query);
+        Assert.EndsWith("/api/auth/external/signin-google", query["redirect_uri"].ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task linking_needs_a_valid_ticket_from_the_signed_in_user()
+    {
+        var token = await _fixture.CreateUserAndGetAccessTokenAsync();
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Url("/api/account/external-logins/link-ticket");
+            s.StatusCodeShouldBe(HttpStatusCode.Unauthorized);
+        });
+        var ticket = (await _fixture.Host.Scenario(s =>
+        {
+            s.Post.Url("/api/account/external-logins/link-ticket");
+            s.WithBearerToken(token);
+            s.StatusCodeShouldBeOk();
+        })).ReadAsJson<LinkTicketResponse>()!.Ticket;
+
+        // A valid ticket goes on to the provider...
+        var linking = await _fixture.Host.Scenario(s =>
+        {
+            s.Get.Url($"/api/auth/external/Google?link={Uri.EscapeDataString(ticket)}");
+            s.StatusCodeShouldBe(HttpStatusCode.Redirect);
+        });
+        Assert.Equal("accounts.google.com", new Uri(linking.Context.Response.Headers.Location.ToString()).Host);
+
+        // ...a forged one is sent back to Settings with an error.
+        var forged = await _fixture.Host.Scenario(s =>
+        {
+            s.Get.Url("/api/auth/external/Google?link=not-a-ticket");
+            s.StatusCodeShouldBe(HttpStatusCode.Redirect);
+        });
+        Assert.StartsWith("http://localhost:5173/settings#error=", forged.Context.Response.Headers.Location.ToString(), StringComparison.Ordinal);
     }
 
     [Fact]

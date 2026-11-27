@@ -309,4 +309,24 @@ public class AccountEndpointsTests
         Assert.True(await db.DataProtectionKeys.AnyAsync());
 #endif
     }
+
+    [Fact]
+    public async Task an_invalid_email_or_overlong_display_name_is_rejected()
+    {
+        var email = NewEmail();
+        var tokens = await RegisterAndLoginAsync(email);
+
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Put.Json(new UpdateProfileRequest("not-an-email", null)).ToUrl("/api/account/profile");
+            s.WithBearerToken(tokens.AccessToken);
+            s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+        });
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Put.Json(new UpdateProfileRequest(email, new string('x', 101))).ToUrl("/api/account/profile");
+            s.WithBearerToken(tokens.AccessToken);
+            s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
+        });
+    }
 }

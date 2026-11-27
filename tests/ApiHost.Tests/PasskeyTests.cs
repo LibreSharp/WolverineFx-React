@@ -214,4 +214,23 @@ public class PasskeyTests
             s.StatusCodeShouldBe(HttpStatusCode.BadRequest);
         });
     }
+
+    [Fact]
+    public async Task a_passkey_can_be_removed_while_a_password_remains()
+    {
+        var accessToken = await SignedInUserAsync();
+        using var passkey = new SoftwarePasskey();
+        await AddPasskeyAsync(accessToken, passkey);
+
+        await _fixture.Host.Scenario(s =>
+        {
+            s.Delete.Url($"/api/account/passkeys/{passkey.Id}");
+            s.WithBearerToken(accessToken);
+            s.StatusCodeShouldBe(HttpStatusCode.NoContent);
+        });
+
+        Assert.Empty(await ListAsync(accessToken));
+        var options = await LoginOptionsAsync();
+        await PasskeyLoginAsync(passkey.Authenticate(options.OptionsJson), options.State, HttpStatusCode.Unauthorized);
+    }
 }

@@ -31,6 +31,11 @@ public class AppFixture : IAsyncLifetime
 #if (Identity)
             // Keep account emails instead of sending them, so tests can follow their links.
             builder.ConfigureServices(services => services.AddSingleton<IEmailSender>(Emails));
+
+            // Turns on "Continue with Google" with made-up credentials, so the sign-in redirect can be
+            // tested; nothing ever contacts Google. GitHub stays off.
+            builder.UseSetting("Authentication:Google:ClientId", "test-client-id");
+            builder.UseSetting("Authentication:Google:ClientSecret", "test-client-secret");
 #endif
 #if (IsMarten)
             builder.UseSetting("ConnectionStrings:Marten", _postgres.GetConnectionString());

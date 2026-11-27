@@ -245,4 +245,20 @@ public class AuthEndpointsTests
 
         Assert.Empty(_fixture.Emails.SentTo(unknownEmail));
     }
+
+    [Fact]
+    public async Task resending_a_confirmation_to_a_confirmed_account_sends_nothing()
+    {
+        var (email, password) = NewCredentials();
+        await RegisterAsync(email, password);
+        var sent = _fixture.Emails.SentTo(email).Count;
+
+        await _fixture.Host.ExecuteAndWaitAsync(() => _fixture.Host.Scenario(s =>
+        {
+            s.Post.Json(new ResendConfirmationRequest(email)).ToUrl("/api/auth/resend-confirmation");
+            s.StatusCodeShouldBe(HttpStatusCode.Accepted);
+        }));
+
+        Assert.Equal(sent, _fixture.Emails.SentTo(email).Count);
+    }
 }
