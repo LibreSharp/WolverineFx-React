@@ -197,27 +197,41 @@ From an architecture and SEO review after v0.3.0 (November 2026).
       one transaction: a crash in between leaves an account without the email, which the user
       recovers with "Send the confirmation email again".
 
-### v0.4.0: groundwork for the SaaS option (no new options; still 8 combinations)
+### v0.4.0: organisations (`--Auth none|identity|saas`)
 
-Before the SaaS work, while there are few pages and 8 combinations, not 12:
+First the groundwork, while there are few pages and 8 combinations, not 12:
 
-- [ ] **Pre-render the public pages** with React Router's framework mode: real HTML at build time
-      for `/` (and the SaaS landing and pricing pages), served as static files by the API and
-      cacheable by a CDN such as Cloudflare; the signed-in app stays a single-page app. Still one
-      deployable, with no Node server. See "Rendering" under Open decisions.
 - [ ] **Persistence code in separate files per option,** not inline `#if (IsMarten)` blocks
       (`CreateTodo.cs` has four variants), so features stay readable at 12 combinations.
 - [ ] **Account endpoints as features:** `Features/Account` and `Features/Admin` (and later
       `Features/Organisations`), keeping `Identity/` for infrastructure, to match the vertical
       slices the template teaches.
+- [ ] **Pre-render the public pages** with React Router's framework mode (`ssr: false` and a
+      `prerender` list): real HTML at build time for `/` (and later the SaaS landing and pricing
+      pages), served as static files by the API and cacheable by a CDN such as Cloudflare; the
+      signed-in app stays a single-page app. Still one deployable, with no Node server. See
+      "Rendering" under Open decisions.
 
-### v0.4.1: the SaaS option
+Then the option:
 
 - [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
-      2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option.
-- [ ] **Organisations (multi-tenancy)** in `saas`: Marten's built-in multi-tenancy or EF Core
-      query filters, with Wolverine carrying the tenant ID through messages.
-- [ ] **Team invitations** by email.
+      2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option. `saas`
+      supports both Marten and EF Core.
+- [ ] **Organisations (multi-tenancy)** in `saas`: each new account gets its own organisation,
+      and a user can create more or be invited into others, with a switcher in the header. The
+      access token carries the current organisation (checked against membership when issued;
+      switching issues new tokens), and Wolverine reads the tenant ID from that claim and carries
+      it through messages. Data is kept apart by Marten's conjoined multi-tenancy or an EF Core
+      global query filter, so a forgotten filter can't leak another organisation's data. Todos
+      and their realtime updates belong to the organisation.
+- [ ] **Organisation roles:** Owner, Admin and Member. Owners and admins invite and remove
+      members; only owners rename or delete the organisation and change who is an owner; there is
+      always at least one owner.
+- [ ] **Team invitations** by email, to existing users and to new ones (who create an account
+      from the invitation).
+
+### v0.4.1: billing
+
 - [ ] **Stripe subscriptions:** Checkout and the customer portal, with Stripe webhooks turned
       into durable Wolverine messages (the outbox makes webhook handling reliable).
       [Stripe.net](https://github.com/stripe/stripe-dotnet) is open source (Apache-2.0); Stripe
@@ -249,8 +263,8 @@ Before the SaaS work, while there are few pages and 8 combinations, not 12:
 
 ### Open decisions
 
-- [ ] Should the `saas` option support both Marten and EF Core, or start Marten-only (simpler
-      tenancy, fewer CI combinations)?
+- [x] Should the `saas` option support both Marten and EF Core, or start Marten-only (simpler
+      tenancy, fewer CI combinations)? Both (v0.4.0).
 - [x] Should email be on by default whenever Identity is on (Mailpit in development, SMTP
       settings in production)? Yes (v0.3).
 - [ ] Which cheap host should the deployment guide target first: a VPS with Docker Compose and

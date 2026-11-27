@@ -8,7 +8,7 @@ change can start from the reasons rather than rediscovering them.
 - **Free, open-source dependencies only.** The template exists to show a .NET stack with no
   commercial licences (see LibreSharp). JasperFx's paid tools and commercial UI kits stay out.
 - **Few options.** Each yes/no option doubles the combinations CI must build and test; features
-  that fit every project go in without one. v0.4.1 replaces `--Identity` with `--Auth
+  that fit every project go in without one. v0.4.0 replaces `--Identity` with `--Auth
   none|identity|saas` rather than adding another yes/no option.
 - **One deployable.** The API serves the built React app in production, so there's one
   container, one origin (no CORS) and one thing to deploy. The Vite dev server proxies `/api` in
