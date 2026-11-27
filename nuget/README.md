@@ -29,14 +29,15 @@ npm install
 npm run dev                          # open http://localhost:5173
 ```
 
-With `--Identity true`, log in as `demo@example.com` / `Demo123!` (created in Development only).
+With `--Identity true`, log in as `demo@example.com` / `Demo123!` (created in Development only),
+and read the app's emails in Mailpit at http://localhost:8025.
 
 ## Options
 
 | Option | Values | Default | |
 |---|---|---|---|
 | `--Persistence` | `marten`, `efcore` | `marten` | Marten (documents and event sourcing) or EF Core |
-| `--Identity` | `true`, `false` | `false` | Login with JWT access tokens and rotating refresh tokens |
+| `--Identity` | `true`, `false` | `false` | Accounts: ASP.NET Core Identity with JWT, email confirmation, roles and an admin page, Google/GitHub sign-in and passkeys |
 | `--IncludeTests` | `true`, `false` | `true` | Integration tests against a real Postgres |
 
 ## What you get
@@ -47,13 +48,19 @@ With `--Identity true`, log in as `demo@example.com` / `Demo123!` (created in De
   the background, surviving restarts.
 - **Event sourcing** (Marten): event streams and Wolverine's aggregate handler workflow.
 - **Realtime updates** with SignalR: every open tab refreshes, scoped to the signed-in user.
-- **Identity** (optional): register, login, refresh-token rotation with reuse detection, and
-  per-user data.
+- **Accounts** (`--Identity true`): ASP.NET Core Identity with JWT access tokens and rotating
+  refresh tokens; email confirmation, password reset and invitations sent through the outbox
+  (MailKit, with Mailpit in development); account settings; lockout; roles and an admin page;
+  sign-in with Google and GitHub; and passkeys.
+- **Security by default:** strict security headers, HTTPS in production, rate limiting and
+  lockout on sign-in, one-time email links, and the generated README's Security section.
+- **Deployment:** a container image, a production `docker-compose` with PostgreSQL and Caddy for
+  HTTPS, health checks and OpenTelemetry.
 - **A typed API client** generated from the OpenAPI document.
 - **Production-ready publish:** `dotnet publish` pre-generates Wolverine's code and bundles the
   React app, so production starts fast with no runtime compilation.
 - **Tests** with xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers, covering
-  endpoints, auth, messaging and SignalR.
+  endpoints, messaging, SignalR and, with Identity, every account feature including passkeys.
 
 Every option combination is built, tested and published in CI on each change.
 

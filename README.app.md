@@ -131,8 +131,8 @@ The Todo feature is a working example of each pattern. Copy it when you add your
 - **Forgot password.** `/forgot-password` emails a link to `/reset-password` with a one-time
   token valid for an hour. The API answers the same whether or not the email has an account, so
   it can't be used to find out who is registered. Resetting also confirms the email.
-- **Account lockout.** Five wrong passwords in a row lock the account for 15 minutes (ASP.NET
-  Core Identity's lockout, set in `Identity/IdentityJwtSetup.cs`). While locked, login answers
+- **Account lockout.** Repeated wrong passwords lock the account for a while (ASP.NET Core
+  Identity's lockout, configured in `Identity/IdentityJwtSetup.cs`). While locked, login answers
   403 without checking the password, refresh tokens stop working, and resetting the password
   lifts the lock.
 - **Roles and the admin page** (`/admin`, Admin role only). Roles are constants in
@@ -154,7 +154,7 @@ The Todo feature is a working example of each pattern. Copy it when you add your
 - **Passkeys.** Users add passkeys in Settings and can then log in with one instead of a
   password ("Log in with a passkey"; the browser offers the passkeys it has for the site, so no
   email is typed). This is ASP.NET Core Identity's own WebAuthn support (`IPasskeyHandler`), used
-  without cookies: the ceremony's state is encrypted and handed to the client for five minutes
+  without cookies: the ceremony's state is encrypted and handed to the client for a few minutes
   (`Identity/Passkeys/PasskeySetup.cs`). The relying party ID is the site's host name, so
   passkeys created on one domain don't work on another. Settings won't remove the last way a
   user can sign in (password, linked provider or passkey).
@@ -304,17 +304,91 @@ unencrypted, like the rest of your data: protect database access and backups acc
 
 ## Security
 
-- Every response carries browser security headers, including a Content-Security-Policy that only
-  allows scripts, styles and connections from the app's own origin
+What the app does to protect its users and data, and what's left to you when you deploy it.
+
+### Built in
+
+- **Browser security headers** on every response: a Content-Security-Policy that only allows
+  scripts, styles and connections from the app's own origin, plus protections against MIME
+  sniffing, framing (clickjacking) and leaking URLs in the Referer header
   (`src/ApiHost/Security/SecurityHeaders.cs`). If you add a third-party script, font or analytics
-  service, add its origin there. Production also sends HSTS.
+  service, add its origin there.
+- **HTTPS only in production:** requests are redirected to HTTPS and browsers are told to keep
+  using it (HSTS).
+- **Development-only tools stay out of production:** the OpenAPI document and the API reference
+  page (`/scalar`) are only served in Development, and the React app's scripts are served from the
+  app itself, not a CDN.
+- **No runtime code compilation in production:** Wolverine's code is generated at publish time
+  and the app fails at startup if any of it is missing.
 <!--#if (Identity) -->
-- Login, registration, email confirmation, password reset and change, and account deletion allow 10 attempts a minute
-  per client IP, then answer 429 (`src/ApiHost/Identity/AuthRateLimiting.cs`). Separately, five
-  wrong passwords lock that account for 15 minutes, whichever addresses they come from. Behind a reverse
-  proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so the app sees each client's real
-  address, and only expose the app through the proxy.
+
+### Accounts and sign-in
+
+- **Passwords** are hashed by ASP.NET Core Identity and must meet its strength rules; they're
+  never logged or returned.
+- **Short-lived access tokens, rotating refresh tokens.** Access tokens (signed JWTs) expire after
+  a few minutes. Refresh tokens are stored only as hashes, replaced on every use, and reusing an
+  old one (a sign it was stolen) signs the user out everywhere. The browser keeps tokens in memory,
+  never in `localStorage`, so injected scripts can't read them from storage.
+- **The signing key is checked at startup:** outside Development the app refuses to start with a
+  missing, too-short or development key.
+- **Email ownership is verified.** New accounts must confirm their email before they can log in,
+  and a changed email only takes effect once the new address is confirmed.
+- **One-time, short-lived links.** Confirmation, password reset and invitation links carry tokens
+  that expire, stop working once used, and are created only when the email is sent, so they're
+  never stored in the database's message tables or written to logs.
+- **No account enumeration where it matters:** "forgot password" and "resend confirmation" answer
+  the same whether or not an account exists, and a login only says an email is unconfirmed to
+  someone who knows the password.
+- **Account lockout** (ASP.NET Core Identity's): repeated wrong passwords lock the account for a
+  while, whichever addresses they come from. A locked account can't refresh its tokens. A password
+  reset lifts a lockout from failed logins. Tune it in `Identity/IdentityJwtSetup.cs`.
+- **Rate limiting:** endpoints that check passwords, send email or create accounts allow a small
+  number of attempts per client address per minute (`Identity/AuthRateLimiting.cs`).
+- **Sessions end when they should:** changing or resetting a password, deleting the account, and
+  an admin lock all revoke the user's refresh tokens.
+- **Each user sees only their own data:** another user's records answer 404, so their existence
+  isn't revealed. Deleting an account (which needs the password again) deletes the user's data
+  too, including Todo event history.
+
+### Roles and the admin page
+
+- Roles are checked by the API on every admin request; hiding the admin page in the browser is
+  only for convenience.
+- Admins can't lock their own account or remove their own Admin role, so an admin always remains.
+- `Accounts:AdminEmails` only grants Admin once that email has been confirmed, so nobody can claim
+  it by registering the address first.
+- Registration can be made invitation-only (`Accounts:AllowRegistration=false`).
+
+### Google, GitHub and passkeys
+
+- **External sign-in** only trusts email addresses the provider has verified. If someone had
+  registered that email without confirming it, their password is removed before the account is
+  linked, so they can't get in afterwards (account pre-hijacking). Linking a provider from Settings
+  uses a short-lived encrypted ticket, and the tokens handed back to the browser are passed in the
+  URL fragment (never sent to a server) and exchanged immediately.
+- **Passkeys** use ASP.NET Core Identity's WebAuthn support, which checks the challenge, the site's
+  origin, the signature and the passkey's counter. The ceremony state the browser holds is
+  encrypted, expires after a few minutes, and is tied to the user when adding a passkey.
+- Settings won't remove a user's last way to sign in.
 <!--#endif -->
+
+### When you deploy
+
+- Keep secrets out of source control: use environment variables, `deploy/.env` (on the server
+  only) or a secret store.
+- Expose only the reverse proxy. In `deploy/docker-compose.yml` only Caddy is reachable; the app
+  and database aren't.
+<!--#if (Identity) -->
+- Set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` behind a reverse proxy (the production compose
+  file does), so rate limits apply to each client's real address and HTTPS is detected.
+- Use a long random `Jwt:SigningKey`, configure SMTP before people register, and set
+  `Accounts:AdminEmails`.
+- ASP.NET Core Data Protection keys (which protect the tokens in emails, link tickets and passkey
+  state) are stored in PostgreSQL so they work across restarts and instances. Like the rest of
+  your data they're unencrypted at rest: protect database access and backups.
+<!--#endif -->
+- Keep dependencies current: `.github/dependabot.yml` opens weekly update pull requests.
 
 ## Created from a template
 

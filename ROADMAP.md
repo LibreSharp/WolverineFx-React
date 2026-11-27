@@ -135,6 +135,23 @@ billing records but no payment provider (see the
       15 minutes) through `SignInManager.CheckPasswordSignInAsync`; refresh tokens stop working
       while locked, and a password reset lifts it.
 
+### v0.3 wrap-up: documentation and test coverage (before tagging v0.3.0)
+
+- [x] **Security section in the generated README:** every security measure described (sign-in,
+      tokens, emails, lockout, rate limits, headers, roles, data protection, deployment) without
+      details that would help an attacker, such as exact thresholds that aren't configurable.
+- [x] **Template README brought fully up to date** with v0.3 (features, options, configuration,
+      known limitations), and the NuGet readme to match.
+- [ ] **Backend test audit:** a test for every endpoint and every rule (success, validation,
+      401/403/404, rate limiting, emails sent, lockout, roles, external sign-in, passkeys),
+      in both persistence options; fill the gaps found.
+- [ ] **Frontend unit tests:** Vitest and React Testing Library for the auth, account, admin and
+      Todo components and hooks (forms, error and notice messages, route guards, passkey and
+      external sign-in pages), run in CI for every combination.
+- [ ] **End-to-end tests:** Playwright in CI against the published app and Mailpit: register,
+      confirm by email, log in, Todos with realtime updates, settings, admin page, lockout.
+      Passkeys with Chrome's virtual authenticator.
+
 ### v0.4: SaaS option
 
 - [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
@@ -152,9 +169,7 @@ billing records but no payment provider (see the
 
 ### Frontend quality (any time)
 
-- [ ] **Frontend tests:** Vitest and React Testing Library for components, and
-      [Playwright](https://playwright.dev/) end-to-end tests in CI covering login and realtime
-      updates.
+- [ ] **Frontend tests:** moved into the v0.3 wrap-up above.
 - [ ] **UI components:** [shadcn/ui](https://ui.shadcn.com/) (MIT) with dark mode, so admin and
       billing screens look finished.
 - [ ] **Translations** with react-i18next (MIT), if users ask.

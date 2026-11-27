@@ -49,7 +49,7 @@ To try unreleased changes, install from a clone of this repository instead:
 ```bash
 dotnet new wolverine-react -n MyApp
 cd MyApp
-docker compose up -d          # starts Postgres
+docker compose up -d          # starts Postgres (and Mailpit, with --Identity true)
 cd src/Client && npm install
 cd ../MyApp && dotnet run      # API on the port shown; Vite dev server proxies /api to it
 ```
@@ -62,15 +62,17 @@ npm run dev                    # http://localhost:5173, proxies /api/* to the AP
 ```
 
 With `--Identity true`, a demo user (`demo@example.com` / `Demo123!`) is created at startup in
-Development only, and the dev server pre-fills the login form with it. Change it under
-`DevelopmentUser` in `appsettings.Development.json` and in `src/Client/.env.development`.
+Development only. It's already confirmed and is an admin, and the dev server pre-fills the login
+form with it. Change it under `DevelopmentUser` in `appsettings.Development.json` and in
+`src/Client/.env.development`. Emails the app sends in Development (confirmation, password reset,
+invitations) land in Mailpit at http://localhost:8025.
 
 ### Parameters
 
 | Parameter | Values | Default | Effect |
 |---|---|---|---|
 | `--Persistence` | `marten` \| `efcore` | `marten` | Document DB/event sourcing over PostgreSQL (Marten) vs. relational EF Core over PostgreSQL |
-| `--Identity` | `true` \| `false` | `false` | Adds JWT-based auth (register/login/refresh/logout, rotating refresh tokens) |
+| `--Identity` | `true` \| `false` | `false` | Adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles and an admin page, invitations, Google/GitHub sign-in and passkeys |
 | `--IncludeTests` | `true` \| `false` | `true` | Includes the `tests/` project(s) |
 
 Example:
@@ -81,84 +83,108 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 
 ## What you get
 
-- A vertical-slice `Features/Todos` example showing Wolverine HTTP endpoints
-  (`[WolverineGet]`/`[WolverinePost]`) wired to either Marten or EF Core, and what Wolverine adds
+### Backend
+
+- **Wolverine HTTP endpoints in vertical slices.** `Features/Todos` is a worked example
+  (`[WolverineGet]`/`[WolverinePost]`) on either Marten or EF Core, showing what Wolverine adds
   beyond plain endpoints:
   - **Messaging with a transactional outbox.** Completing a Todo cascades a `TodoCompleted`
-    message to `TodoCompletedHandler`, which runs in the background. Local queues are durable,
-    so the message is saved in the same database transaction as the Todo change: it survives a
-    restart and is never sent if the change rolls back.
-  - **Event sourcing** (`--Persistence marten`). Each Todo is an event stream (`TodoCreated`,
-    `TodoCompleted`). The complete endpoint uses Wolverine's aggregate handler workflow
-    (`[WriteAggregate]`): it receives the rebuilt Todo and returns the events to append and the
-    messages to send, with an optimistic concurrency check. An inline snapshot projection keeps
-    a queryable Todo document in step.
-  - **Validation.** A FluentValidation validator rejects an empty or over-long title with a 400
-    `ProblemDetails` response before the endpoint runs; the React form shows the message.
-  - **Realtime updates with SignalR.** Creating or completing a Todo pushes a `todo-changed`
-    message to the browser through Wolverine's SignalR transport (`AppHub` at `/api/hub`), so
-    every open tab refreshes its list. Completion travels the whole chain: endpoint →
-    `TodoCompleted` (outbox) → background handler → SignalR. With `--Identity true`, updates go
-    only to the signed-in user's own tabs (a per-user SignalR group), and the hub requires login.
-- Vite dev server proxies `/api/*` to the API in development (no CORS); in production, the
-  client is built and served as static files from the same Kestrel host (`dotnet publish` builds
-  the client automatically).
-- **Production-ready code generation.** In Development, Wolverine generates its handler code at
-  runtime, so changes need no extra step. `dotnet publish` runs `codegen write` and compiles the
-  generated code in, and Production loads it ready-made (`TypeLoadMode.Static`): a faster start,
-  no runtime compilation, and a clear error at startup if anything is missing. The generated
-  code is never committed (`Internal/Generated/` is ignored), so it can't go stale.
-- **An app shell:** a header with navigation and (with `--Identity true`) a user menu, a public
-  home page, a footer, and a not-found page.
-- **Account settings** (`--Identity true`): change email and display name, change password
-  (signs out other sessions), delete account (deletes the user's data through an
-  `AccountDeleted` message each feature handles), and forgot/reset password by email.
-- **Account emails** (`--Identity true`): email confirmation (required to log in), confirmed
-  email changes and password reset, sent with [MailKit](https://github.com/jstedfast/MailKit)
-  from a Wolverine handler, so they go through the durable outbox and are retried. In
-  Development, [Mailpit](https://github.com/axllent/mailpit) in `docker-compose` catches them.
-- **Roles and an admin page** (`--Identity true`): an Admin role, a `/admin` page to search
-  users, change roles, lock and unlock accounts, and invite people by email; admins come from
-  `Accounts:AdminEmails`, and registration can be made invitation-only.
-- **Sign-in with Google and GitHub** (`--Identity true`), each on when its client ID and secret
-  are set: verified emails only, linking and unlinking in Settings, and protection against
-  account pre-hijacking.
-- **Passkeys** (`--Identity true`) with ASP.NET Core Identity's WebAuthn support: add them in
-  Settings, then log in without a password.
-- **Account lockout** (`--Identity true`): Identity's lockout after five failed logins (15
-  minutes), which also stops refresh tokens; a password reset lifts it.
-- **React Router** (`createBrowserRouter`) with a shared layout and a not-found page. With
-  `--Identity true`, `/login` and `/register` are real routes, signed-out users are redirected
-  to `/login` and returned to the page they wanted afterwards. In production, unknown paths serve
-  the app (so these routes load directly) and unknown `/api` paths return 404.
-- **TanStack Query** for server data: the Todo list is a cached query, adding and completing are
-  mutations that invalidate it, and SignalR `todo-changed` messages invalidate it too. The cache
-  is cleared on logout, so the next user never sees the previous user's data.
-- An OpenAPI-generated, fully-typed TypeScript client (`openapi-typescript` + `openapi-fetch`) —
-  regenerate after changing API contracts with `npm run gen:api` (requires the API running).
-- (`--Identity true`) JWT access tokens (HS256, 15 min) + rotating refresh tokens (14 days) with
-  reuse-detection (a previously-rotated-away token being replayed revokes the whole chain).
-  Client-side tokens are held only in memory (not `sessionStorage`/`localStorage`) to avoid
-  exposing them to an injected script — the trade-off is that a hard page reload forces re-login.
-  The Todo endpoints require login and each user sees only their own Todos. The dev signing key
-  lives in `appsettings.Development.json` only; outside Development, set `Jwt:SigningKey` (≥ 32
-  bytes) via user-secrets, the `Jwt__SigningKey` environment variable, or a secret store — startup
-  fails if it's missing or still the dev key.
-- (`--IncludeTests true`, the default) A `tests/` project (xUnit + [Alba](https://jasperfx.github.io/alba/)
-  + Testcontainers) that boots the real app against a throwaway Postgres container and exercises
-  the Todo endpoints, validation, (using Wolverine's message tracking) the background
-  `TodoCompleted` handler, and SignalR notifications received by real hub clients, plus (when `--Identity true`) register/login/refresh-rotation/
-  reuse-detection/logout. It drives the app over HTTP, so one project covers both `--Persistence`
-  choices; the Marten version adds a test of the Todo event stream.
+    message to a background handler. Local queues are durable, so the message is saved in the
+    same database transaction as the change: it survives a restart and is never sent if the
+    change rolls back.
+  - **Scheduled messages.** "Remind me…" schedules a durable message that pushes a reminder to
+    the browser when it's due, unless the Todo was completed first.
+  - **Event sourcing** (`--Persistence marten`). Each Todo is an event stream; the complete
+    endpoint uses Wolverine's aggregate handler workflow (`[WriteAggregate]`) with an optimistic
+    concurrency check, and an inline snapshot projection keeps a queryable document in step.
+  - **Validation.** FluentValidation rejects bad input with a 400 `ProblemDetails` response
+    before the endpoint runs; the React forms show the messages.
+  - **Realtime updates with SignalR** through Wolverine's SignalR transport: every open tab
+    refreshes. With `--Identity true`, updates go only to the signed-in user's own tabs.
+- **Production-ready code generation.** Development generates Wolverine's code at runtime;
+  `dotnet publish` runs `codegen write` and Production loads it ready-made
+  (`TypeLoadMode.Static`): a faster start, no runtime compilation, and a clear error at startup if
+  anything is missing. The generated code is never committed, so it can't go stale.
+- **Health checks** (`/health/live`, and `/health/ready` with a PostgreSQL check) and
+  **OpenTelemetry** traces, metrics and logs from ASP.NET Core, Npgsql, Wolverine and Marten,
+  exported over OTLP when configured, with an optional Aspire dashboard in `docker-compose`.
+- **An API reference page** in Development ([Scalar](https://scalar.com/) at `/scalar`) and a
+  `.http` file with the app's requests.
 
+### Frontend
+
+- **React, Vite, TypeScript and Tailwind CSS**, with an app shell (header, user menu, home page,
+  footer, not-found page).
+- **React Router** with real URLs; with `--Identity true`, signed-out users are sent to `/login`
+  and back to the page they wanted.
+- **TanStack Query** for server data, invalidated by mutations and SignalR messages, and cleared
+  on logout so the next user never sees the previous user's data.
+- **A typed API client** generated from the OpenAPI document (`openapi-typescript` +
+  `openapi-fetch`); regenerate with `npm run gen:api`.
+- **One deployable:** the Vite dev server proxies `/api` in development (no CORS), and in
+  production the API serves the built client.
+
+### Accounts (`--Identity true`)
+
+- **ASP.NET Core Identity with JWT:** short-lived access tokens and rotating refresh tokens with
+  reuse detection, kept in memory in the browser. Each user sees only their own data.
+- **Account emails:** email confirmation (required to log in), confirmed email changes, password
+  reset and invitations, sent with [MailKit](https://github.com/jstedfast/MailKit) from a
+  Wolverine handler, so they go through the durable outbox and are retried. In Development,
+  [Mailpit](https://github.com/axllent/mailpit) catches them.
+- **Account settings:** display name, email (after confirming the new one), password, passkeys,
+  linked Google/GitHub accounts, and account deletion (which deletes the user's data through an
+  `AccountDeleted` message each feature handles).
+- **Roles and an admin page** (`/admin`): search users, change roles, lock and unlock accounts,
+  and invite people by email. The first admins come from configuration, and registration can be
+  made invitation-only.
+- **Sign-in with Google and GitHub**, each turned on by setting its client ID and secret.
+- **Passkeys** with ASP.NET Core Identity's own WebAuthn support: add them in Settings, then log
+  in without a password.
+- **Account lockout** with Identity's lockout, which also stops refresh tokens.
+
+### Security
+
+- Browser security headers on every response (a strict Content-Security-Policy, framing, MIME
+  sniffing and referrer protections), HTTPS redirection and HSTS in production, and
+  development-only tools kept out of production.
+- With `--Identity true`: verified emails, one-time and short-lived email links whose tokens are
+  never stored, no account enumeration from "forgot password", rate limiting on sign-in and
+  account endpoints, lockout, sessions ended on password changes and admin locks, verified-email
+  rules and pre-hijacking protection for Google/GitHub sign-in, and a startup check that refuses
+  a weak or development signing key in production.
+- The generated app's README has a Security section describing each measure and what to do when
+  deploying.
+
+### Deployment
+
+- **Container publishing** (`dotnet publish /t:PublishContainer`) and a production
+  `docker-compose` with PostgreSQL and [Caddy](https://caddyserver.com/) for automatic HTTPS,
+  with a step-by-step guide for a small VPS (`deploy/`).
+- **Data Protection keys in PostgreSQL**, so email links and other protected tokens work across
+  restarts and instances.
+
+### Tests (`--IncludeTests true`, the default)
+
+- A `tests/` project (xUnit, [Alba](https://jasperfx.github.io/alba/) and Testcontainers) that
+  boots the real app against a throwaway Postgres and drives it over HTTP, so one project covers
+  both `--Persistence` choices. It covers the Todo endpoints and validation, background and
+  scheduled messages (with Wolverine's message tracking), SignalR with real hub clients, health
+  checks, security headers, and the Marten event stream.
+- With `--Identity true`: registration and email confirmation (following the links in captured
+  emails), login, token rotation and reuse detection, account settings, password reset, lockout,
+  rate limiting, roles and the admin endpoints, invitations, Google/GitHub sign-in rules, and
+  passkeys (with a software authenticator, so Identity's real WebAuthn checks run).
+
+### Developer experience
+
+- **A README for the generated app** (`README.app.md`, renamed to `README.md`): running it, the
+  project layout, how the example works, adding a feature, common tasks, deployment and
+  security, matching the chosen options.
 - **Help for AI coding assistants:** `AGENTS.md` (with `CLAUDE.md` importing it) describes the
-  generated app's conventions and the rules that are easy to miss.
-- **Project housekeeping:** central package management (`Directory.Packages.props`), the free
-  Meziantou analyzer with a commented `.editorconfig`, and Dependabot for NuGet, npm and Docker.
-- **A README for the generated app** (`README.app.md`, renamed to `README.md` on generation):
-  how to run it, the project layout, how the example works, how to add a feature, common
-  commands and deployment, with sections matching the chosen options. A final "Created from a
-  template" section links back here and can be deleted.
+  app's conventions and the rules that are easy to miss.
+- **Housekeeping:** central package management (`Directory.Packages.props`), the free Meziantou
+  analyzer with a commented `.editorconfig` (0 warnings), and Dependabot for NuGet, npm and Docker.
 
 ### Known limitations
 
@@ -167,6 +193,15 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   tokens. If you actually need a *separate* service to verify tokens without sharing that
   secret, upgrade to asymmetric signing (RS256) with a `/.well-known/jwks.json` endpoint —
   not included here to keep the default lean.
+- **Reloading the page signs you out** (`--Identity true`): tokens are kept in memory, not browser
+  storage, which is safer against injected scripts. A `sessionStorage` option is on the roadmap
+  if people ask.
+- **No two-factor codes:** passkeys are the stronger alternative offered; TOTP authenticator
+  codes aren't included.
+- **Passkeys belong to one domain:** they're created for the site's host name, so moving the app
+  to another domain means users add new passkeys.
+- **Role changes apply at the next token refresh** (within the access token's lifetime), and an
+  admin lock ends sessions the same way.
 
 ## Releasing
 
@@ -188,7 +223,6 @@ Publishing):
 The nuget.org page shows `nuget/README.md`; this README is for working on the template.
 
 
-CI generates and builds all 8 parameter combinations on every push, and runs the integration
-tests against a real Postgres (Testcontainers). The app has also been checked by hand in the
-browser (Marten + Identity), including realtime updates across two tabs. See
-[ROADMAP.md](ROADMAP.md) for what's next, starting with the first nuget.org release.
+CI generates all 8 parameter combinations on every push: it builds them, runs the integration
+tests against a real Postgres (Testcontainers), builds the container image, and publishes and
+starts each one in Production. See [ROADMAP.md](ROADMAP.md) for what's next.
