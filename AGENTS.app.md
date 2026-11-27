@@ -80,7 +80,9 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
   by the plan's name: `RequireFeatureAsync`/`RequireRoomAsync` in a `Before` method, `TryUseAsync`
   for PerPeriod limits, and `IsEnabledAsync` in handlers that run later. Plans, features and
   limits are defined only in `Billing/Plans.cs`; change a plan customers are on by adding a
-  version. A downgrade never deletes data. See `docs/billing.md`.
+  version. A downgrade never deletes data. Billing state comes from the local `BillingAccount`,
+  kept in step by the payment provider's webhooks: never call Stripe to decide what a plan
+  allows. See `docs/billing.md`.
 <!--#endif -->
 - **Auth:** protect endpoints with `[Authorize]` (or `[Authorize(Roles = AppRoles.Admin)]`; roles
   are constants in `Identity/AppRoles.cs`) and scope a user's own data to `user.GetUserId()`.

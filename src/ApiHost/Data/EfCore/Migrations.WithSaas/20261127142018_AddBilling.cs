@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiHost.Data.EfCore.Migrations;
 
 /// <inheritdoc />
-public partial class _20261127132647_AddBilling : Migration
+public partial class _20261127142018_AddBilling : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,6 +35,42 @@ public partial class _20261127132647_AddBilling : Migration
             });
 
         migrationBuilder.CreateTable(
+            name: "BillingInvoices",
+            columns: table => new
+            {
+                Id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                OrganisationId = table.Column<Guid>(type: "uuid", nullable: false),
+                Provider = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                Number = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                Total = table.Column<long>(type: "bigint", nullable: false),
+                AmountPaid = table.Column<long>(type: "bigint", nullable: false),
+                Currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                PeriodStart = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                PeriodEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                HostedUrl = table.Column<string>(type: "text", nullable: true),
+                PdfUrl = table.Column<string>(type: "text", nullable: true)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_BillingInvoices", x => x.Id);
+            });
+
+        migrationBuilder.CreateTable(
+            name: "PaymentEvents",
+            columns: table => new
+            {
+                Id = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                Type = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                ReceivedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_PaymentEvents", x => x.Id);
+            });
+
+        migrationBuilder.CreateTable(
             name: "PeriodUsage",
             columns: table => new
             {
@@ -57,6 +93,11 @@ public partial class _20261127132647_AddBilling : Migration
             name: "IX_BillingAccounts_SubscriptionId",
             table: "BillingAccounts",
             column: "SubscriptionId");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_BillingInvoices_OrganisationId",
+            table: "BillingInvoices",
+            column: "OrganisationId");
     }
 
     /// <inheritdoc />
@@ -64,6 +105,12 @@ public partial class _20261127132647_AddBilling : Migration
     {
         migrationBuilder.DropTable(
             name: "BillingAccounts");
+
+        migrationBuilder.DropTable(
+            name: "BillingInvoices");
+
+        migrationBuilder.DropTable(
+            name: "PaymentEvents");
 
         migrationBuilder.DropTable(
             name: "PeriodUsage");

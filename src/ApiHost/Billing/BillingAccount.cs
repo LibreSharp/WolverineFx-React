@@ -39,6 +39,50 @@ public class BillingAccount
     public DateTimeOffset UpdatedAt { get; set; }
 }
 
+// The app's copy of an invoice from the payment provider, for the back office. The provider keeps
+// the real one: customers see theirs in its portal. Id: the provider's.
+public class BillingInvoice
+{
+    public string Id { get; set; } = string.Empty;
+
+    public Guid OrganisationId { get; set; }
+
+    public string Provider { get; set; } = string.Empty;
+
+    public string? Number { get; set; }
+
+    // The provider's: "paid", "open", "void", "uncollectible" or "draft".
+    public string Status { get; set; } = string.Empty;
+
+    // In the currency's smallest unit.
+    public long Total { get; set; }
+
+    public long AmountPaid { get; set; }
+
+    public string Currency { get; set; } = string.Empty;
+
+    public DateTimeOffset CreatedAt { get; set; }
+
+    public DateTimeOffset PeriodStart { get; set; }
+
+    public DateTimeOffset PeriodEnd { get; set; }
+
+    public string? HostedUrl { get; set; }
+
+    public string? PdfUrl { get; set; }
+}
+
+// A webhook event the app has received, so a second delivery of it is ignored. Id:
+// "{provider}:{event id}".
+public class PaymentEventRecord
+{
+    public string Id { get; set; } = string.Empty;
+
+    public string Type { get; set; } = string.Empty;
+
+    public DateTimeOffset ReceivedAt { get; set; }
+}
+
 public static class SubscriptionStatuses
 {
     // No subscription: the free plan, once any trial is over.

@@ -60,7 +60,9 @@ public static class MartenPersistence
 
             // Billing: accounts are documents; PerPeriod usage is a plain table that BillingStore
             // adds to with one SQL statement, so requests at the same moment can't pass a limit.
-            opts.Schema.For<BillingAccount>();
+            opts.Schema.For<BillingAccount>().Index(a => a.CustomerId!);
+            opts.Schema.For<BillingInvoice>().Index(i => i.OrganisationId);
+            opts.Schema.For<PaymentEventRecord>();
             var usage = new Table(new PostgresqlObjectName(opts.DatabaseSchemaName, BillingStore.UsageTable, SchemaUtils.IdentifierUsage.General));
             usage.AddColumn<Guid>("organisation_id").AsPrimaryKey();
             usage.AddColumn<string>("limit_name").AsPrimaryKey();

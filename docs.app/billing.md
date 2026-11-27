@@ -73,6 +73,54 @@ it's back under the limit: a 26th open Todo on Free is refused, but completing T
 Paid features switch off at once, including reminders already scheduled, which are dropped when
 they come due.
 
+## Payments with Stripe
+
+Paid plans are sold through [Stripe](https://stripe.com/) (Stripe charges fees). Until its keys
+are set, the app offers no paid plans: just the trial and the free plan.
+
+- **Subscribing** happens on Stripe's own pages, so card details never reach the app. An owner
+  presses Upgrade on `/organisation`, `POST /api/billing/checkout` opens Stripe Checkout, and
+  Stripe brings them back. Whatever is left of the trial carries on, and Stripe charges when it
+  ends. Changing plan or payment details, invoices and cancelling are in Stripe's customer
+  portal (Manage billing; `POST /api/billing/portal`).
+- **Webhooks keep the app's copy in step.** Stripe calls `POST /api/billing/webhooks/stripe` for
+  each change. The endpoint checks the signature, stores the event and answers at once. A second
+  delivery of the same event is ignored. A Wolverine handler (`Billing/Payments/PaymentEventHandler.cs`)
+  then reads the subscription from Stripe and updates the organisation's `BillingAccount`: plan
+  and version, status, billing period and invoices. It runs from a durable queue, so a failure
+  is retried, and then parked with Wolverine's failed messages. Answering "which plan is this
+  organisation on?" never calls Stripe.
+- **A failed payment** (`PastDue`) keeps the plan while Stripe retries. When Stripe gives up, or
+  the customer cancels, the subscription ends and the organisation is on the free plan.
+- **Deleting an organisation** cancels its subscription.
+- **Another provider** (such as Paddle or Lemon Squeezy, which handle sales tax and VAT as the
+  seller) implements `IPaymentProvider` (`Billing/Payments/`) and is registered in `BillingSetup`
+  instead. Nothing else changes.
+
+### Setting it up
+
+1. In the [Stripe dashboard](https://dashboard.stripe.com/), in test mode, copy the secret key
+   (`sk_test_...`) into user secrets:
+   `dotnet user-secrets --project src/ApiHost set Billing:Stripe:SecretKey sk_test_...`
+2. Create the products and prices from `Billing/Plans.cs`:
+   `dotnet run --project src/ApiHost -- stripe-prices`. Each plan version and currency becomes a
+   price with a lookup key (such as `pro-v1-usd`), which checkout finds it by. Run it again after
+   adding a plan version: it only adds what's missing. Prices can't change in Stripe, so a new
+   price means a new plan version.
+3. Forward webhooks to the app with the [Stripe CLI](https://docs.stripe.com/stripe-cli):
+   `stripe listen --forward-to localhost:5133/api/billing/webhooks/stripe`. Put the signing
+   secret it prints (`whsec_...`) in `Billing:Stripe:WebhookSecret`.
+4. Turn on the customer portal in the dashboard (Settings > Billing > Customer portal), with the
+   plans customers may switch between.
+5. Subscribe with a [test card](https://docs.stripe.com/testing), such as 4242 4242 4242 4242.
+
+In production, use the live keys (`Billing__Stripe__SecretKey`, `Billing__Stripe__WebhookSecret`;
+see [deployment](deployment.md)), run `stripe-prices` with the live key, and add a webhook
+endpoint for `https://your-domain/api/billing/webhooks/stripe` with these events:
+`checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`,
+`customer.subscription.deleted`, `invoice.paid` and `invoice.payment_failed`.
+`Billing__Stripe__AutomaticTax=true` has Stripe Tax add sales tax and VAT.
+
 ## Adding a feature or a limit
 
 1. Add a constant to `PlanFeatures` (with a description) or `PlanLimits.All` in `Billing/Plans.cs`,

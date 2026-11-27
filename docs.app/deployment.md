@@ -61,6 +61,11 @@ Set these with environment variables (or any ASP.NET Core configuration source):
 | `Accounts__AuthAttemptsPerMinute` | Sign-in and account attempts allowed per client address per minute |
 | `Authentication__Google__ClientId`, `Authentication__Google__ClientSecret` | Optional: turns on "Continue with Google" ([how-to](how-to/set-up-external-sign-in.md)) |
 | `Authentication__GitHub__ClientId`, `Authentication__GitHub__ClientSecret` | Optional: turns on "Continue with GitHub" |
+<!--#if (Saas) -->
+| `Billing__Stripe__SecretKey`, `Billing__Stripe__WebhookSecret` | Optional: paid plans through Stripe ([billing](billing.md#payments-with-stripe)) |
+| `Billing__Stripe__AutomaticTax` | `true` to have Stripe Tax add sales tax and VAT |
+| `Billing__TrialDays`, `Billing__TrialPlan` | The trial new organisations get (default 14 days of `pro`; 0 days turns it off) |
+<!--#endif -->
 
 The app refuses to start outside Development if `Jwt:SigningKey` is missing, too short, or still
 the development key, or if `App:ClientUrl` isn't set. Email links (confirmation, password reset,

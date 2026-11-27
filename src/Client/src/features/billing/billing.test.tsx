@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { server } from '../../test/server'
@@ -73,5 +74,43 @@ describe('PlanTodoList', () => {
     expect(await screen.findByRole('link', { name: 'Reminders: upgrade' })).toHaveAttribute('href', '/pricing')
     expect(screen.queryByLabelText('Remind me about Write tests')).not.toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent("21 of the Free plan's 25 open Todos used")
+  })
+})
+
+describe('BillingSection payments', () => {
+  it('lets an owner on the trial check out a paid plan', async () => {
+    let body: unknown
+    server.use(
+      billingHandler(),
+      http.post('*/api/billing/checkout', async ({ request }) => {
+        body = await request.json()
+        return HttpResponse.json({ problem: true }, { status: 503 })
+      }),
+    )
+    renderPage(<BillingSection />)
+
+    await userEvent.click(await screen.findByRole('button', { name: /Keep Pro/ }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not start the checkout.')
+    expect(body).toEqual({ planId: 'pro', currency: 'USD' })
+  })
+
+  it('offers the portal to a subscribed owner, and nothing to other members', async () => {
+    server.use(billingHandler({ status: 'Active', trialEndsAt: null, hasCustomer: true }))
+    const { unmount } = renderPage(<BillingSection />)
+    expect(await screen.findByRole('button', { name: 'Manage billing' })).toBeInTheDocument()
+    unmount()
+
+    server.use(billingHandler({ canManage: false }))
+    renderPage(<BillingSection />)
+    expect(await screen.findByText(/Only the organisation's owners/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Upgrade|Keep/ })).not.toBeInTheDocument()
+  })
+
+  it('thanks the owner when they come back from checkout', async () => {
+    server.use(billingHandler({ status: 'Active', trialEndsAt: null, hasCustomer: true }))
+    renderPage(<BillingSection />, '/organisation?billing=success')
+
+    expect(await screen.findByRole('status')).toHaveTextContent("you're on the Pro plan")
   })
 })

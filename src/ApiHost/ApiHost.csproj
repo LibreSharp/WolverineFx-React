@@ -55,6 +55,7 @@
 <!--#endif -->
 <!--#if (Saas) -->
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
+    <PackageReference Include="Stripe.net" />
 <!--#endif -->
   </ItemGroup>
 

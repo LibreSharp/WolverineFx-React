@@ -344,6 +344,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/billing/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_billing_checkout
+         * @description POST_api_billing_checkout
+         */
+        post: operations["POST_api_billing_checkout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/portal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_billing_portal
+         * @description POST_api_billing_portal
+         */
+        post: operations["POST_api_billing_portal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/webhooks/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST_api_billing_webhooks_provider
+         * @description POST_api_billing_webhooks_provider
+         */
+        post: operations["POST_api_billing_webhooks_provider"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/accept-invitation": {
         parameters: {
             query?: never;
@@ -1007,6 +1067,8 @@ export interface components {
             features: string[];
             limits: components["schemas"]["LimitUsage"][];
             canManage: boolean;
+            paymentsEnabled: boolean;
+            hasCustomer: boolean;
         };
         ChangeMemberRoleRequest: {
             role: string;
@@ -1014,6 +1076,10 @@ export interface components {
         ChangePasswordRequest: {
             currentPassword: string;
             newPassword: string;
+        };
+        CheckoutRequestBody: {
+            planId: string;
+            currency: null | string;
         };
         ConfirmEmailChangeRequest: {
             userId: string;
@@ -1149,6 +1215,9 @@ export interface components {
             name: string;
             /** Format: date-time */
             createdAt: string;
+        };
+        PaymentPageResponse: {
+            url: string;
         };
         PendingInvitation: {
             /** Format: uuid */
@@ -1917,6 +1986,97 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanCatalogueResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    POST_api_billing_checkout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutRequestBody"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentPageResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    POST_api_billing_portal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentPageResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+        };
+    };
+    POST_api_billing_webhooks_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IResult"];
                 };
             };
             /** @description Not Found */

@@ -1,21 +1,62 @@
+using ApiHost.Billing.Payments;
 using Marten;
+using JasperFx;
+using Wolverine.Marten;
 
 namespace ApiHost.Billing;
 
-// Billing accounts are ordinary (not tenanted) Marten documents. PerPeriod usage is a plain table,
-// billing_usage (Data/Marten/MartenPersistence.cs), so it can be added to in one SQL statement.
-public class BillingStore(IDocumentSession session) : IBillingStore
+// Billing accounts, invoices and webhook events are ordinary (not tenanted) Marten documents.
+// PerPeriod usage is a plain table, billing_usage (Data/Marten/MartenPersistence.cs), so it can be
+// added to in one SQL statement.
+public class BillingStore(IDocumentSession session, IMartenOutbox outbox, TimeProvider clock) : IBillingStore
 {
     public const string UsageTable = "billing_usage";
 
     public Task<BillingAccount?> FindAccountAsync(Guid organisationId, CancellationToken cancellationToken)
         => session.LoadAsync<BillingAccount>(organisationId, cancellationToken);
 
-    public Task SaveAccountAsync(BillingAccount account, CancellationToken cancellationToken)
+    public Task SaveAccountAsync(BillingAccount account, CancellationToken cancellationToken, BillingInvoice? invoice = null)
     {
         session.Store(account);
+        if (invoice is not null)
+        {
+            session.Store(invoice);
+        }
+
         return session.SaveChangesAsync(cancellationToken);
     }
+
+    public Task<BillingAccount?> FindAccountByCustomerAsync(string customerId, CancellationToken cancellationToken)
+        => session.Query<BillingAccount>().FirstOrDefaultAsync(a => a.CustomerId == customerId, cancellationToken);
+
+    public async Task<bool> RecordPaymentEventAsync(PaymentEvent paymentEvent, CancellationToken cancellationToken)
+    {
+        var id = $"{paymentEvent.Provider}:{paymentEvent.Id}";
+        if (await session.LoadAsync<PaymentEventRecord>(id, cancellationToken) is not null)
+        {
+            return false;
+        }
+
+        // Insert fails if another delivery of the event got here first.
+        session.Insert(new PaymentEventRecord { Id = id, Type = paymentEvent.Type, ReceivedAt = clock.GetUtcNow() });
+        outbox.Enroll(session);
+        await outbox.PublishAsync(new PaymentEventReceived(paymentEvent));
+        try
+        {
+            await session.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (DocumentAlreadyExistsException)
+        {
+            return false;
+        }
+    }
+
+    public async Task<IReadOnlyList<BillingInvoice>> InvoicesAsync(Guid organisationId, CancellationToken cancellationToken)
+        => await session.Query<BillingInvoice>()
+            .Where(i => i.OrganisationId == organisationId)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToListAsync(cancellationToken);
 
     public async Task<int> UsageAsync(Guid organisationId, string limit, DateTimeOffset periodStart, CancellationToken cancellationToken)
     {
@@ -46,6 +87,7 @@ public class BillingStore(IDocumentSession session) : IBillingStore
     public Task DeleteOrganisationAsync(Guid organisationId, CancellationToken cancellationToken)
     {
         session.Delete<BillingAccount>(organisationId);
+        session.DeleteWhere<BillingInvoice>(i => i.OrganisationId == organisationId);
         session.QueueSqlCommand($"delete from {session.DocumentStore.Options.DatabaseSchemaName}.{UsageTable} where organisation_id = ?", organisationId);
         return session.SaveChangesAsync(cancellationToken);
     }

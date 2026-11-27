@@ -17,7 +17,7 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261127132647_AddBilling";
+    public override string LastMigrationId => "20261127142018_AddBilling";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -85,6 +85,81 @@ partial class AppDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("SubscriptionId");
 
                 b.ToTable("BillingAccounts");
+            });
+
+        modelBuilder.Entity("ApiHost.Billing.BillingInvoice", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(255)
+                    .HasColumnType("character varying(255)");
+
+                b.Property<long>("AmountPaid")
+                    .HasColumnType("bigint");
+
+                b.Property<DateTimeOffset>("CreatedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Currency")
+                    .IsRequired()
+                    .HasMaxLength(3)
+                    .HasColumnType("character varying(3)");
+
+                b.Property<string>("HostedUrl")
+                    .HasColumnType("text");
+
+                b.Property<string>("Number")
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.Property<Guid>("OrganisationId")
+                    .HasColumnType("uuid");
+
+                b.Property<string>("PdfUrl")
+                    .HasColumnType("text");
+
+                b.Property<DateTimeOffset>("PeriodEnd")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<DateTimeOffset>("PeriodStart")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Provider")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<string>("Status")
+                    .IsRequired()
+                    .HasMaxLength(20)
+                    .HasColumnType("character varying(20)");
+
+                b.Property<long>("Total")
+                    .HasColumnType("bigint");
+
+                b.HasKey("Id");
+
+                b.HasIndex("OrganisationId");
+
+                b.ToTable("BillingInvoices");
+            });
+
+        modelBuilder.Entity("ApiHost.Billing.PaymentEventRecord", b =>
+            {
+                b.Property<string>("Id")
+                    .HasMaxLength(300)
+                    .HasColumnType("character varying(300)");
+
+                b.Property<DateTimeOffset>("ReceivedAt")
+                    .HasColumnType("timestamp with time zone");
+
+                b.Property<string>("Type")
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnType("character varying(100)");
+
+                b.HasKey("Id");
+
+                b.ToTable("PaymentEvents");
             });
 
         modelBuilder.Entity("ApiHost.Billing.PeriodUsage", b =>

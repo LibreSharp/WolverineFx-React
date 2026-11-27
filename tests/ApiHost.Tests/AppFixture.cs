@@ -41,6 +41,9 @@ public class AppFixture : IAsyncLifetime
 #if (Saas)
             // Few enough pending invitations to reach the limit in a test (OrganisationTests).
             builder.UseSetting("Organisations:MaxPendingInvitations", "3");
+
+            // A fake payment provider instead of Stripe (PaymentTests).
+            builder.ConfigureServices(services => services.AddSingleton<ApiHost.Billing.Payments.IPaymentProvider>(Payments));
 #endif
 #if (IsMarten)
             builder.UseSetting("ConnectionStrings:Marten", _postgres.GetConnectionString());
@@ -50,6 +53,10 @@ public class AppFixture : IAsyncLifetime
         });
     }
 
+#if (Saas)
+    public FakePaymentProvider Payments { get; } = new();
+
+#endif
 #if (Identity)
     public CapturedEmails Emails { get; } = new();
 

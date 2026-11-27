@@ -51,6 +51,11 @@ services:
       Email__Smtp__Password: ${SMTP_PASSWORD:-}
       Email__Smtp__From: ${SMTP_FROM:-}
 #endif
+#if (Saas)
+      Billing__Stripe__SecretKey: ${STRIPE_SECRET_KEY:-}
+      Billing__Stripe__WebhookSecret: ${STRIPE_WEBHOOK_SECRET:-}
+      Billing__Stripe__AutomaticTax: ${STRIPE_AUTOMATIC_TAX:-false}
+#endif
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
       OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
 

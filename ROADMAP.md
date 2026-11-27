@@ -241,7 +241,7 @@ Then the option:
 
 Billing, inside `--Auth saas` (no new options):
 
-- [ ] **Stripe subscriptions:** Checkout and the customer portal, with Stripe webhooks turned
+- [x] **Stripe subscriptions:** Checkout and the customer portal, with Stripe webhooks turned
       into durable Wolverine messages (the outbox makes webhook handling reliable).
       [Stripe.net](https://github.com/stripe/stripe-dotnet) is open source (Apache-2.0); Stripe
       itself charges fees. Keep payments behind an interface so others can add Paddle or Lemon
@@ -261,7 +261,7 @@ Billing, inside `--Auth saas` (no new options):
       "50 AI credits a month", with a warning at 80% and a stop at 100%.
 - [x] **Downgrades never delete data:** anything over a limit stays but becomes read-only until
       the organisation is back under the limit, and paid features switch off.
-- [ ] **A local copy of billing state** (customer, subscription, plan, invoices), kept in step by
+- [x] **A local copy of billing state** (customer, subscription, plan, invoices), kept in step by
       Stripe webhooks, so the app and the back office never call Stripe to answer "which plan is
       this organisation on?".
 

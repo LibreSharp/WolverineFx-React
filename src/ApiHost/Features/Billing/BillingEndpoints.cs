@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ApiHost.Billing;
+using ApiHost.Billing.Payments;
 using ApiHost.Identity;
 using ApiHost.Organisations;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,8 @@ namespace ApiHost.Features.Billing;
 
 // The current organisation's plan: what it includes, how much of each limit is used, and whether
 // the signed-in user can change it (owners only). The client uses it to show or hide features and
-// upgrade prompts.
+// upgrade prompts. PaymentsEnabled: paid plans can be bought (a payment provider is set up).
+// HasCustomer: the organisation has subscribed before, so the provider's portal is available.
 public record BillingSummary(
     string PlanId,
     int PlanVersion,
@@ -22,7 +24,9 @@ public record BillingSummary(
     bool CancelAtPeriodEnd,
     IReadOnlyList<string> Features,
     IReadOnlyList<LimitUsage> Limits,
-    bool CanManage);
+    bool CanManage,
+    bool PaymentsEnabled,
+    bool HasCustomer);
 
 public record PlanFeatureOffer(string Name, string Description, bool Included);
 
@@ -46,7 +50,12 @@ public static class BillingEndpoints
     [Authorize]
     [WolverineGet("/api/billing")]
     public static async Task<BillingSummary> Get(
-        ClaimsPrincipal user, Entitlements entitlements, IOrganisationStore organisations, CancellationToken cancellationToken)
+        ClaimsPrincipal user,
+        Entitlements entitlements,
+        IOrganisationStore organisations,
+        IBillingStore store,
+        IPaymentProvider provider,
+        CancellationToken cancellationToken)
     {
         var organisationId = user.GetOrganisationId();
         var state = await entitlements.StateAsync(organisationId, cancellationToken);
@@ -71,12 +80,14 @@ public static class BillingEndpoints
             state.CancelAtPeriodEnd,
             features,
             await entitlements.AllUsageAsync(organisationId, cancellationToken),
-            membership?.Role == OrganisationRoles.Owner);
+            membership?.Role == OrganisationRoles.Owner,
+            provider.IsConfigured,
+            (await store.FindAccountAsync(organisationId, cancellationToken))?.CustomerId is not null);
     }
 
     // The plans on offer, for the pricing page. Public: the pricing page is for visitors. The
-    // client's copy (src/Client/src/features/billing/plans.json) is generated from it with
-    // `npm run gen:plans`, so the pre-rendered pricing page always matches the catalogue.
+    // pricing page is pre-rendered from a copy (src/Client/src/features/billing/plans.json), which
+    // a test keeps the same as this (docs/billing.md).
     [AllowAnonymous]
     [WolverineGet("/api/billing/plans")]
     public static PlanCatalogueResponse Plans(IOptions<BillingOptions> options)

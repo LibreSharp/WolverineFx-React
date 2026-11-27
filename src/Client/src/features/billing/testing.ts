@@ -22,6 +22,8 @@ export function billingHandler(summary: Partial<BillingSummary> = {}) {
         { name: 'Reminders', kind: 'PerPeriod', description: 'Reminders a month', limit: 1000, used: 0, nearLimit: false, reached: false },
       ],
       canManage: true,
+      paymentsEnabled: true,
+      hasCustomer: false,
       ...summary,
     } satisfies BillingSummary),
   )

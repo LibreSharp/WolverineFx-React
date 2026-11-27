@@ -44,6 +44,10 @@ public class AppDbContext : DbContext
     public DbSet<BillingAccount> BillingAccounts => Set<BillingAccount>();
 
     public DbSet<PeriodUsage> PeriodUsage => Set<PeriodUsage>();
+
+    public DbSet<BillingInvoice> BillingInvoices => Set<BillingInvoice>();
+
+    public DbSet<PaymentEventRecord> PaymentEvents => Set<PaymentEventRecord>();
 #endif
 
 #if (Identity)
@@ -89,6 +93,21 @@ public class AppDbContext : DbContext
             usage.ToTable("PeriodUsage");
             usage.HasKey(u => new { u.OrganisationId, u.LimitName, u.PeriodStart });
             usage.Property(u => u.LimitName).HasMaxLength(50);
+        });
+        modelBuilder.Entity<BillingInvoice>(invoice =>
+        {
+            invoice.Property(i => i.Id).HasMaxLength(255);
+            invoice.Property(i => i.Provider).HasMaxLength(20);
+            invoice.Property(i => i.Number).HasMaxLength(100);
+            invoice.Property(i => i.Status).HasMaxLength(20);
+            invoice.Property(i => i.Currency).HasMaxLength(3);
+            invoice.HasIndex(i => i.OrganisationId);
+        });
+        modelBuilder.Entity<PaymentEventRecord>(paymentEvent =>
+        {
+            paymentEvent.ToTable("PaymentEvents");
+            paymentEvent.Property(e => e.Id).HasMaxLength(300);
+            paymentEvent.Property(e => e.Type).HasMaxLength(100);
         });
 #endif
     }
