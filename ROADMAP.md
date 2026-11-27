@@ -163,7 +163,54 @@ billing records but no payment provider (see the
       EF Core migrations), `releasing.md` and `decisions.md`. CI now also checks that the
       packed template generates the same projects as this folder.
 
+### v0.3.1: quick wins (no new options)
+
+From an architecture and SEO review after v0.3.0 (November 2026).
+
+- [ ] **Errors as `ProblemDetails`:** `AddProblemDetails()` and `UseExceptionHandler()`, so an
+      unhandled error in production returns a `ProblemDetails` body (with the trace ID, to match
+      a user's report to the logs) rather than an empty 500.
+- [ ] **Lazy-loaded routes:** the client is one bundle of about 445 kB (133 kB gzipped),
+      including the admin page, settings and SignalR, even for a visitor on the home page. Load
+      each route's code when it's first visited (React Router's `lazy`).
+- [ ] **Page metadata:** a meta description, Open Graph and Twitter tags, a canonical link and
+      `theme-color` in `index.html`, and per-page titles and descriptions with React 19's
+      built-in `<title>`/`<meta>` support (no library).
+- [ ] **`robots.txt` and `sitemap.xml`:** allow the public pages; disallow `/api/` and the
+      signed-in, admin and auth pages.
+- [ ] **`noindex` on pages that shouldn't be in search results:** login, register, the email-link
+      pages, settings and admin.
+- [ ] **Real 404s:** unknown URLs return the app's HTML with status 200, which search engines treat
+      as duplicate "soft 404" pages. Answer 404 for paths that aren't client routes (and add
+      `noindex` to the not-found page).
+- [ ] **Say plainly that the app runs as one instance,** and what scaling out would need: today
+      SignalR only reaches browsers connected to the instance that sent the message, and the
+      sign-in rate limits are counted per instance. (Scheduled messages and the outbox already
+      coordinate through the database.)
+- [ ] **Cloudflare in front, documented:** caching rules (cache the built assets and public pages,
+      bypass `/api/`), "Full (strict)" TLS to Caddy, and Caddy trusting Cloudflare's addresses
+      so the app sees each visitor's real IP. Without that, the sign-in rate limits count per
+      Cloudflare server instead of per visitor.
+- [ ] **Record in `decisions.md`** that creating a user and storing its confirmation email aren't
+      one transaction: a crash in between leaves an account without the email, which the user
+      recovers with "Send the confirmation email again".
+
 ### v0.4: SaaS option
+
+Before the SaaS work, while there are few pages and 8 combinations, not 12:
+
+- [ ] **Pre-render the public pages** with React Router's framework mode: real HTML at build time
+      for `/` (and the SaaS landing and pricing pages), served as static files by the API and
+      cacheable by a CDN such as Cloudflare; the signed-in app stays a single-page app. Still one
+      deployable, with no Node server. See "Rendering" under Open decisions.
+- [ ] **Persistence code in separate files per option,** not inline `#if (IsMarten)` blocks
+      (`CreateTodo.cs` has four variants), so features stay readable at 12 combinations.
+- [ ] **Account endpoints as features:** `Features/Account` and `Features/Admin` (and later
+      `Features/Organisations`), keeping `Identity/` for infrastructure, to match the vertical
+      slices the template teaches.
+
+The SaaS option:
+
 
 - [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
       2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option.
@@ -197,6 +244,11 @@ billing records but no payment provider (see the
       settings in production)? Yes (v0.3).
 - [ ] Which cheap host should the deployment guide target first: a VPS with Docker Compose and
       Caddy, or Fly.io or Railway?
+- [ ] **Rendering:** pre-rendering the public pages (above) gives static HTML that a CDN serves
+      from cache, which is as fast as a page can be and needs no rendering server. Server-side
+      rendering per request (React Router with a Node server) is only worth its cost when public
+      pages show data that changes per request, such as a public catalogue or user-generated
+      content. Revisit if a user needs that.
 
 ## Later, if users ask
 
@@ -206,6 +258,13 @@ billing records but no payment provider (see the
       without sharing the signing secret. HS256 is enough for this API and its own client.
 - [ ] **`sessionStorage` token option,** so logins survive a page reload. Tokens are kept in
       memory today, which is safer against injected scripts.
+- [ ] **Running more than one instance:** a SignalR backplane (Redis, MIT-licensed client) and
+      rate limits shared between instances.
+- [ ] **A separate Blazor template** (Wolverine with Blazor's static server rendering), for teams
+      who want C# end to end. A separate template, not an option: it shares little with the
+      React client, and it isn't needed for SEO or speed (see "Rendering" under Open decisions).
+- [ ] **API types only for the chosen options:** apps without Identity carry the account
+      endpoints' types in `schema.d.ts` (harmless, but untidy).
 
 ## Upgrades to track
 
