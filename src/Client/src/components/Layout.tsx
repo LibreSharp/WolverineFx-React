@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, Outlet } from 'react-router'
+import { appName, PageMeta } from './PageMeta'
 
 // A link in the header's navigation; highlighted on its current page.
 export function NavItem({ to, children }: { to: string; children: ReactNode }) {
@@ -20,10 +21,11 @@ export function NavItem({ to, children }: { to: string; children: ReactNode }) {
 export function Layout({ nav, actions }: { nav?: ReactNode; actions?: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 text-gray-900">
+      <PageMeta />
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-3">
           <Link to="/" className="font-semibold">
-            ApiHost
+            {appName}
           </Link>
           <nav className="flex flex-1 items-center gap-1">{nav}</nav>
           {actions}
@@ -34,7 +36,7 @@ export function Layout({ nav, actions }: { nav?: ReactNode; actions?: ReactNode 
       </main>
       <footer className="border-t border-gray-200 bg-white">
         <div className="mx-auto max-w-3xl px-6 py-4 text-sm text-gray-500">
-          ApiHost · Built with Wolverine and React
+          {appName} · Built with Wolverine and React
         </div>
       </footer>
     </div>

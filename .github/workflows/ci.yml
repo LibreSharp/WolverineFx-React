@@ -172,6 +172,13 @@ jobs:
             || fail "The React app didn't render in Chrome: $(head -c 600 "$RUNNER_TEMP/page.html")"
           ready=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/health/ready)
           [ "$ready" = "200" ] || fail "GET /health/ready returned $ready, expected 200."
+          # Search engines: unknown pages are real 404s, and robots.txt and sitemap.xml are served.
+          missing=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/no-such-page)
+          [ "$missing" = "404" ] || fail "GET /no-such-page returned $missing, expected 404."
+          curl -fs http://localhost:5000/robots.txt | grep -q "Sitemap: http://localhost:5000/sitemap.xml" \
+            || fail "robots.txt doesn't point at the sitemap."
+          curl -fs http://localhost:5000/sitemap.xml | grep -q "<loc>http://localhost:5000/</loc>" \
+            || fail "sitemap.xml doesn't list the home page."
           echo "Published app works: renders in Chrome, GET /api/todos $status, GET /health/ready 200."
 
       # Playwright in Chrome against the published app still running from the step above, with

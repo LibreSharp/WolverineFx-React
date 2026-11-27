@@ -12,6 +12,7 @@ using Wolverine.FluentValidation;
 using Wolverine.Http;
 using Wolverine.Http.FluentValidation;
 using Wolverine.SignalR;
+using ApiHost.ClientApp;
 using ApiHost.Errors;
 using ApiHost.Features.Todos;
 using ApiHost.Observability;
@@ -127,27 +128,11 @@ app.MapWolverineSignalRHub<AppHub>(AppHub.Path);
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 
+// Production: serve the built React app, with real 404s, robots.txt and sitemap.xml (see
+// ClientApp/ClientAppHosting.cs). In Development the Vite dev server serves it.
 if (!app.Environment.IsDevelopment())
 {
-    // Serve the React app that `dotnet publish` builds into wwwroot. (MapStaticAssets would only
-    // serve files known at build time, and the client is copied in later, during publish.)
-    // Vite puts a content hash in every file name under /assets, so browsers can cache those
-    // for a year; index.html isn't cached, so a new deployment is picked up straight away.
-    app.UseDefaultFiles();
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        OnPrepareResponse = context =>
-        {
-            if (context.Context.Request.Path.StartsWithSegments("/assets", StringComparison.OrdinalIgnoreCase))
-            {
-                context.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
-            }
-        },
-    });
-    // Unknown paths serve the React app, so client-side routes such as /login load directly;
-    // unknown API paths still get a 404 rather than the app's HTML.
-    app.MapFallback("/api/{**path}", () => Results.NotFound());
-    app.MapFallbackToFile("index.html");
+    app.MapClientApp();
 }
 
 return await app.RunJasperFxCommands(args);

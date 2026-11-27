@@ -69,7 +69,8 @@ src/ApiHost/
   Identity/Passkeys/      Passkeys: adding them in Settings, and logging in with one
 <!--#endif -->
 src/Client/src/
-  App.tsx                 Routes (React Router)
+  router.tsx              Routes (React Router), with each page's title
+  routes.ts               Every page's path, for the API's 404s and sitemap.xml
   components/             Layout (header, navigation, footer), home page, not-found page
   features/todos/         Todo page, TanStack Query hooks, SignalR hook (useTodoRealtime)
 <!--#if (Identity) -->

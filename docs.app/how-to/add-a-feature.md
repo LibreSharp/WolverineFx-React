@@ -136,7 +136,9 @@ Other things a feature often needs:
 1. Run the API and update the client's types: `npm run gen:api` in `src/Client`.
 2. Create `src/Client/src/features/notes/` with TanStack Query hooks (copy
    `features/todos/todoQueries.ts`) and a page component.
-3. Add a route in `src/Client/src/App.tsx` and a `NavItem` for it.
+3. Add a route in `src/Client/src/router.tsx`, with a `handle` giving its title (and
+   `index: true` only if search engines should list it), and a `NavItem` for it. Add its path to
+   `src/Client/src/routes.ts` too; a unit test fails until they match.
 <!--#if (Identity) -->
    Put the route inside `RequireAuth` if it needs a login.
 <!--#endif -->

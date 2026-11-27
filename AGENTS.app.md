@@ -83,7 +83,9 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
 
 ## Client conventions
 
-- Features live in `src/Client/src/features/<name>/`; routes are in `src/Client/src/App.tsx`.
+- Features live in `src/Client/src/features/<name>/`; routes are in `src/Client/src/router.tsx`.
+  A new route needs a `handle` with its title, and its path in `src/Client/src/routes.ts` (a unit
+  test checks they match). Load new pages with `lazy`, like the existing ones.
 - Server data goes through TanStack Query hooks (see `features/todos/todoQueries.ts`). After a
   change, invalidate the affected query keys.
 - Call the API with the typed client in `lib/api/client.ts`. Never edit `lib/api/schema.d.ts` by

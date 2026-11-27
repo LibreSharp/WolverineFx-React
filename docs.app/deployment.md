@@ -25,6 +25,18 @@ Marten creates and updates its tables when the app starts.
 <!--#endif -->
 For health checks, see [Observability](observability.md).
 
+## What the published app serves
+
+- The React app for every page path in `src/Client/src/routes.ts`, and the same app with status
+  404 for any other path (it shows its not-found page), so search engines don't index made-up
+  URLs. The HTML is sent with `Cache-Control: no-cache`, so browsers and CDNs pick up a new
+  deployment at once.
+- Built files under `/assets/`, with content hashes in their names, cached for a year.
+- `/robots.txt` (everything may be crawled except `/api/`) and `/sitemap.xml` (the pages marked
+  `index` in `routes.ts`), using the address the visitor used.
+- Unknown `/api/` paths answer 404 as `ProblemDetails`; errors are `ProblemDetails` with a trace ID
+  that matches the logs.
+
 ## Configuration
 
 Set these with environment variables (or any ASP.NET Core configuration source):

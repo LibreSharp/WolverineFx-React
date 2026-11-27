@@ -38,8 +38,15 @@ The Todo feature is a working example of each pattern. Copy it when you add your
 
 ## Frontend
 
-- **Routes** are in `src/Client/src/App.tsx` (React Router), with a shared layout (header,
-  navigation, footer) in `components/Layout.tsx`.
+- **Routes** are in `src/Client/src/router.tsx` (React Router), with a shared layout (header,
+  navigation, footer) in `components/Layout.tsx`. Pages other than the home page load when first
+  visited (`lazy`), so the first page view downloads less JavaScript.
+- **Page titles and search engines.** Each route's `handle` sets its page title and whether search
+  engines may index it (`components/PageMeta.tsx`); only the home page may by default, and every
+  other page gets `noindex`. `src/routes.ts` lists every page's path: the build writes it into
+  `client-routes.json`, from which the API answers 404 for other paths and builds `sitemap.xml`.
+  A unit test checks it matches the router. The default description and link-preview tags are in
+  `index.html`: describe your product there.
 - **Server data.** TanStack Query caches the Todo list (`features/todos/todoQueries.ts`).
   Changes and SignalR messages invalidate it, which refetches it.
 - **The API client** (`lib/api/client.ts`) is typed from the API's OpenAPI document

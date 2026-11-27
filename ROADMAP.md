@@ -167,20 +167,22 @@ billing records but no payment provider (see the
 
 From an architecture and SEO review after v0.3.0 (November 2026).
 
-- [ ] **Errors as `ProblemDetails`:** `AddProblemDetails()` and `UseExceptionHandler()`, so an
+- [x] **Errors as `ProblemDetails`:** `AddProblemDetails()` and `UseExceptionHandler()`, so an
       unhandled error in production returns a `ProblemDetails` body (with the trace ID, to match
       a user's report to the logs) rather than an empty 500.
-- [ ] **Lazy-loaded routes:** the client is one bundle of about 445 kB (133 kB gzipped),
-      including the admin page, settings and SignalR, even for a visitor on the home page. Load
-      each route's code when it's first visited (React Router's `lazy`).
-- [ ] **Page metadata:** a meta description, Open Graph and Twitter tags, a canonical link and
+- [x] **Lazy-loaded routes:** the client was one bundle of about 445 kB (133 kB gzipped),
+      including the admin page, settings and SignalR, even for a visitor on the home page. Each
+      page now loads when first visited; the first download is 374 kB (115 kB gzipped), most of
+      it React itself.
+- [x] **Page metadata:** a meta description, Open Graph and Twitter tags, a canonical link and
       `theme-color` in `index.html`, and per-page titles and descriptions with React 19's
       built-in `<title>`/`<meta>` support (no library).
-- [ ] **`robots.txt` and `sitemap.xml`:** allow the public pages; disallow `/api/` and the
-      signed-in, admin and auth pages.
-- [ ] **`noindex` on pages that shouldn't be in search results:** login, register, the email-link
+- [x] **`robots.txt` and `sitemap.xml`:** everything may be crawled except `/api/` (blocking the
+      private pages would stop crawlers seeing their `noindex`); the sitemap lists the pages
+      marked `index` in `routes.ts`.
+- [x] **`noindex` on pages that shouldn't be in search results:** login, register, the email-link
       pages, settings and admin.
-- [ ] **Real 404s:** unknown URLs return the app's HTML with status 200, which search engines treat
+- [x] **Real 404s:** unknown URLs return the app's HTML with status 200, which search engines treat
       as duplicate "soft 404" pages. Answer 404 for paths that aren't client routes (and add
       `noindex` to the not-found page).
 - [ ] **Say plainly that the app runs as one instance,** and what scaling out would need: today

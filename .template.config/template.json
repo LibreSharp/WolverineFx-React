@@ -124,6 +124,8 @@
             "src/Client/src/lib/passkeys.ts",
             "src/Client/.env.development",
             "src/Client/src/App.WithIdentity.tsx",
+            "src/Client/src/router.WithIdentity.tsx",
+            "src/Client/src/routes.WithIdentity.ts",
             "src/ApiHost/ApiHost.WithIdentity.http",
             "tests/ApiHost.Tests/AuthEndpointsTests.cs",
             "tests/ApiHost.Tests/AccountEndpointsTests.cs",
@@ -148,9 +150,11 @@
         },
         {
           "condition": "(Identity)",
-          "exclude": [ "src/Client/src/App.tsx", "src/ApiHost/ApiHost.http", "tests/e2e/specs/todos.spec.ts" ],
+          "exclude": [ "src/Client/src/App.tsx", "src/Client/src/router.tsx", "src/Client/src/routes.ts", "src/ApiHost/ApiHost.http", "tests/e2e/specs/todos.spec.ts" ],
           "rename": {
             "src/Client/src/App.WithIdentity.tsx": "src/Client/src/App.tsx",
+            "src/Client/src/router.WithIdentity.tsx": "src/Client/src/router.tsx",
+            "src/Client/src/routes.WithIdentity.ts": "src/Client/src/routes.ts",
             "src/ApiHost/ApiHost.WithIdentity.http": "src/ApiHost/ApiHost.http"
           }
         },
