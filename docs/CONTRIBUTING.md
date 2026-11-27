@@ -24,6 +24,11 @@ computed symbols `IsMarten` and `IsEfCore`. Code differs between options in two 
 
 - **Whole files:** exclude or rename them per option in `template.json` (for example, the Marten
   and EF Core folders, the Identity-only tests and client features, the EF Core migrations).
+  Code that differs by persistence goes in a pair of files named `<Name>.Marten.cs` and
+  `<Name>.EfCore.cs` (for example `Features/Todos/CreateTodoEndpoint.Marten.cs`): each app
+  gets only its own, renamed to `<Name>.cs`, with no `template.json` change needed. Keep what
+  both share, such as request records and validators, in `<Name>.cs` beside them
+  (`CreateTodo.cs`).
 - **Lines within a file:** conditional comments, which must each be on a line of their own
   (an `#if` inside a line of text is copied as-is):
 

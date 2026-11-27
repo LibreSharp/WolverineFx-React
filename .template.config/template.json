@@ -32,6 +32,18 @@
       "defaultValue": "false",
       "description": "Include JWT-based authentication (register/login/refresh/logout) using ASP.NET Core Identity"
     },
+    "MartenFileSuffix": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": { "value": ".cs" },
+      "fileRename": ".Marten.cs"
+    },
+    "EfCoreFileSuffix": {
+      "type": "generated",
+      "generator": "constant",
+      "parameters": { "value": ".cs" },
+      "fileRename": ".EfCore.cs"
+    },
     "IncludeTests": {
       "type": "parameter",
       "datatype": "bool",
@@ -107,17 +119,17 @@
         },
         {
           "condition": "(!IsMarten)",
-          "exclude": [ "src/ApiHost/Data/Marten/**", "src/ApiHost/Identity/Marten/**", "tests/ApiHost.Tests/TodoEventStreamTests.cs" ]
+          "exclude": [ "**/*.Marten.cs", "src/ApiHost/Data/Marten/**", "src/ApiHost/Identity/Marten/**", "tests/ApiHost.Tests/TodoEventStreamTests.cs" ]
         },
         {
           "condition": "(!IsEfCore)",
-          "exclude": [ "src/ApiHost/Data/EfCore/**", "src/ApiHost/Identity/EfCore/**", "docs.app/how-to/add-a-migration.md" ]
+          "exclude": [ "**/*.EfCore.cs", "src/ApiHost/Data/EfCore/**", "src/ApiHost/Identity/EfCore/**", "docs.app/how-to/add-a-migration.md" ]
         },
         {
           "condition": "(!Identity)",
           "exclude": [
             "src/ApiHost/Identity/**",
-            "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.cs",
+            "src/ApiHost/Features/Todos/DeleteTodosOfDeletedAccountHandler.*.cs",
             "src/Client/src/features/auth/**",
             "src/Client/src/features/account/**",
             "src/Client/src/features/admin/**",

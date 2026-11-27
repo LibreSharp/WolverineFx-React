@@ -1,20 +1,14 @@
-#if (IsMarten)
-using Marten;
-#elif (IsEfCore)
-using ApiHost.Data.EfCore;
-using Microsoft.EntityFrameworkCore;
-#endif
 using ApiHost.Identity;
+using Marten;
 
 namespace ApiHost.Features.Todos;
 
 // Deletes a user's Todos when they delete their account (AccountDeleted is published by
-// Identity/Endpoints/DeleteAccountEndpoint.cs). Runs in the background through Wolverine's
+// Features/Account/DeleteAccountEndpoint.cs). Runs in the background through Wolverine's
 // durable outbox; the changes are saved automatically (AutoApplyTransactions).
 // Wolverine finds handlers by name: the class name must end in "Handler" (or "Consumer").
 public static class DeleteTodosOfDeletedAccountHandler
 {
-#if (IsMarten)
     public static async Task Handle(AccountDeleted message, IDocumentSession session, CancellationToken cancellationToken)
     {
         var todoIds = await session.Query<Todo>()
@@ -30,11 +24,4 @@ public static class DeleteTodosOfDeletedAccountHandler
             session.HardDelete<Todo>(id);
         }
     }
-#elif (IsEfCore)
-    public static async Task Handle(AccountDeleted message, AppDbContext db, CancellationToken cancellationToken)
-    {
-        var todos = await db.Todos.Where(t => t.OwnerId == message.UserId).ToListAsync(cancellationToken);
-        db.Todos.RemoveRange(todos);
-    }
-#endif
 }

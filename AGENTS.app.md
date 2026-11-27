@@ -57,7 +57,7 @@ suppressing them, unless `.editorconfig` explains why a rule is off.
 - **Browser updates:** give the message `[MessageIdentity("kebab-name")]` and route it with
   `opts.PublishMessage<T>().ToSignalR()` in `Program.cs`; the client matches on that name.
 <!--#if (IsMarten) -->
-- **Event sourcing:** follow `Features/Todos/CompleteTodo.cs` (`[WriteAggregate]`, return the
+- **Event sourcing:** follow `Features/Todos/CompleteTodoEndpoint.cs` (`[WriteAggregate]`, return the
   events to append) and register a projection in `Data/Marten/MartenPersistence.cs`.
 <!--#else -->
 - **Data:** add a `DbSet` to `Data/EfCore/AppDbContext.cs` and a migration. Never edit existing

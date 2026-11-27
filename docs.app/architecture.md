@@ -19,7 +19,7 @@ The Todo feature is a working example of each pattern. Copy it when you add your
   projection keeps a `Todo` document up to date for queries.
 <!--#endif -->
 - **Scheduled messages.** "Remind me…" on a Todo calls `POST /api/todos/{id}/remind`, which
-  schedules a `TodoReminderDue` message for later (`Features/Todos/RemindTodo.cs`). Scheduled
+  schedules a `TodoReminderDue` message for later (`Features/Todos/RemindTodoEndpoint.cs`). Scheduled
   messages are stored in PostgreSQL, so reminders still fire after a restart. When it's due,
   `TodoReminderDueHandler` pushes a `todo-reminder` to the browser, unless the Todo was completed
   in the meantime.

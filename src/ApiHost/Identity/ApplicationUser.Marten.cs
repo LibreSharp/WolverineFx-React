@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Identity;
-#if (IsMarten)
 using Marten.AspNetIdentity;
-#endif
+using Microsoft.AspNetCore.Identity;
 
 namespace ApiHost.Identity;
 
-#if (IsMarten)
+// A user document. Marten.AspNetIdentity stores Identity's users as documents, and
+// ApplicationUserStore (Identity/Marten) keeps roles, external logins and passkeys on it.
 public class ApplicationUser : IdentityUser, IClaimsUser
 {
     public IList<string> RoleClaims { get; set; } = new List<string>();
@@ -37,11 +36,3 @@ public record StoredPasskey(
     byte[] AttestationObject,
     byte[] ClientDataJson,
     byte[]? Aaguid);
-#else
-public class ApplicationUser : IdentityUser
-{
-    // Optional name shown in the app instead of the email address.
-    [System.ComponentModel.DataAnnotations.MaxLength(100)]
-    public string? DisplayName { get; set; }
-}
-#endif
