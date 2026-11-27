@@ -26,11 +26,24 @@
       "type": "computed",
       "value": "(Persistence == \"efcore\")"
     },
-    "Identity": {
+    "Auth": {
       "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "description": "Include JWT-based authentication (register/login/refresh/logout) using ASP.NET Core Identity"
+      "datatype": "choice",
+      "choices": [
+        { "choice": "none", "description": "No accounts: everyone shares the same Todos" },
+        { "choice": "identity", "description": "Accounts with ASP.NET Core Identity: JWT, email confirmation, roles and an admin page, Google/GitHub sign-in and passkeys" },
+        { "choice": "saas", "description": "Accounts plus organisations: each user's data belongs to an organisation, with members, roles and invitations" }
+      ],
+      "defaultValue": "none",
+      "description": "Accounts and organisations"
+    },
+    "Identity": {
+      "type": "computed",
+      "value": "(Auth == \"identity\" || Auth == \"saas\")"
+    },
+    "Saas": {
+      "type": "computed",
+      "value": "(Auth == \"saas\")"
     },
     "MartenFileSuffix": {
       "type": "generated",

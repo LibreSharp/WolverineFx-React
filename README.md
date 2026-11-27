@@ -49,7 +49,7 @@ To try unreleased changes, install from a clone of this repository instead:
 ```bash
 dotnet new wolverine-react -n MyApp
 cd MyApp
-docker compose up -d          # starts Postgres (and Mailpit, with --Identity true)
+docker compose up -d          # starts Postgres (and Mailpit, with accounts)
 cd src/Client && npm install
 cd ../MyApp && dotnet run      # API on the port shown; Vite dev server proxies /api to it
 ```
@@ -61,7 +61,7 @@ cd MyApp/src/Client
 npm run dev                    # http://localhost:5173, proxies /api/* to the API
 ```
 
-With `--Identity true`, a demo user (`demo@example.com` / `Demo123!`) is created at startup in
+With accounts (`--Auth identity` or `saas`), a demo user (`demo@example.com` / `Demo123!`) is created at startup in
 Development only. It's already confirmed and is an admin, and the dev server pre-fills the login
 form with it. Change it under `DevelopmentUser` in `appsettings.Development.json` and in
 `src/Client/.env.development`. Emails the app sends in Development (confirmation, password reset,
@@ -72,13 +72,13 @@ invitations) land in Mailpit at http://localhost:8025.
 | Parameter | Values | Default | Effect |
 |---|---|---|---|
 | `--Persistence` | `marten` \| `efcore` | `marten` | Document DB/event sourcing over PostgreSQL (Marten) vs. relational EF Core over PostgreSQL |
-| `--Identity` | `true` \| `false` | `false` | Adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles and an admin page, invitations, Google/GitHub sign-in and passkeys |
+| `--Auth` | `none` \| `identity` \| `saas` | `none` | `identity` adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles and an admin page, invitations, Google/GitHub sign-in and passkeys. `saas` adds organisations on top: data belongs to an organisation, with members, roles (Owner, Admin, Member), email invitations and a switcher |
 | `--IncludeTests` | `true` \| `false` | `true` | Includes the `tests/` project(s) |
 
 Example:
 
 ```bash
-dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
+dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
 ```
 
 ## What you get
@@ -100,7 +100,7 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
   - **Validation.** FluentValidation rejects bad input with a 400 `ProblemDetails` response
     before the endpoint runs; the React forms show the messages.
   - **Realtime updates with SignalR** through Wolverine's SignalR transport: every open tab
-    refreshes. With `--Identity true`, updates go only to the signed-in user's own tabs.
+    refreshes. With accounts (`--Auth identity` or `saas`), updates go only to the signed-in user's own tabs.
 - **Production-ready code generation.** Development generates Wolverine's code at runtime;
   `dotnet publish` runs `codegen write` and Production loads it ready-made
   (`TypeLoadMode.Static`): a faster start, no runtime compilation, and a clear error at startup if
@@ -115,7 +115,7 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 
 - **React, Vite, TypeScript and Tailwind CSS**, with an app shell (header, user menu, home page,
   footer, not-found page).
-- **React Router** with real URLs; with `--Identity true`, signed-out users are sent to `/login`
+- **React Router** with real URLs; with accounts, signed-out users are sent to `/login`
   and back to the page they wanted.
 - **TanStack Query** for server data, invalidated by mutations and SignalR messages, and cleared
   on logout so the next user never sees the previous user's data.
@@ -124,7 +124,7 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 - **One deployable:** the Vite dev server proxies `/api` in development (no CORS), and in
   production the API serves the built client.
 
-### Accounts (`--Identity true`)
+### Accounts (`--Auth identity` or `saas`)
 
 - **ASP.NET Core Identity with JWT:** short-lived access tokens and rotating refresh tokens with
   reuse detection, kept in memory in the browser. Each user sees only their own data.
@@ -148,7 +148,7 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 - Browser security headers on every response (a strict Content-Security-Policy, framing, MIME
   sniffing and referrer protections), HTTPS redirection and HSTS in production, and
   development-only tools kept out of production.
-- With `--Identity true`: verified emails, one-time and short-lived email links whose tokens are
+- With accounts: verified emails, one-time and short-lived email links whose tokens are
   never stored, no account enumeration from "forgot password", rate limiting on sign-in and
   account endpoints, lockout, sessions ended on password changes and admin locks, verified-email
   rules and pre-hijacking protection for Google/GitHub sign-in, and a startup check that refuses
@@ -168,13 +168,13 @@ dotnet new wolverine-react -n MyApp --Persistence efcore --Identity true
 
 - **Client unit tests** (always included): Vitest and React Testing Library with the API faked
   by [MSW](https://mswjs.io/), next to the code they test, covering the Todo page and, with
-  `--Identity true`, the token refresh, every sign-in page, route guards, Settings and the admin
+  accounts, the token refresh, every sign-in page, route guards, Settings and the admin
   page.
 
 With `--IncludeTests true` (the default):
 
 - **End-to-end tests** with [Playwright](https://playwright.dev/) (Apache-2.0) in the installed
-  Chrome, against the running app: Todos with live updates and, with `--Identity true`, sign-up
+  Chrome, against the running app: Todos with live updates and, with accounts, sign-up
   with the real confirmation email (read from Mailpit), settings, password reset, lockout, the
   admin page and invitations, and passkeys with Chrome's virtual authenticator. CI runs them
   against each published combination.
@@ -184,7 +184,7 @@ With `--IncludeTests true` (the default):
   both `--Persistence` choices. It covers the Todo endpoints and validation, background and
   scheduled messages (with Wolverine's message tracking), SignalR with real hub clients, health
   checks, security headers, and the Marten event stream.
-- With `--Identity true`: registration and email confirmation (following the links in captured
+- With accounts: registration and email confirmation (following the links in captured
   emails), login, token rotation and reuse detection, account settings, password reset, lockout,
   rate limiting, roles and the admin endpoints, invitations, Google/GitHub sign-in rules, and
   passkeys (with a software authenticator, so Identity's real WebAuthn checks run).
@@ -209,7 +209,7 @@ With `--IncludeTests true` (the default):
   tokens. If you actually need a *separate* service to verify tokens without sharing that
   secret, upgrade to asymmetric signing (RS256) with a `/.well-known/jwks.json` endpoint —
   not included here to keep the default lean.
-- **Reloading the page signs you out** (`--Identity true`): tokens are kept in memory, not browser
+- **Reloading the page signs you out** (with accounts): tokens are kept in memory, not browser
   storage, which is safer against injected scripts. A `sessionStorage` option is on the roadmap
   if people ask.
 - **No two-factor codes:** passkeys are the stronger alternative offered; TOTP authenticator
@@ -228,7 +228,7 @@ With `--IncludeTests true` (the default):
 
 The nuget.org page shows `nuget/README.md`; this README is for working on the template.
 
-CI generates all 8 parameter combinations on every push: it builds them, runs the integration
+CI generates all 12 parameter combinations on every push: it builds them, runs the integration
 tests against a real Postgres (Testcontainers) and the client's unit tests, builds the container
 image, runs the end-to-end tests against the published app, and publishes and
 starts each one in Production. See [ROADMAP.md](ROADMAP.md) for what's next.

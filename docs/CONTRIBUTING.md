@@ -19,8 +19,9 @@ options, and renames `ApiHost` to the project's name.
 
 ## Options and conditional code
 
-The options are `Persistence` (`marten`/`efcore`), `Identity` and `IncludeTests`, with the
-computed symbols `IsMarten` and `IsEfCore`. Code differs between options in two ways:
+The options are `Persistence` (`marten`/`efcore`), `Auth` (`none`/`identity`/`saas`) and
+`IncludeTests`, with the computed symbols `IsMarten`, `IsEfCore`, `Identity` (any accounts:
+`identity` or `saas`) and `Saas` (organisations). Conditional code uses the computed symbols. Code differs between options in two ways:
 
 - **Whole files:** exclude or rename them per option in `template.json` (for example, the Marten
   and EF Core folders, the Identity-only tests and client features, the EF Core migrations).
@@ -50,13 +51,13 @@ features that fit every project go in without one.
 ## Test your change
 
 ```bash
-scripts/test-combination.sh marten true      # also: marten false, efcore true, efcore false
+scripts/test-combination.sh marten saas      # also: none or identity, and efcore
 ```
 
 It installs this folder as the template, generates a project with that combination, and runs what
 CI runs: the build with warnings as errors, the API tests (Docker must be running), and the
 client's build, unit tests and lint. Run every combination your change can affect; CI runs all
-eight (`IncludeTests` true and false).
+twelve (`IncludeTests` true and false).
 
 The end-to-end tests run against a published app with PostgreSQL and Mailpit, as the
 "Publish and run" and "End-to-end tests" steps in `.github/workflows/ci.yml` do. Locally, start
@@ -77,8 +78,8 @@ Also check, when relevant:
 app with Identity (apps without Identity simply don't call those endpoints). After changing an
 endpoint's request or response:
 
-1. Generate a Marten + Identity app named `ApiHost` (so names match the template):
-   `dotnet new wolverine-react -n ApiHost -o /tmp/schema-app --Identity true`.
+1. Generate a Marten app with `saas` named `ApiHost` (so names match the template):
+   `dotnet new wolverine-react -n ApiHost -o /tmp/schema-app --Auth saas`.
 2. Start PostgreSQL, then run its API on port 5133 in Development.
 3. In this repository's `src/Client`: `npx openapi-typescript http://localhost:5133/openapi/v1.json -o src/lib/api/schema.d.ts`.
 
@@ -88,7 +89,7 @@ The EF Core option has two migration folders, chosen by `Identity`:
 `src/ApiHost/Data/EfCore/Migrations.WithIdentity/` and `Migrations.NoIdentity/`. Each is renamed to
 `Migrations/` on generation, file by file, in `template.json`. To add a migration:
 
-1. Generate an EF Core app named `ApiHost` with the matching `--Identity`, and make the model
+1. Generate an EF Core app named `ApiHost` with the matching `--Auth`, and make the model
    change there.
 2. Run `dotnet ef migrations add <Name> --project src/ApiHost --output-dir Data/EfCore/Migrations`
    in it, and check `dotnet ef migrations has-pending-model-changes --project src/ApiHost`.

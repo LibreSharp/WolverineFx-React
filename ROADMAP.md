@@ -35,7 +35,7 @@ issues.
   adding a feature, common tasks and deployment, tailored to the chosen options.
 - **Requests to try in your IDE:** a `.http` file with the app's requests (login first when
   Identity is on), each reusing earlier responses such as the new Todo's id.
-- **CI:** all 8 option combinations on every push: build, tests, and a Production publish
+- **CI:** all 12 option combinations (8 before v0.4.0) on every push: build, tests, and a Production publish
   that is started and called.
 
 ## v0.1.0 on nuget.org (released 26 November 2026)
@@ -216,7 +216,7 @@ First the groundwork, while there are few pages and 8 combinations, not 12:
 
 Then the option:
 
-- [ ] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
+- [x] **Replace `--Identity true|false` with `--Auth none|identity|saas`.** That gives
       2 × 3 × 2 = 12 CI combinations, instead of doubling for each new yes/no option. `saas`
       supports both Marten and EF Core.
 - [ ] **Organisations (multi-tenancy)** in `saas`: each new account gets its own organisation,

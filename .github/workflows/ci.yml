@@ -32,23 +32,23 @@ jobs:
           dotnet new install "$RUNNER_TEMP"/pack/*.nupkg --debug:custom-hive "$RUNNER_TEMP/hive-package"
           dotnet new install ./ --debug:custom-hive "$RUNNER_TEMP/hive-folder"
           for persistence in marten efcore; do
-            for identity in false true; do
-              args="--Persistence $persistence --Identity $identity --IncludeTests true"
-              dotnet new wolverine-react -n MyApp -o "$RUNNER_TEMP/out/package-$persistence-$identity" $args --debug:custom-hive "$RUNNER_TEMP/hive-package"
-              dotnet new wolverine-react -n MyApp -o "$RUNNER_TEMP/out/folder-$persistence-$identity" $args --debug:custom-hive "$RUNNER_TEMP/hive-folder"
-              diff -r "$RUNNER_TEMP/out/package-$persistence-$identity" "$RUNNER_TEMP/out/folder-$persistence-$identity"
+            for auth in none identity saas; do
+              args="--Persistence $persistence --Auth $auth --IncludeTests true"
+              dotnet new wolverine-react -n MyApp -o "$RUNNER_TEMP/out/package-$persistence-$auth" $args --debug:custom-hive "$RUNNER_TEMP/hive-package"
+              dotnet new wolverine-react -n MyApp -o "$RUNNER_TEMP/out/folder-$persistence-$auth" $args --debug:custom-hive "$RUNNER_TEMP/hive-folder"
+              diff -r "$RUNNER_TEMP/out/package-$persistence-$auth" "$RUNNER_TEMP/out/folder-$persistence-$auth"
             done
           done
 
   template:
-    name: ${{ matrix.persistence }} · identity=${{ matrix.identity }} · tests=${{ matrix.tests }}
+    name: ${{ matrix.persistence }} · auth=${{ matrix.auth }} · tests=${{ matrix.tests }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         persistence: [marten, efcore]
-        identity: [false, true]
+        auth: [none, identity, saas]
         tests: [false, true]
 
     env:
@@ -97,7 +97,7 @@ jobs:
         run: >
           dotnet new wolverine-react -n MyApp -o "$APP_DIR"
           --Persistence ${{ matrix.persistence }}
-          --Identity ${{ matrix.identity }}
+          --Auth ${{ matrix.auth }}
           --IncludeTests ${{ matrix.tests }}
 
       - name: Build API
@@ -142,7 +142,7 @@ jobs:
           ConnectionStrings__Marten: Host=localhost;Database=myapp;Username=postgres;Password=postgres
           ConnectionStrings__Postgres: Host=localhost;Database=myapp;Username=postgres;Password=postgres
           Jwt__SigningKey: ci-only-signing-key-that-is-long-enough-0123456789
-          # For the end-to-end tests (ignored without --Identity): email through Mailpit, an admin
+          # For the end-to-end tests (ignored with --Auth none): email through Mailpit, an admin
           # account, and a higher sign-in rate limit, since every test comes from one address.
           Email__Smtp__Host: localhost
           Email__Smtp__Port: "1025"
@@ -159,7 +159,7 @@ jobs:
           fail() { echo "$1"; cat "$RUNNER_TEMP/app.log"; exit 1; }
           curl -fsS -o /dev/null --retry 30 --retry-delay 1 --retry-all-errors http://localhost:5000/ \
             || fail "The published app did not serve the client."
-          expected=${{ matrix.identity && '401' || '200' }}
+          expected=${{ matrix.auth != 'none' && '401' || '200' }}
           status=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5000/api/todos)
           [ "$status" = "$expected" ] || fail "GET /api/todos returned $status, expected $expected."
           # The page must actually work in a browser: its scripts load, and React renders. (The home
@@ -202,6 +202,6 @@ jobs:
         if: ${{ failure() && matrix.tests }}
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-traces-${{ matrix.persistence }}-identity-${{ matrix.identity }}
+          name: e2e-traces-${{ matrix.persistence }}-${{ matrix.auth }}-tests-${{ matrix.tests }}
           path: ${{ env.APP_DIR }}/tests/e2e/test-results/
           if-no-files-found: ignore

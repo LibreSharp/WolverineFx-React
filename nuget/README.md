@@ -15,7 +15,7 @@ You need the .NET 11 SDK, Node.js 22.22 or later, and Docker with Compose.
 
 ```bash
 dotnet new install LibreSharp.Templates.WolverineFxReact
-dotnet new wolverine-react -n MyApp --Identity true
+dotnet new wolverine-react -n MyApp --Auth identity
 cd MyApp
 docker compose up -d                 # Postgres
 dotnet run --project src/MyApp       # the API; leave it running
@@ -29,7 +29,7 @@ npm install
 npm run dev                          # open http://localhost:5173
 ```
 
-With `--Identity true`, log in as `demo@example.com` / `Demo123!` (created in Development only),
+With accounts (`--Auth identity` or `saas`), log in as `demo@example.com` / `Demo123!` (created in Development only),
 and read the app's emails in Mailpit at http://localhost:8025.
 
 ## Options
@@ -37,7 +37,7 @@ and read the app's emails in Mailpit at http://localhost:8025.
 | Option | Values | Default | |
 |---|---|---|---|
 | `--Persistence` | `marten`, `efcore` | `marten` | Marten (documents and event sourcing) or EF Core |
-| `--Identity` | `true`, `false` | `false` | Accounts: ASP.NET Core Identity with JWT, email confirmation, roles and an admin page, Google/GitHub sign-in and passkeys |
+| `--Auth` | `none`, `identity`, `saas` | `none` | `identity`: accounts with ASP.NET Core Identity and JWT, email confirmation, roles and an admin page, Google/GitHub sign-in and passkeys. `saas`: accounts plus organisations, with members, roles and invitations |
 | `--IncludeTests` | `true`, `false` | `true` | Integration tests against a real Postgres |
 
 ## What you get
@@ -48,7 +48,7 @@ and read the app's emails in Mailpit at http://localhost:8025.
   the background, surviving restarts.
 - **Event sourcing** (Marten): event streams and Wolverine's aggregate handler workflow.
 - **Realtime updates** with SignalR: every open tab refreshes, scoped to the signed-in user.
-- **Accounts** (`--Identity true`): ASP.NET Core Identity with JWT access tokens and rotating
+- **Accounts** (`--Auth identity` or `saas`): ASP.NET Core Identity with JWT access tokens and rotating
   refresh tokens; email confirmation, password reset and invitations sent through the outbox
   (MailKit, with Mailpit in development); account settings; lockout; roles and an admin page;
   sign-in with Google and GitHub; and passkeys.
