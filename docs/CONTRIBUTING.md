@@ -6,7 +6,7 @@ open-source dependencies only, few template options, and every combination teste
 
 ## How the repository is laid out
 
-The repository root *is* the template: `dotnet new wolverine-react` copies it, applies the
+The repository root *is* the template: `dotnet new saas-starter` copies it, applies the
 options, and renames `ApiHost` to the project's name.
 
 | Path | What it is |
@@ -15,7 +15,7 @@ options, and renames `ApiHost` to the project's name.
 | `src/`, `tests/`, `deploy/`, `docker-compose.yml`, `Directory.Packages.props`, ... | The generated app's files |
 | `README.app.md`, `AGENTS.app.md`, `CLAUDE.app.md`, `dependabot.app.yml`, `docs.app/` | Become `README.md`, `AGENTS.md`, `CLAUDE.md`, `.github/dependabot.yml` and `docs/` in the app |
 | `README.md`, `ROADMAP.md`, `docs/`, `scripts/`, `nuget/`, `.github/` | This repository's own files, never copied into apps |
-| `LibreSharp.Templates.WolverineFxReact.csproj` | Packs the template for nuget.org. It lists what goes in the package: **add new top-level files or folders of the app there**, or apps created from nuget.org won't have them (CI's "package" job catches this) |
+| `LibreSharp.Templates.SaasStarter.csproj` | Packs the template for nuget.org. It lists what goes in the package: **add new top-level files or folders of the app there**, or apps created from nuget.org won't have them (CI's "package" job catches this) |
 
 ## Options and conditional code
 
@@ -69,7 +69,7 @@ Also check, when relevant:
 
 - **Generated docs:** generate an app and read its `README.md` and `docs/`: no template markers
   left, and links resolve.
-- **The package:** `dotnet pack LibreSharp.Templates.WolverineFxReact.csproj -o /tmp/pack`,
+- **The package:** `dotnet pack LibreSharp.Templates.SaasStarter.csproj -o /tmp/pack`,
   then install it with `dotnet new install /tmp/pack/*.nupkg` and generate from it.
 
 ## Regenerate the client's API types
@@ -79,7 +79,7 @@ app with Identity (apps without Identity simply don't call those endpoints). Aft
 endpoint's request or response:
 
 1. Generate a Marten app with `saas` named `ApiHost` (so names match the template):
-   `dotnet new wolverine-react -n ApiHost -o /tmp/schema-app --Auth saas`.
+   `dotnet new saas-starter -n ApiHost -o /tmp/schema-app --Auth saas`.
 2. Start PostgreSQL, then run its API on port 5133 in Development.
 3. In this repository's `src/Client`: `npx openapi-typescript http://localhost:5133/openapi/v1.json -o src/lib/api/schema.d.ts`.
 

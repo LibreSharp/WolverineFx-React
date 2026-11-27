@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # The package published to nuget.org only contains what LibreSharp.Templates.WolverineFxReact.csproj
+  # The package published to nuget.org only contains what LibreSharp.Templates.SaasStarter.csproj
   # lists, while the matrix below installs the template from this folder. Check that the package
   # generates exactly the same projects, so a file missing from the package can't slip through.
   package:
@@ -28,14 +28,14 @@ jobs:
 
       - name: Pack, then compare generated projects
         run: |
-          dotnet pack LibreSharp.Templates.WolverineFxReact.csproj -c Release -o "$RUNNER_TEMP/pack" -p:PackageVersion=0.0.0-ci
+          dotnet pack LibreSharp.Templates.SaasStarter.csproj -c Release -o "$RUNNER_TEMP/pack" -p:PackageVersion=0.0.0-ci
           dotnet new install "$RUNNER_TEMP"/pack/*.nupkg --debug:custom-hive "$RUNNER_TEMP/hive-package"
           dotnet new install ./ --debug:custom-hive "$RUNNER_TEMP/hive-folder"
           for persistence in marten efcore; do
             for auth in none identity saas; do
               args="--Persistence $persistence --Auth $auth --IncludeTests true"
-              dotnet new wolverine-react -n MyApp -o "$RUNNER_TEMP/out/package-$persistence-$auth" $args --debug:custom-hive "$RUNNER_TEMP/hive-package"
-              dotnet new wolverine-react -n MyApp -o "$RUNNER_TEMP/out/folder-$persistence-$auth" $args --debug:custom-hive "$RUNNER_TEMP/hive-folder"
+              dotnet new saas-starter -n MyApp -o "$RUNNER_TEMP/out/package-$persistence-$auth" $args --debug:custom-hive "$RUNNER_TEMP/hive-package"
+              dotnet new saas-starter -n MyApp -o "$RUNNER_TEMP/out/folder-$persistence-$auth" $args --debug:custom-hive "$RUNNER_TEMP/hive-folder"
               diff -r "$RUNNER_TEMP/out/package-$persistence-$auth" "$RUNNER_TEMP/out/folder-$persistence-$auth"
             done
           done
@@ -95,7 +95,7 @@ jobs:
       # -n MyApp exercises sourceName replacement: the solution, namespaces and project become MyApp.
       - name: Generate project
         run: >
-          dotnet new wolverine-react -n MyApp -o "$APP_DIR"
+          dotnet new saas-starter -n MyApp -o "$APP_DIR"
           --Persistence ${{ matrix.persistence }}
           --Auth ${{ matrix.auth }}
           --IncludeTests ${{ matrix.tests }}

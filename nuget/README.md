@@ -1,8 +1,12 @@
-# LibreSharp WolverineFx + React Template
+# LibreSharp SaaS Starter
 
-A `dotnet new` template for a full-stack app: a [WolverineFx](https://wolverinefx.net/) backend
-and a React frontend (Vite, TypeScript, Tailwind CSS, shadcn/ui with dark mode), built and deployed as one ASP.NET Core
-app on PostgreSQL.
+A `dotnet new` template for a SaaS app: organisations with members and invitations, plans,
+trials and limits, Stripe subscriptions, and a back office. It has a [WolverineFx](https://wolverinefx.net/)
+backend and a React frontend (Vite, TypeScript, Tailwind CSS, shadcn/ui with dark mode), built
+and deployed as one ASP.NET Core app on PostgreSQL. `--Auth identity` or `--Auth none` give
+smaller apps without organisations or accounts.
+
+Formerly `LibreSharp.Templates.WolverineFxReact` (`dotnet new wolverine-react`).
 
 It does the jobs often given to MediatR (in-process messaging) and MassTransit (message bus and
 transactional outbox) with Wolverine, using only free, open-source libraries. Part of
@@ -14,10 +18,10 @@ went commercial. This is a community template, not an official WolverineFx/Jaspe
 You need the .NET 11 SDK, Node.js 22.22 or later, and Docker with Compose.
 
 ```bash
-dotnet new install LibreSharp.Templates.WolverineFxReact
-dotnet new wolverine-react -n MyApp --Auth identity
+dotnet new install LibreSharp.Templates.SaasStarter
+dotnet new saas-starter -n MyApp
 cd MyApp
-docker compose up -d                 # Postgres
+docker compose up -d                 # Postgres and Mailpit
 dotnet run --project src/MyApp       # the API; leave it running
 ```
 
@@ -37,7 +41,7 @@ and read the app's emails in Mailpit at http://localhost:8025.
 | Option | Values | Default | |
 |---|---|---|---|
 | `--Persistence` | `marten`, `efcore` | `marten` | Marten (documents and event sourcing) or EF Core |
-| `--Auth` | `none`, `identity`, `saas` | `none` | `identity`: accounts with ASP.NET Core Identity and JWT, email confirmation, roles and a back office, Google/GitHub sign-in and passkeys. `saas`: accounts plus organisations, with members, roles and invitations, plans, trials, limits, Stripe billing and a back office for customers |
+| `--Auth` | `none`, `identity`, `saas` | `saas` | `identity`: accounts with ASP.NET Core Identity and JWT, email confirmation, roles and a back office, Google/GitHub sign-in and passkeys. `saas`: accounts plus organisations, with members, roles and invitations, plans, trials, limits, Stripe billing and a back office for customers |
 | `--IncludeTests` | `true`, `false` | `true` | Integration tests against a real Postgres |
 
 ## What you get
@@ -80,6 +84,10 @@ Every option combination is built, tested and published in CI on each change.
 
 ## Changes in 0.4.1
 
+- **Renamed from `LibreSharp.Templates.WolverineFxReact`:** create projects with
+  `dotnet new saas-starter`, and `--Auth` now defaults to `saas` (`--Auth none` for the previous
+  default). Uninstall the old package with
+  `dotnet new uninstall LibreSharp.Templates.WolverineFxReact`.
 - **Billing and a back office** with `--Auth saas`: plans, a reverse trial, limits, Stripe
   subscriptions, and admin pages for organisations, feature flags, an audit log and failed
   messages.
@@ -96,6 +104,6 @@ Every option combination is built, tested and published in CI on each change.
 
 ## Links
 
-- Source, issues and full documentation: https://github.com/LibreSharp/WolverineFx-React
-- Roadmap: https://github.com/LibreSharp/WolverineFx-React/blob/main/ROADMAP.md
+- Source, issues and full documentation: https://github.com/LibreSharp/saas-starter
+- Roadmap: https://github.com/LibreSharp/saas-starter/blob/main/ROADMAP.md
 - LibreSharp: https://libresharp.github.io

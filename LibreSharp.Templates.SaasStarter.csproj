@@ -3,15 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageType>Template</PackageType>
-    <PackageId>LibreSharp.Templates.WolverineFxReact</PackageId>
+    <PackageId>LibreSharp.Templates.SaasStarter</PackageId>
     <PackageVersion>0.1.0</PackageVersion>
-    <Title>LibreSharp WolverineFx + React Template</Title>
+    <Title>LibreSharp SaaS Starter</Title>
     <Authors>LibreSharp</Authors>
-    <Description>A dotnet new template pairing a WolverineFx backend with a React (Vite + TypeScript + Tailwind) frontend: HTTP endpoints, messaging with a transactional outbox, Marten event sourcing or EF Core, validation, SignalR realtime updates, and optional accounts with ASP.NET Core Identity: JWT, email confirmation, lockout, roles and an admin page, invitations, Google/GitHub sign-in and passkeys. Tested end to end, with deployment to a small server. Built entirely on free, open-source libraries. A community template from LibreSharp, not an official WolverineFx/JasperFx package.</Description>
-    <PackageTags>dotnet-new;templates;wolverine;wolverinefx;marten;react;vite;signalr;identity;passkeys;libresharp</PackageTags>
+    <Description>A dotnet new template for a SaaS app: a WolverineFx backend with a React (Vite + TypeScript + Tailwind + shadcn/ui) frontend, with organisations and multi-tenancy, plans, trials, limits and Stripe subscriptions, and a back office. Accounts with ASP.NET Core Identity: JWT, email confirmation, lockout, roles, invitations, Google/GitHub sign-in and passkeys. HTTP endpoints, messaging with a transactional outbox, Marten event sourcing or EF Core, validation and SignalR realtime updates; smaller apps without organisations or accounts too. Tested end to end, with deployment to a small server. Built entirely on free, open-source libraries. A community template from LibreSharp, not an official WolverineFx/JasperFx package.</Description>
+    <PackageTags>dotnet-new;templates;wolverine;wolverinefx;marten;react;vite;signalr;identity;passkeys;saas;multi-tenancy;stripe;billing;shadcn;libresharp</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://libresharp.github.io</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/LibreSharp/WolverineFx-React</RepositoryUrl>
+    <RepositoryUrl>https://github.com/LibreSharp/saas-starter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <!-- nuget/README.md is written for the nuget.org page; the repo README is for contributors. -->
     <PackageReadmeFile>README.md</PackageReadmeFile>

@@ -5,17 +5,17 @@
 #   scripts/test-combination.sh <marten|efcore> <none|identity|saas>   [output folder]
 #
 # Needs Docker running (the API tests start PostgreSQL). Installs this folder as the
-# wolverine-react template (replacing any installed version); `dotnet new uninstall ./` removes it.
+# saas-starter template (replacing any installed version); `dotnet new uninstall ./` removes it.
 set -euo pipefail
 
 persistence=${1:?usage: scripts/test-combination.sh <marten|efcore> <none|identity|saas> [output folder]}
 auth=${2:?usage: scripts/test-combination.sh <marten|efcore> <none|identity|saas> [output folder]}
 repo=$(cd "$(dirname "$0")/.." && pwd)
-out=${3:-${TMPDIR:-/tmp}/wolverine-react-$persistence-$auth}
+out=${3:-${TMPDIR:-/tmp}/saas-starter-$persistence-$auth}
 
 dotnet new install "$repo" --force > /dev/null
 rm -rf "$out"
-dotnet new wolverine-react -n MyApp -o "$out" --Persistence "$persistence" --Auth "$auth" --IncludeTests true > /dev/null
+dotnet new saas-starter -n MyApp -o "$out" --Persistence "$persistence" --Auth "$auth" --IncludeTests true > /dev/null
 echo "Generated $out"
 
 cd "$out"

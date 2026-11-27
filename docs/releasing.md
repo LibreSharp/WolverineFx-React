@@ -22,13 +22,13 @@ Before tagging:
 So the workflow can publish without a stored API key (nuget.org Trusted Publishing):
 
 1. On nuget.org, under your account's **Trusted Publishing** settings, add a GitHub Actions
-   policy for owner `LibreSharp`, repository `WolverineFx-React`, workflow file `release.yml`.
+   policy for owner `LibreSharp`, repository `saas-starter`, workflow file `release.yml`.
 2. In this GitHub repository, add the **variable** (not secret) `NUGET_USER`, set to that
    nuget.org account's username.
 
 ## After releasing
 
 - Check the package page on nuget.org, then try it:
-  `dotnet new install LibreSharp.Templates.WolverineFxReact@<version>` and generate a project.
+  `dotnet new install LibreSharp.Templates.SaasStarter@<version>` and generate a project.
 - Update the template's entry on the [LibreSharp site](https://libresharp.github.io/templates/)
   if what it offers changed.

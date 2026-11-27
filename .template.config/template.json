@@ -1,10 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "LibreSharp",
-  "classifications": [ "Web", "React", "Wolverine" ],
-  "name": "LibreSharp WolverineFx + React",
-  "identity": "LibreSharp.Templates.WolverineFxReact",
-  "shortName": "wolverine-react",
+  "classifications": [ "Web", "React", "Wolverine", "SaaS" ],
+  "name": "LibreSharp SaaS Starter",
+  "identity": "LibreSharp.Templates.SaasStarter",
+  "shortName": "saas-starter",
   "sourceName": "ApiHost",
   "preferNameDirectory": true,
   "symbols": {
@@ -34,7 +34,7 @@
         { "choice": "identity", "description": "Accounts with ASP.NET Core Identity: JWT, email confirmation, roles and an admin page, Google/GitHub sign-in and passkeys" },
         { "choice": "saas", "description": "Accounts plus organisations: each user's data belongs to an organisation, with members, roles and invitations" }
       ],
-      "defaultValue": "none",
+      "defaultValue": "saas",
       "description": "Accounts and organisations"
     },
     "Identity": {
@@ -127,7 +127,7 @@
         "scripts/**",
         "nuget/**",
         "README.md",
-        "LibreSharp.Templates.WolverineFxReact.csproj",
+        "LibreSharp.Templates.SaasStarter.csproj",
         ".git/**",
         "LICENSE",
         ".claude/**",

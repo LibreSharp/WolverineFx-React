@@ -1,8 +1,14 @@
-# LibreSharp WolverineFx + React Template
+# LibreSharp SaaS Starter
 
-A `dotnet new` template pairing a [WolverineFx](https://wolverinefx.net/) backend (HTTP
-endpoints + message bus) with a React ([Vite](https://vite.dev/) + TypeScript + Tailwind CSS +
-[shadcn/ui](https://ui.shadcn.com/)) frontend, built as a single deployable ASP.NET Core host.
+A `dotnet new` template for a SaaS app: organisations with members and invitations, plans,
+trials and limits, Stripe subscriptions, and a back office, on a [WolverineFx](https://wolverinefx.net/)
+backend (HTTP endpoints + message bus) and a React ([Vite](https://vite.dev/) + TypeScript +
+Tailwind CSS + [shadcn/ui](https://ui.shadcn.com/)) frontend, built as a single deployable
+ASP.NET Core host. `--Auth identity` or `--Auth none` give smaller apps without organisations or
+accounts.
+
+It was called the LibreSharp WolverineFx + React template (`LibreSharp.Templates.WolverineFxReact`,
+`dotnet new wolverine-react`) until 0.4.1.
 
 Part of [LibreSharp](https://libresharp.github.io), which collects free alternatives to .NET
 packages that went commercial. This template does the jobs often given to MediatR (in-process
@@ -25,19 +31,19 @@ package.
 ## Install
 
 The template is on nuget.org as
-[LibreSharp.Templates.WolverineFxReact](https://www.nuget.org/packages/LibreSharp.Templates.WolverineFxReact).
-Install it once, then create projects with `dotnet new wolverine-react`:
+[LibreSharp.Templates.SaasStarter](https://www.nuget.org/packages/LibreSharp.Templates.SaasStarter).
+Install it once, then create projects with `dotnet new saas-starter`:
 
 ```bash
-dotnet new install LibreSharp.Templates.WolverineFxReact
+dotnet new install LibreSharp.Templates.SaasStarter
 ```
 
 | To | Run |
 |---|---|
 | Update to the latest version | `dotnet new update` |
-| Install a specific version | `dotnet new install LibreSharp.Templates.WolverineFxReact@0.4.1` |
-| See the template's options | `dotnet new wolverine-react --help` |
-| Uninstall | `dotnet new uninstall LibreSharp.Templates.WolverineFxReact` |
+| Install a specific version | `dotnet new install LibreSharp.Templates.SaasStarter@0.4.1` |
+| See the template's options | `dotnet new saas-starter --help` |
+| Uninstall | `dotnet new uninstall LibreSharp.Templates.SaasStarter` |
 
 Updating the template only affects projects you create afterwards.
 
@@ -46,6 +52,11 @@ To try unreleased changes, install from a clone of this repository instead:
 
 ### Changes in 0.4.1
 
+- **The template is renamed the LibreSharp SaaS Starter:** install
+  `LibreSharp.Templates.SaasStarter` (the old `LibreSharp.Templates.WolverineFxReact` package is
+  deprecated and gets no more versions) and create projects with `dotnet new saas-starter`.
+  Uninstall the old one with `dotnet new uninstall LibreSharp.Templates.WolverineFxReact`.
+- **`--Auth` now defaults to `saas`.** Pass `--Auth none` for the previous default.
 - **Billing and a back office** with `--Auth saas`: plans, a reverse trial, limits and Stripe
   subscriptions, and admin pages for organisations, feature flags, an audit log and failed
   messages. The pricing page is public and pre-rendered.
@@ -69,9 +80,9 @@ To try unreleased changes, install from a clone of this repository instead:
 ## Usage
 
 ```bash
-dotnet new wolverine-react -n MyApp
+dotnet new saas-starter -n MyApp
 cd MyApp
-docker compose up -d          # starts Postgres (and Mailpit, with accounts)
+docker compose up -d          # starts Postgres and Mailpit
 cd src/Client && npm install
 cd ../MyApp && dotnet run      # API on the port shown; Vite dev server proxies /api to it
 ```
@@ -94,13 +105,13 @@ invitations) land in Mailpit at http://localhost:8025.
 | Parameter | Values | Default | Effect |
 |---|---|---|---|
 | `--Persistence` | `marten` \| `efcore` | `marten` | Document DB/event sourcing over PostgreSQL (Marten) vs. relational EF Core over PostgreSQL |
-| `--Auth` | `none` \| `identity` \| `saas` | `none` | `identity` adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles, a back office (users, audit log, failed messages), invitations, Google/GitHub sign-in and passkeys. `saas` adds organisations on top: data belongs to an organisation, with members, roles (Owner, Admin, Member), email invitations and a switcher; plans, trials, limits and Stripe billing; and a back office for organisations and feature flags |
+| `--Auth` | `none` \| `identity` \| `saas` | `saas` | `identity` adds accounts: ASP.NET Core Identity with JWT tokens, email confirmation, account settings, lockout, roles, a back office (users, audit log, failed messages), invitations, Google/GitHub sign-in and passkeys. `saas` adds organisations on top: data belongs to an organisation, with members, roles (Owner, Admin, Member), email invitations and a switcher; plans, trials, limits and Stripe billing; and a back office for organisations and feature flags |
 | `--IncludeTests` | `true` \| `false` | `true` | Includes the `tests/` project(s) |
 
 Example:
 
 ```bash
-dotnet new wolverine-react -n MyApp --Persistence efcore --Auth saas
+dotnet new saas-starter -n MyApp --Persistence efcore --Auth identity
 ```
 
 ## What you get

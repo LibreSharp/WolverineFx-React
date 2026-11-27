@@ -150,7 +150,7 @@ The [docs](docs/README.md) folder explains how the app works and how to change i
 ## Created from a template
 
 This project was created from the
-[LibreSharp WolverineFx + React template](https://github.com/LibreSharp/WolverineFx-React)
-(`dotnet new wolverine-react`). See that repository for its documentation, roadmap and issues.
+[LibreSharp SaaS Starter](https://github.com/LibreSharp/saas-starter)
+(`dotnet new saas-starter`). See that repository for its documentation, roadmap and issues.
 Newer template versions (`dotnet new update`) affect new projects only, not this one. You can
 delete this section.

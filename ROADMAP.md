@@ -1,6 +1,6 @@
 # Roadmap
 
-Where the LibreSharp WolverineFx + React template is heading. Suggestions are welcome as GitHub
+Where the LibreSharp SaaS Starter is heading. Suggestions are welcome as GitHub
 issues.
 
 ## Principles
