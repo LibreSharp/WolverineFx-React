@@ -65,7 +65,12 @@ issues.
 - [ ] **Reserve the `LibreSharp.` ID prefix** on nuget.org after the first package is out.
 - [x] **List the template** on the [LibreSharp site](https://libresharp.github.io/templates/#libresharp-saas-starter)
       (26 November 2026).
-- [ ] **List the template** in the `dotnet/templating` wiki's list of available templates.
+- [x] ~~**List the template** in the `dotnet/templating` wiki's list of available templates.~~
+      Dropped (28 November 2026): only Microsoft's maintainers can edit that wiki, and
+      `dotnet/templating` has moved into `dotnet/sdk`, which closes requests to be listed as not
+      actionable. `dotnet new search` is the way people find templates now.
+- [ ] **Check `dotnet new search saas-starter` finds the template.** nuget.org lists 0.4.1 as a
+      template package, but on 28 November 2026 the search's index didn't have it yet.
 
 ## Then: frontend
 
