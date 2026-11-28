@@ -289,7 +289,7 @@ revenue, accounts, users, invoices and feature flags):
       failed or a Stripe webhook that errored. JasperFx sells monitoring tooling for this; a small
       free page fits this template's purpose.
 
-### v0.5.0: building blocks most SaaS apps need (done, not yet released)
+### v0.5.0: building blocks most SaaS apps need (released 28 November 2026)
 
 No new options: each goes inside `--Auth identity` or `saas`, wherever it makes sense.
 
